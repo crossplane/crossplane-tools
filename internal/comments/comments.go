@@ -1,4 +1,4 @@
-// Package comments provides utilities for extracting comments from a package.
+// Package comments extracts and parses comments from a package.
 package comments
 
 import (
@@ -10,7 +10,7 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-// A DefaultMarkerPrefix that is commonly used by comment markers.
+// DefaultMarkerPrefix that is commonly used by comment markers.
 const DefaultMarkerPrefix = "+"
 
 type fl struct {
@@ -37,11 +37,15 @@ func In(p *packages.Package) Comments {
 	return Comments{groups: groups, fset: p.Fset}
 }
 
+// For returns the comments for the supplied Object, if any.
 func (c Comments) For(o types.Object) string {
 	p := c.fset.Position(o.Pos())
 	return c.groups[fl{Filename: p.Filename, Line: p.Line - 1}].Text()
 }
 
+// Before returns the comments before the supplied Object, if any. A comment is
+// deemed to be 'before' (rather than 'for') an Object if it ends exactly one
+// blank line above where the Object (including its comment, if any) begins.
 func (c Comments) Before(o types.Object) string {
 	p := c.fset.Position(o.Pos())
 	g := c.groups[fl{Filename: p.Filename, Line: p.Line - 1}]
@@ -58,12 +62,25 @@ func (c Comments) Before(o types.Object) string {
 	return c.groups[fl{Filename: start.Filename, Line: start.Line - 2}].Text()
 }
 
+// Markers are comments that begin with a special character (typically
+// DefaultMarkerPrefix). Comment markers that contain '=' are considered to be
+// key=value pairs, represented as one map key with a slice of multiple values.
 type Markers map[string][]string
 
+// ParseMarkers parses comment markers from the supplied comment using the
+// DefaultMarkerPrefix.
 func ParseMarkers(comment string) Markers {
 	return ParseMarkersWithPrefix(DefaultMarkerPrefix, comment)
 }
 
+// ParseMarkersWithPrefix parses comment markers from the supplied comment. Any
+// line that begins with the supplied prefix is considered a comment marker. For
+// example using marker prefix '+' the following comments:
+//
+// +key:value1
+// +key:value2
+//
+// Would be parsed as Markers{"key": []string{"value1", "value2"}}
 func ParseMarkersWithPrefix(prefix, comment string) Markers {
 	m := map[string][]string{}
 
@@ -84,11 +101,4 @@ func ParseMarkersWithPrefix(prefix, comment string) Markers {
 	}
 
 	return m
-}
-
-func (m Markers) IsTrue(key string) bool {
-	if len(m[key]) != 1 {
-		return false
-	}
-	return strings.EqualFold(m[key][0], "true")
 }

@@ -7,8 +7,12 @@ import (
 	"github.com/negz/angryjet/internal/fields"
 )
 
+// An Object matcher is a function that returns true if the supplied object
+// matches.
 type Object func(o types.Object) bool
 
+// Managed returns an Object matcher that returns true if the supplied Object is
+// a Crossplane managed resource.
 func Managed() Object {
 	return func(o types.Object) bool {
 		return fields.Has(o,
@@ -20,6 +24,8 @@ func Managed() Object {
 	}
 }
 
+// NonPortableClass returns an Object matcher that returns true if the supplied
+// Object is a Crossplane non-portable resource class.
 func NonPortableClass() Object {
 	return func(o types.Object) bool {
 		return fields.Has(o,
@@ -30,6 +36,8 @@ func NonPortableClass() Object {
 	}
 }
 
+// Claim returns an Object matcher that returns true if the supplied Object is a
+// Crossplane resource claim.
 func Claim() Object {
 	return func(o types.Object) bool {
 		return fields.Has(o,
@@ -41,6 +49,8 @@ func Claim() Object {
 	}
 }
 
+// PortableClass returns an Object matcher that returns true if the supplied
+// Object is a Crossplane portable resource class.
 func PortableClass() Object {
 	return func(o types.Object) bool {
 		return fields.Has(o,
@@ -51,18 +61,9 @@ func PortableClass() Object {
 	}
 }
 
-func HasMethod(name string) Object {
-	return func(o types.Object) bool {
-		s := types.NewMethodSet(types.NewPointer(o.Type()))
-		for i := 0; i < s.Len(); i++ {
-			if s.At(i).Obj().Name() == name {
-				return true
-			}
-		}
-		return false
-	}
-}
-
+// HasMarker returns an Object matcher that returns true if the supplied Object
+// has a comment marker k with the value v. Comment markers are read from the
+// supplied Comments.
 func HasMarker(c comments.Comments, k, v string) Object {
 	return func(o types.Object) bool {
 		for _, val := range comments.ParseMarkers(c.For(o))[k] {
@@ -81,12 +82,17 @@ func HasMarker(c comments.Comments, k, v string) Object {
 	}
 }
 
+// DoesNotHaveMarker returns and Object matcher that returns true if the
+// supplied Object does not have a comment marker k with the value v. Comment
+// marker are read from the supplied Comments.
 func DoesNotHaveMarker(c comments.Comments, k, v string) Object {
 	return func(o types.Object) bool {
 		return !HasMarker(c, k, v)(o)
 	}
 }
 
+// AllOf returns an Object matcher that returns true if all of the supplied
+// Object matchers return true.
 func AllOf(match ...Object) Object {
 	return func(o types.Object) bool {
 		for _, fn := range match {
@@ -98,6 +104,8 @@ func AllOf(match ...Object) Object {
 	}
 }
 
+// AnyOf returns an Object matcher that returns true if any of the supplied
+// Object matchers return true.
 func AnyOf(match ...Object) Object {
 	return func(o types.Object) bool {
 		for _, fn := range match {
