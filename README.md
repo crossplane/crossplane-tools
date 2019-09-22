@@ -9,9 +9,10 @@ considered capable of satisfying `resource.Managed` if its `Spec` field is a
 struct that embeds a [`ResourceSpec`] and its `Status` field is a struct that
 embeds a [`ResourceStatus`]. The method set is written to
 `zz_generated.managed.go` by default. Methods are not written if they are
-already defined.
+already defined. Use the `// +crossplane:generate:methods=false` comment marker
+to explicitly disable generation of any methods for a type.
 
-```
+```console
 usage: angryjet [<flags>] [<packages>]
 
 Generates Crossplane API type methods.
