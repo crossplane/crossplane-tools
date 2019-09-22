@@ -1,3 +1,4 @@
+// Package match identifies Go types as common Crossplane resources.
 package match
 
 import (
