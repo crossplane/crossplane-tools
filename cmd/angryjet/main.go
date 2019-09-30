@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/negz/angryjet/internal/comments"
+	"github.com/negz/angryjet/internal/fields"
 	"github.com/negz/angryjet/internal/generate"
 	"github.com/negz/angryjet/internal/match"
 	"github.com/negz/angryjet/internal/methods"
@@ -87,8 +88,8 @@ func GenerateManaged(base, filename, header string, p *packages.Package) error {
 		"GetNonPortableClassReference":        methods.NewGetNonPortableClassReference(receiver, CoreImport),
 		"SetWriteConnectionSecretToReference": methods.NewSetWriteConnectionSecretToReference(receiver, CoreImport),
 		"GetWriteConnectionSecretToReference": methods.NewGetWriteConnectionSecretToReference(receiver, CoreImport),
-		"SetReclaimPolicy":                    methods.NewSetReclaimPolicy(receiver, RuntimeImport),
-		"GetReclaimPolicy":                    methods.NewGetReclaimPolicy(receiver, RuntimeImport),
+		"SetReclaimPolicy":                    methods.NewSetReclaimPolicy(receiver, RuntimeImport, fields.NameSpec),
+		"GetReclaimPolicy":                    methods.NewGetReclaimPolicy(receiver, RuntimeImport, fields.NameSpec),
 	}
 
 	err := generate.WriteMethods(p, methods, filepath.Join(base, p.PkgPath, filename),
@@ -163,6 +164,7 @@ func GeneratePortableClassList(base, filename, header string, p *packages.Packag
 	receiver := "csl"
 
 	methods := generate.MethodSet{
+		"SetPortableClassItems": methods.NewSetPortableClassItems(receiver, ResourceImport),
 		"GetPortableClassItems": methods.NewGetPortableClassItems(receiver, ResourceImport),
 	}
 
@@ -182,8 +184,8 @@ func GenerateNonPortableClass(base, filename, header string, p *packages.Package
 	receiver := "cs"
 
 	methods := generate.MethodSet{
-		"SetReclaimPolicy": methods.NewSetReclaimPolicy(receiver, RuntimeImport),
-		"GetReclaimPolicy": methods.NewGetReclaimPolicy(receiver, RuntimeImport),
+		"SetReclaimPolicy": methods.NewSetReclaimPolicy(receiver, RuntimeImport, fields.NameSpecTemplate),
+		"GetReclaimPolicy": methods.NewGetReclaimPolicy(receiver, RuntimeImport, fields.NameSpecTemplate),
 	}
 
 	err := generate.WriteMethods(p, methods, filepath.Join(base, p.PkgPath, filename),

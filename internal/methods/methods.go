@@ -160,23 +160,25 @@ func NewGetWriteConnectionSecretToReference(receiver, core string) generate.NewM
 }
 
 // NewSetReclaimPolicy returns a NewMethod that writes a SetReclaimPolicy method
-// for the supplied Object to the supplied file.
-func NewSetReclaimPolicy(receiver, core string) generate.NewMethod {
+// for the supplied Object to the supplied file. The ReclaimPolicy is set in the
+// supplied field - typically Spec or SpecTemplate.
+func NewSetReclaimPolicy(receiver, core, field string) generate.NewMethod {
 	return func(f *jen.File, o types.Object) {
 		f.Commentf("SetReclaimPolicy of this %s.", o.Name())
 		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetReclaimPolicy").Params(jen.Id("r").Qual(core, "ReclaimPolicy")).Block(
-			jen.Id(receiver).Dot(fields.NameSpec).Dot("ReclaimPolicy").Op("=").Id("r"),
+			jen.Id(receiver).Dot(field).Dot("ReclaimPolicy").Op("=").Id("r"),
 		)
 	}
 }
 
 // NewGetReclaimPolicy returns a NewMethod that writes a GetReclaimPolicy method
-// for the supplied Object to the supplied file.
-func NewGetReclaimPolicy(receiver, runtime string) generate.NewMethod {
+// for the supplied Object to the supplied file. The ReclaimPolicy is returned
+// from the supplied field - typically Spec or SpecTemplate.
+func NewGetReclaimPolicy(receiver, runtime, field string) generate.NewMethod {
 	return func(f *jen.File, o types.Object) {
 		f.Commentf("GetReclaimPolicy of this %s.", o.Name())
 		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetReclaimPolicy").Params().Qual(runtime, "ReclaimPolicy").Block(
-			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("ReclaimPolicy")),
+			jen.Return(jen.Id(receiver).Dot(field).Dot("ReclaimPolicy")),
 		)
 	}
 }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/dave/jennifer/jen"
 	"github.com/google/go-cmp/cmp"
+	"github.com/negz/angryjet/internal/fields"
 )
 
 type MockObject struct {
@@ -249,7 +250,7 @@ func (t *Type) SetReclaimPolicy(r runtime.ReclaimPolicy) {
 }
 `
 	f := jen.NewFile("pkg")
-	NewSetReclaimPolicy("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	NewSetReclaimPolicy("t", "example.org/runtime", fields.NameSpec)(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewSetReclaimPolicy(): -want, +got\n%s", diff)
 	}
@@ -266,7 +267,7 @@ func (t *Type) GetReclaimPolicy() runtime.ReclaimPolicy {
 }
 `
 	f := jen.NewFile("pkg")
-	NewGetReclaimPolicy("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	NewGetReclaimPolicy("t", "example.org/runtime", fields.NameSpec)(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewGetReclaimPolicy(): -want, +got\n%s", diff)
 	}
