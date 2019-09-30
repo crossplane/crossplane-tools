@@ -13,19 +13,29 @@ already defined. Use the `// +crossplane:generate:methods=false` comment marker
 to explicitly disable generation of any methods for a type.
 
 ```console
-usage: angryjet [<flags>] [<packages>]
+$ go run cmd/angryjet/main.go generate-methodsets --help
+usage: main generate-methodsets [<flags>] [<packages>]
 
-Generates Crossplane API type methods.
+Generate a Crossplane method sets.
 
 Flags:
   --help                     Show context-sensitive help (also try --help-long and --help-man).
   --base-dir=/Users/negz/control/go/src  
                              Generated files are written to their package paths relative to this directory.
-  --prefix="zz_generated."   This string is prepended to the names of all generated files.
   --header-file=HEADER-FILE  The contents of this file will be added to the top of all generated files.
+  --filename-managed="zz_generated.managed.go"  
+                             The filename of generated managed resource files.
+  --filename-claim="zz_generated.claim.go"  
+                             The filename of generated resource claim files.
+  --filename-portable-class="zz_generated.portableclass.go"  
+                             The filename of generated portable class files.
+  --filename-portable-class-list="zz_generated.portableclasslist.go"  
+                             The filename of generated portable class list files.
+  --filename-non-portable-class="zz_generated.nonportableclass.go"  
+                             The filename of generated non-portable class files.
 
 Args:
-  [<packages>]  Package(s) for which to generate Crossplane methods, for example github.com/crossplaneio/crossplane/apis/...
+  [<packages>]  Package(s) for which to generate methods, for example github.com/crossplaneio/crossplane/apis/...
 ```
 
 [Crossplane]: https://crossplane.io
