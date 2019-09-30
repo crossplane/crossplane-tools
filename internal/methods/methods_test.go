@@ -103,6 +103,39 @@ func (t *Type) GetClaimReference() *core.ObjectReference {
 		t.Errorf("NewGetClaimReference(): -want, +got\n%s", diff)
 	}
 }
+func TestNewSetResourceReference(t *testing.T) {
+	want := `package pkg
+
+import core "example.org/core"
+
+// SetResourceReference of this Type.
+func (t *Type) SetResourceReference(r *core.ObjectReference) {
+	t.Spec.ResourceReference = r
+}
+`
+	f := jen.NewFile("pkg")
+	NewSetResourceReference("t", "example.org/core")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewSetResourceReference(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewGetResourceReference(t *testing.T) {
+	want := `package pkg
+
+import core "example.org/core"
+
+// GetResourceReference of this Type.
+func (t *Type) GetResourceReference() *core.ObjectReference {
+	return t.Spec.ResourceReference
+}
+`
+	f := jen.NewFile("pkg")
+	NewGetResourceReference("t", "example.org/core")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewGetResourceReference(): -want, +got\n%s", diff)
+	}
+}
 
 func TestNewSetNonPortableClassReference(t *testing.T) {
 	want := `package pkg
@@ -135,6 +168,39 @@ func (t *Type) GetNonPortableClassReference() *core.ObjectReference {
 	NewGetNonPortableClassReference("t", "example.org/core")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewGetNonPortableClassReference(): -want, +got\n%s", diff)
+	}
+}
+func TestNewSetPortableClassReference(t *testing.T) {
+	want := `package pkg
+
+import core "example.org/core"
+
+// SetPortableClassReference of this Type.
+func (t *Type) SetPortableClassReference(r *core.LocalObjectReference) {
+	t.Spec.PortableClassReference = r
+}
+`
+	f := jen.NewFile("pkg")
+	NewSetPortableClassReference("t", "example.org/core")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewSetPortableClassReference(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewGetPortableClassReference(t *testing.T) {
+	want := `package pkg
+
+import core "example.org/core"
+
+// GetPortableClassReference of this Type.
+func (t *Type) GetPortableClassReference() *core.LocalObjectReference {
+	return t.Spec.PortableClassReference
+}
+`
+	f := jen.NewFile("pkg")
+	NewGetPortableClassReference("t", "example.org/core")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewGetPortableClassReference(): -want, +got\n%s", diff)
 	}
 }
 
@@ -203,5 +269,48 @@ func (t *Type) GetReclaimPolicy() runtime.ReclaimPolicy {
 	NewGetReclaimPolicy("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewGetReclaimPolicy(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewSetPortableClassItems(t *testing.T) {
+	want := `package pkg
+
+import resource "example.org/resource"
+
+// SetPortableClassItems of this TypeList.
+func (tl *TypeList) SetPortableClassItems(i []resource.PortableClass) {
+	tl.Items = make([]Type, 0, len(i))
+	for j := range i {
+		if actual, ok := i[j].(*Type); ok {
+			tl.Items = append(tl.Items, *actual)
+		}
+	}
+}
+`
+	f := jen.NewFile("pkg")
+	NewSetPortableClassItems("tl", "example.org/resource")(f, MockObject{Named: "TypeList"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewSetPortableClassItems(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewGetPortableClassItems(t *testing.T) {
+	want := `package pkg
+
+import resource "example.org/resource"
+
+// GetPortableClassItems of this Type.
+func (t *Type) GetPortableClassItems() []resource.PortableClass {
+	items := make([]resource.PortableClass, len(t.Items))
+	for i := range t.Items {
+		items[i] = resource.PortableClass(&t.Items[i])
+	}
+	return items
+}
+`
+	f := jen.NewFile("pkg")
+	NewGetPortableClassItems("t", "example.org/resource")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewGetPortableClassItems(): -want, +got\n%s", diff)
 	}
 }

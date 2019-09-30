@@ -3,6 +3,7 @@ package methods
 
 import (
 	"go/types"
+	"strings"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/negz/angryjet/internal/fields"
@@ -64,6 +65,28 @@ func NewGetClaimReference(receiver, core string) generate.NewMethod {
 	}
 }
 
+// NewSetResourceReference returns a NewMethod that writes a
+// SetResourceReference method for the supplied Object to the supplied file.
+func NewSetResourceReference(receiver, core string) generate.NewMethod {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("SetResourceReference of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetResourceReference").Params(jen.Id("r").Op("*").Qual(core, "ObjectReference")).Block(
+			jen.Id(receiver).Dot(fields.NameSpec).Dot("ResourceReference").Op("=").Id("r"),
+		)
+	}
+}
+
+// NewGetResourceReference returns a NewMethod that writes a
+// GetResourceReference method for the supplied Object to the supplied file.
+func NewGetResourceReference(receiver, core string) generate.NewMethod {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("GetResourceReference of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetResourceReference").Params().Op("*").Qual(core, "ObjectReference").Block(
+			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("ResourceReference")),
+		)
+	}
+}
+
 // NewSetNonPortableClassReference returns a NewMethod that writes a
 // SetNonPortableClassReference method for the supplied Object to the supplied
 // file.
@@ -84,6 +107,30 @@ func NewGetNonPortableClassReference(receiver, core string) generate.NewMethod {
 		f.Commentf("GetNonPortableClassReference of this %s.", o.Name())
 		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetNonPortableClassReference").Params().Op("*").Qual(core, "ObjectReference").Block(
 			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("NonPortableClassReference")),
+		)
+	}
+}
+
+// NewSetPortableClassReference returns a NewMethod that writes a
+// SetPortableClassReference method for the supplied Object to the supplied
+// file.
+func NewSetPortableClassReference(receiver, core string) generate.NewMethod {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("SetPortableClassReference of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetPortableClassReference").Params(jen.Id("r").Op("*").Qual(core, "LocalObjectReference")).Block(
+			jen.Id(receiver).Dot(fields.NameSpec).Dot("PortableClassReference").Op("=").Id("r"),
+		)
+	}
+}
+
+// NewGetPortableClassReference returns a NewMethod that writes a
+// GetPortableClassReference method for the supplied Object to the supplied
+// file.
+func NewGetPortableClassReference(receiver, core string) generate.NewMethod {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("GetPortableClassReference of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetPortableClassReference").Params().Op("*").Qual(core, "LocalObjectReference").Block(
+			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("PortableClassReference")),
 		)
 	}
 }
@@ -130,6 +177,38 @@ func NewGetReclaimPolicy(receiver, runtime string) generate.NewMethod {
 		f.Commentf("GetReclaimPolicy of this %s.", o.Name())
 		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetReclaimPolicy").Params().Qual(runtime, "ReclaimPolicy").Block(
 			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("ReclaimPolicy")),
+		)
+	}
+}
+
+// NewSetPortableClassItems returns a NewMethod that writes a
+// SetPortableClassItems method for the supplied Object to the supplied file.
+func NewSetPortableClassItems(receiver, resource string) generate.NewMethod {
+	return func(f *jen.File, o types.Object) {
+		element := strings.TrimSuffix(o.Name(), "List")
+		f.Commentf("SetPortableClassItems of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetPortableClassItems").Params(jen.Id("i").Index().Qual(resource, "PortableClass")).Block(
+			jen.Id(receiver).Dot("Items").Op("=").Make(jen.Index().Id(element), jen.Id("0"), jen.Len(jen.Id("i"))),
+			jen.For(jen.Id("j").Op(":=").Range().Id("i")).Block(
+				jen.If(jen.List(jen.Id("actual"), jen.Id("ok")).Op(":=").Id("i").Index(jen.Id("j")).Assert(jen.Op("*").Id(element)), jen.Id("ok")).Block(
+					jen.Id(receiver).Dot("Items").Op("=").Append(jen.Id(receiver).Dot("Items"), jen.Op("*").Id("actual")),
+				),
+			),
+		)
+	}
+}
+
+// NewGetPortableClassItems returns a NewMethod that writes a
+// GetPortableClassItems method for the supplied Object to the supplied file.
+func NewGetPortableClassItems(receiver, resource string) generate.NewMethod {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("GetPortableClassItems of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetPortableClassItems").Params().Index().Qual(resource, "PortableClass").Block(
+			jen.Id("items").Op(":=").Make(jen.Index().Qual(resource, "PortableClass"), jen.Len(jen.Id(receiver).Dot("Items"))),
+			jen.For(jen.Id("i").Op(":=").Range().Id(receiver).Dot("Items")).Block(
+				jen.Id("items").Index(jen.Id("i")).Op("=").Qual(resource, "PortableClass").Call(jen.Op("&").Id(receiver).Dot("Items").Index(jen.Id("i"))),
+			),
+			jen.Return(jen.Id("items")),
 		)
 	}
 }

@@ -17,10 +17,14 @@ type Object func(o types.Object) bool
 func Managed() Object {
 	return func(o types.Object) bool {
 		return fields.Has(o,
-			fields.IsTypeMeta(),
-			fields.IsObjectMeta(),
-			fields.IsSpec().And(fields.HasFieldThat(fields.IsEmbedded(fields.IsResourceSpec()))),
-			fields.IsStatus().And(fields.HasFieldThat(fields.IsEmbedded(fields.IsResourceStatus()))),
+			fields.IsTypeMeta().And(fields.IsEmbedded()),
+			fields.IsObjectMeta().And(fields.IsEmbedded()),
+			fields.IsSpec().And(fields.HasFieldThat(
+				fields.IsResourceSpec().And(fields.IsEmbedded()),
+			)),
+			fields.IsStatus().And(fields.HasFieldThat(
+				fields.IsResourceStatus().And(fields.IsEmbedded()),
+			)),
 		)
 	}
 }
@@ -30,9 +34,11 @@ func Managed() Object {
 func NonPortableClass() Object {
 	return func(o types.Object) bool {
 		return fields.Has(o,
-			fields.IsTypeMeta(),
-			fields.IsObjectMeta(),
-			fields.IsSpecTemplate().And(fields.HasFieldThat(fields.IsEmbedded(fields.IsNonPortableClassSpecTemplate()))),
+			fields.IsTypeMeta().And(fields.IsEmbedded()),
+			fields.IsObjectMeta().And(fields.IsEmbedded()),
+			fields.IsSpecTemplate().And(fields.HasFieldThat(
+				fields.IsNonPortableClassSpecTemplate().And(fields.IsEmbedded()),
+			)),
 		)
 	}
 }
@@ -42,9 +48,11 @@ func NonPortableClass() Object {
 func Claim() Object {
 	return func(o types.Object) bool {
 		return fields.Has(o,
-			fields.IsTypeMeta(),
-			fields.IsObjectMeta(),
-			fields.IsSpec().And(fields.HasFieldThat(fields.IsEmbedded(fields.IsResourceClaimSpec()))),
+			fields.IsTypeMeta().And(fields.IsEmbedded()),
+			fields.IsObjectMeta().And(fields.IsEmbedded()),
+			fields.IsSpec().And(fields.HasFieldThat(
+				fields.IsResourceClaimSpec().And(fields.IsEmbedded()),
+			)),
 			fields.IsResourceClaimStatus(),
 		)
 	}
@@ -55,9 +63,25 @@ func Claim() Object {
 func PortableClass() Object {
 	return func(o types.Object) bool {
 		return fields.Has(o,
-			fields.IsTypeMeta(),
-			fields.IsObjectMeta(),
-			fields.IsEmbedded(fields.IsPortableClass()),
+			fields.IsTypeMeta().And(fields.IsEmbedded()),
+			fields.IsObjectMeta().And(fields.IsEmbedded()),
+			fields.IsPortableClass().And(fields.IsEmbedded()),
+		)
+	}
+}
+
+// PortableClassList returns an Object matcher that returns true if the supplied
+// Object is a Crossplane portable resource class list.
+func PortableClassList() Object {
+	return func(o types.Object) bool {
+		return fields.Has(o,
+			fields.IsTypeMeta().And(fields.IsEmbedded()),
+			fields.IsListMeta().And(fields.IsEmbedded()),
+			fields.IsItems().And(fields.IsSlice()).And(fields.HasFieldThat(
+				fields.IsTypeMeta().And(fields.IsEmbedded()),
+				fields.IsObjectMeta().And(fields.IsEmbedded()),
+				fields.IsPortableClass().And(fields.IsEmbedded()),
+			)),
 		)
 	}
 }
