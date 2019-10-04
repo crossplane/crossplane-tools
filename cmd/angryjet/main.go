@@ -28,7 +28,7 @@ import (
 	"github.com/crossplaneio/crossplane-tools/internal/fields"
 	"github.com/crossplaneio/crossplane-tools/internal/generate"
 	"github.com/crossplaneio/crossplane-tools/internal/match"
-	"github.com/crossplaneio/crossplane-tools/internal/methods"
+	"github.com/crossplaneio/crossplane-tools/internal/method"
 )
 
 const (
@@ -94,18 +94,18 @@ func main() {
 func GenerateManaged(base, filename, header string, p *packages.Package) error {
 	receiver := "mg"
 
-	methods := generate.MethodSet{
-		"SetConditions":                       methods.NewSetConditions(receiver, RuntimeImport),
-		"SetBindingPhase":                     methods.NewSetBindingPhase(receiver, RuntimeImport),
-		"GetBindingPhase":                     methods.NewGetBindingPhase(receiver, RuntimeImport),
-		"SetClaimReference":                   methods.NewSetClaimReference(receiver, CoreImport),
-		"GetClaimReference":                   methods.NewGetClaimReference(receiver, CoreImport),
-		"SetNonPortableClassReference":        methods.NewSetNonPortableClassReference(receiver, CoreImport),
-		"GetNonPortableClassReference":        methods.NewGetNonPortableClassReference(receiver, CoreImport),
-		"SetWriteConnectionSecretToReference": methods.NewSetWriteConnectionSecretToReference(receiver, CoreImport),
-		"GetWriteConnectionSecretToReference": methods.NewGetWriteConnectionSecretToReference(receiver, CoreImport),
-		"SetReclaimPolicy":                    methods.NewSetReclaimPolicy(receiver, RuntimeImport, fields.NameSpec),
-		"GetReclaimPolicy":                    methods.NewGetReclaimPolicy(receiver, RuntimeImport, fields.NameSpec),
+	methods := method.Set{
+		"SetConditions":                       method.NewSetConditions(receiver, RuntimeImport),
+		"SetBindingPhase":                     method.NewSetBindingPhase(receiver, RuntimeImport),
+		"GetBindingPhase":                     method.NewGetBindingPhase(receiver, RuntimeImport),
+		"SetClaimReference":                   method.NewSetClaimReference(receiver, CoreImport),
+		"GetClaimReference":                   method.NewGetClaimReference(receiver, CoreImport),
+		"SetNonPortableClassReference":        method.NewSetNonPortableClassReference(receiver, CoreImport),
+		"GetNonPortableClassReference":        method.NewGetNonPortableClassReference(receiver, CoreImport),
+		"SetWriteConnectionSecretToReference": method.NewSetWriteConnectionSecretToReference(receiver, CoreImport),
+		"GetWriteConnectionSecretToReference": method.NewGetWriteConnectionSecretToReference(receiver, CoreImport),
+		"SetReclaimPolicy":                    method.NewSetReclaimPolicy(receiver, RuntimeImport, fields.NameSpec),
+		"GetReclaimPolicy":                    method.NewGetReclaimPolicy(receiver, RuntimeImport, fields.NameSpec),
 	}
 
 	err := generate.WriteMethods(p, methods, filepath.Join(base, p.PkgPath, filename),
@@ -127,16 +127,16 @@ func GenerateManaged(base, filename, header string, p *packages.Package) error {
 func GenerateClaim(base, filename, header string, p *packages.Package) error {
 	receiver := "cm"
 
-	methods := generate.MethodSet{
-		"SetConditions":                       methods.NewSetConditions(receiver, RuntimeImport),
-		"SetBindingPhase":                     methods.NewSetBindingPhase(receiver, RuntimeImport),
-		"GetBindingPhase":                     methods.NewGetBindingPhase(receiver, RuntimeImport),
-		"SetResourceReference":                methods.NewSetResourceReference(receiver, CoreImport),
-		"GetResourceReference":                methods.NewGetResourceReference(receiver, CoreImport),
-		"SetPortableClassReference":           methods.NewSetPortableClassReference(receiver, CoreImport),
-		"GetPortableClassReference":           methods.NewGetPortableClassReference(receiver, CoreImport),
-		"SetWriteConnectionSecretToReference": methods.NewSetWriteConnectionSecretToReference(receiver, CoreImport),
-		"GetWriteConnectionSecretToReference": methods.NewGetWriteConnectionSecretToReference(receiver, CoreImport),
+	methods := method.Set{
+		"SetConditions":                       method.NewSetConditions(receiver, RuntimeImport),
+		"SetBindingPhase":                     method.NewSetBindingPhase(receiver, RuntimeImport),
+		"GetBindingPhase":                     method.NewGetBindingPhase(receiver, RuntimeImport),
+		"SetResourceReference":                method.NewSetResourceReference(receiver, CoreImport),
+		"GetResourceReference":                method.NewGetResourceReference(receiver, CoreImport),
+		"SetPortableClassReference":           method.NewSetPortableClassReference(receiver, CoreImport),
+		"GetPortableClassReference":           method.NewGetPortableClassReference(receiver, CoreImport),
+		"SetWriteConnectionSecretToReference": method.NewSetWriteConnectionSecretToReference(receiver, CoreImport),
+		"GetWriteConnectionSecretToReference": method.NewGetWriteConnectionSecretToReference(receiver, CoreImport),
 	}
 
 	err := generate.WriteMethods(p, methods, filepath.Join(base, p.PkgPath, filename),
@@ -158,9 +158,9 @@ func GenerateClaim(base, filename, header string, p *packages.Package) error {
 func GeneratePortableClass(base, filename, header string, p *packages.Package) error {
 	receiver := "cs"
 
-	methods := generate.MethodSet{
-		"SetNonPortableClassReference": methods.NewSetNonPortableClassReference(receiver, CoreImport),
-		"GetNonPortableClassReference": methods.NewGetNonPortableClassReference(receiver, CoreImport),
+	methods := method.Set{
+		"SetNonPortableClassReference": method.NewSetNonPortableClassReference(receiver, CoreImport),
+		"GetNonPortableClassReference": method.NewGetNonPortableClassReference(receiver, CoreImport),
 	}
 
 	err := generate.WriteMethods(p, methods, filepath.Join(base, p.PkgPath, filename),
@@ -179,9 +179,9 @@ func GeneratePortableClass(base, filename, header string, p *packages.Package) e
 func GeneratePortableClassList(base, filename, header string, p *packages.Package) error {
 	receiver := "csl"
 
-	methods := generate.MethodSet{
-		"SetPortableClassItems": methods.NewSetPortableClassItems(receiver, ResourceImport),
-		"GetPortableClassItems": methods.NewGetPortableClassItems(receiver, ResourceImport),
+	methods := method.Set{
+		"SetPortableClassItems": method.NewSetPortableClassItems(receiver, ResourceImport),
+		"GetPortableClassItems": method.NewGetPortableClassItems(receiver, ResourceImport),
 	}
 
 	err := generate.WriteMethods(p, methods, filepath.Join(base, p.PkgPath, filename),
@@ -199,9 +199,9 @@ func GeneratePortableClassList(base, filename, header string, p *packages.Packag
 func GenerateNonPortableClass(base, filename, header string, p *packages.Package) error {
 	receiver := "cs"
 
-	methods := generate.MethodSet{
-		"SetReclaimPolicy": methods.NewSetReclaimPolicy(receiver, RuntimeImport, fields.NameSpecTemplate),
-		"GetReclaimPolicy": methods.NewGetReclaimPolicy(receiver, RuntimeImport, fields.NameSpecTemplate),
+	methods := method.Set{
+		"SetReclaimPolicy": method.NewSetReclaimPolicy(receiver, RuntimeImport, fields.NameSpecTemplate),
+		"GetReclaimPolicy": method.NewGetReclaimPolicy(receiver, RuntimeImport, fields.NameSpecTemplate),
 	}
 
 	err := generate.WriteMethods(p, methods, filepath.Join(base, p.PkgPath, filename),
