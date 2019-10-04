@@ -14,11 +14,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4be0754e8ae810a4cc3b41f0dda393d9d0e22f3589c9a81120e00c925deb4f9c"
+  digest = "1:f780e2e814981de9dbdc2ca49d6c91d4aa4e2a1639ebc4106fafb0dc54fa5bd8"
   name = "github.com/alecthomas/units"
   packages = ["."]
   pruneopts = "UT"
-  revision = "680d30ca31172657fa50e996eb82d790d1d8b96e"
+  revision = "f65c72e2690dc4b403c8bd637baf4611cd4c069b"
 
 [[projects]]
   digest = "1:60abec4c812fc39cf7e66571da9e1758c586c258af815c4062b20d136542ff19"
@@ -52,7 +52,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:7ebbc54f43ca941fe96ab2c115712a1ae0e25f3f6f4064fadc4c0f22a341a018"
+  digest = "1:18be5c94d0795019fd5455847b68ed49c2e34b1cd2ad4122578ffef0b29e8643"
   name = "golang.org/x/tools"
   packages = [
     "go/ast/astutil",
@@ -66,7 +66,7 @@
     "internal/semver",
   ]
   pruneopts = "UT"
-  revision = "5eefd052ad727afc5e2e7b034c752b9d3d902b3b"
+  revision = "9cd7e18f8ef73a428ee6125634aae52a8d0c94d4"
 
 [[projects]]
   digest = "1:c06d9e11d955af78ac3bbb26bd02e01d2f61f689e1a3bce2ef6fb683ef8a7f2d"

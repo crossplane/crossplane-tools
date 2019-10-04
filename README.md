@@ -1,20 +1,32 @@
-# angryjet [![Godoc](https://img.shields.io/badge/godoc-reference-blue.svg)](https://godoc.org/github.com/negz/angryjet)
+# crossplane-tools [![Godoc](https://img.shields.io/badge/godoc-reference-blue.svg)](https://godoc.org/github.com/crossplaneio/crossplane-tools)
 
-An experimental code generator for [Crossplane] controllers.
+Experimental code generators for [Crossplane] controllers.
 
-Currently `angryjet` will detect Go structs that appear to be capable of
-satisfying crossplane-runtime's [`resource.Managed`] interface and automatically
-generate the method set required to satisfy that interface. A struct is
-considered capable of satisfying `resource.Managed` if its `Spec` field is a
-struct that embeds a [`ResourceSpec`] and its `Status` field is a struct that
-embeds a [`ResourceStatus`]. The method set is written to
-`zz_generated.managed.go` by default. Methods are not written if they are
-already defined. Use the `// +crossplane:generate:methods=false` comment marker
-to explicitly disable generation of any methods for a type.
+`angryjet` is the only extant tool within crossplane-tools. It will detect Go
+structs that appear to be capable of satisfying crossplane-runtime's interfaces
+(such as [`resource.Managed`]) and automatically generate the method set
+required to satisfy that interface. A struct is considered capable of satisfying
+crossplane-runtime's interfaces based on the heuristics described in the
+[Crossplane Services Developer Guide], for example a managed resource must:
+
+* Embed a [`ResourceStatus`] struct in their `Status` struct.
+* Embed a [`ResourceSpec`] struct in their `Spec` struct.
+* Embed a `Parameters` struct in their `Spec` struct.
+
+Methods are not written if they are already defined outside of the file that
+would be generated. Use the `//+crossplane:generate:methods=false` comment
+marker to explicitly disable generation of any methods for a type. Use `go
+generate` to generate your Crossplane API types by adding a generate marker to
+the top level of your `api/` directory, for example:
+
+```go
+// Generate crossplane-runtime methodsets (resource.Claim, etc)
+//go:generate go run ../vendor/github.com/crossplaneio/crossplane-tools/cmd/angryjet/main.go generate-methodsets ./...
+```
 
 ```console
-$ go run cmd/angryjet/main.go generate-methodsets --help
-usage: main generate-methodsets [<flags>] [<packages>]
+$ angryjet generate-methodsets --help
+usage: angryjet generate-methodsets [<flags>] [<packages>]
 
 Generate a Crossplane method sets.
 
@@ -42,3 +54,4 @@ Args:
 [`resource.Managed`]: https://godoc.org/github.com/crossplaneio/crossplane-runtime/pkg/resource#Managed
 [`ResourceSpec`]: https://godoc.org/github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1#ResourceSpec
 [`ResourceStatus`]: https://godoc.org/github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1#ResourceStatus
+[Crossplane Services Developer Guide]: https://crossplane.io/docs/v0.3/services-developer-guide.html#defining-resource-kinds

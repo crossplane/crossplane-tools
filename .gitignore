@@ -12,3 +12,8 @@
 *.out
 
 vendor/
+
+# Upbound build directories
+.cache
+.work
+_output
