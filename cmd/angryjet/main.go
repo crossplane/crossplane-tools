@@ -33,7 +33,7 @@ import (
 
 const (
 	// LoadMode used to load all packages.
-	LoadMode = packages.NeedName | packages.NeedImports | packages.NeedDeps | packages.NeedTypes | packages.NeedSyntax
+	LoadMode = packages.NeedName | packages.NeedFiles | packages.NeedImports | packages.NeedDeps | packages.NeedTypes | packages.NeedSyntax
 
 	// DisableMarker used to disable generation of managed resource methods for
 	// a type that otherwise appears to be a managed resource that is missing a
@@ -57,7 +57,6 @@ func main() {
 		app = kingpin.New(filepath.Base(os.Args[0]), "Generates Crossplane API type methods.").DefaultEnvars()
 
 		methodsets                = app.Command("generate-methodsets", "Generate a Crossplane method sets.")
-		base                      = methodsets.Flag("base-dir", "Generated files are written to their package paths relative to this directory.").Default(filepath.Join(os.Getenv("GOPATH"), "src")).ExistingDir()
 		headerFile                = methodsets.Flag("header-file", "The contents of this file will be added to the top of all generated files.").ExistingFile()
 		filenameManaged           = methodsets.Flag("filename-managed", "The filename of generated managed resource files.").Default("zz_generated.managed.go").String()
 		filenameClaim             = methodsets.Flag("filename-claim", "The filename of generated resource claim files.").Default("zz_generated.claim.go").String()
@@ -82,16 +81,16 @@ func main() {
 		for _, err := range p.Errors {
 			kingpin.FatalIfError(err, "error loading packages using pattern %s", *pattern)
 		}
-		kingpin.FatalIfError(GenerateManaged(*base, *filenameManaged, header, p), "cannot write managed resource method set for package %s", p.PkgPath)
-		kingpin.FatalIfError(GenerateClaim(*base, *filenameClaim, header, p), "cannot write resource claim method set for package %s", p.PkgPath)
-		kingpin.FatalIfError(GeneratePortableClass(*base, *filenamePortableClass, header, p), "cannot write portable class method set for package %s", p.PkgPath)
-		kingpin.FatalIfError(GeneratePortableClassList(*base, *filenamePortableClassList, header, p), "cannot write portable class list method set for package %s", p.PkgPath)
-		kingpin.FatalIfError(GenerateNonPortableClass(*base, *filenameNonPortableClass, header, p), "cannot write non portable class method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateManaged(*filenameManaged, header, p), "cannot write managed resource method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateClaim(*filenameClaim, header, p), "cannot write resource claim method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GeneratePortableClass(*filenamePortableClass, header, p), "cannot write portable class method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GeneratePortableClassList(*filenamePortableClassList, header, p), "cannot write portable class list method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateNonPortableClass(*filenameNonPortableClass, header, p), "cannot write non portable class method set for package %s", p.PkgPath)
 	}
 }
 
 // GenerateManaged generates the resource.Managed method set.
-func GenerateManaged(base, filename, header string, p *packages.Package) error {
+func GenerateManaged(filename, header string, p *packages.Package) error {
 	receiver := "mg"
 
 	methods := method.Set{
@@ -108,7 +107,7 @@ func GenerateManaged(base, filename, header string, p *packages.Package) error {
 		"GetReclaimPolicy":                    method.NewGetReclaimPolicy(receiver, RuntimeImport, fields.NameSpec),
 	}
 
-	err := generate.WriteMethods(p, methods, filepath.Join(base, p.PkgPath, filename),
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
 		generate.WithHeaders(header),
 		generate.WithImportAliases(map[string]string{
 			CoreImport:    CoreAlias,
@@ -124,7 +123,7 @@ func GenerateManaged(base, filename, header string, p *packages.Package) error {
 }
 
 // GenerateClaim generates the resource.Claim method set.
-func GenerateClaim(base, filename, header string, p *packages.Package) error {
+func GenerateClaim(filename, header string, p *packages.Package) error {
 	receiver := "cm"
 
 	methods := method.Set{
@@ -139,7 +138,7 @@ func GenerateClaim(base, filename, header string, p *packages.Package) error {
 		"GetWriteConnectionSecretToReference": method.NewGetWriteConnectionSecretToReference(receiver, CoreImport),
 	}
 
-	err := generate.WriteMethods(p, methods, filepath.Join(base, p.PkgPath, filename),
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
 		generate.WithHeaders(header),
 		generate.WithImportAliases(map[string]string{
 			CoreImport:    CoreAlias,
@@ -155,7 +154,7 @@ func GenerateClaim(base, filename, header string, p *packages.Package) error {
 }
 
 // GeneratePortableClass generates the resource.PortableClass method set.
-func GeneratePortableClass(base, filename, header string, p *packages.Package) error {
+func GeneratePortableClass(filename, header string, p *packages.Package) error {
 	receiver := "cs"
 
 	methods := method.Set{
@@ -163,7 +162,7 @@ func GeneratePortableClass(base, filename, header string, p *packages.Package) e
 		"GetNonPortableClassReference": method.NewGetNonPortableClassReference(receiver, CoreImport),
 	}
 
-	err := generate.WriteMethods(p, methods, filepath.Join(base, p.PkgPath, filename),
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
 		generate.WithHeaders(header),
 		generate.WithImportAliases(map[string]string{CoreImport: CoreAlias}),
 		generate.WithMatcher(match.AllOf(
@@ -176,7 +175,7 @@ func GeneratePortableClass(base, filename, header string, p *packages.Package) e
 }
 
 // GeneratePortableClassList generates the resource.PortableClassList method set.
-func GeneratePortableClassList(base, filename, header string, p *packages.Package) error {
+func GeneratePortableClassList(filename, header string, p *packages.Package) error {
 	receiver := "csl"
 
 	methods := method.Set{
@@ -184,7 +183,7 @@ func GeneratePortableClassList(base, filename, header string, p *packages.Packag
 		"GetPortableClassItems": method.NewGetPortableClassItems(receiver, ResourceImport),
 	}
 
-	err := generate.WriteMethods(p, methods, filepath.Join(base, p.PkgPath, filename),
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
 		generate.WithHeaders(header),
 		generate.WithMatcher(match.AllOf(
 			match.PortableClassList(),
@@ -196,7 +195,7 @@ func GeneratePortableClassList(base, filename, header string, p *packages.Packag
 }
 
 // GenerateNonPortableClass generates the resource.NonPortableClass method set.
-func GenerateNonPortableClass(base, filename, header string, p *packages.Package) error {
+func GenerateNonPortableClass(filename, header string, p *packages.Package) error {
 	receiver := "cs"
 
 	methods := method.Set{
@@ -204,7 +203,7 @@ func GenerateNonPortableClass(base, filename, header string, p *packages.Package
 		"GetReclaimPolicy": method.NewGetReclaimPolicy(receiver, RuntimeImport, fields.NameSpecTemplate),
 	}
 
-	err := generate.WriteMethods(p, methods, filepath.Join(base, p.PkgPath, filename),
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
 		generate.WithHeaders(header),
 		generate.WithImportAliases(map[string]string{RuntimeImport: RuntimeAlias}),
 		generate.WithMatcher(match.AllOf(

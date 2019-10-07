@@ -32,8 +32,6 @@ Generate a Crossplane method sets.
 
 Flags:
   --help                     Show context-sensitive help (also try --help-long and --help-man).
-  --base-dir=/Users/negz/control/go/src  
-                             Generated files are written to their package paths relative to this directory.
   --header-file=HEADER-FILE  The contents of this file will be added to the top of all generated files.
   --filename-managed="zz_generated.managed.go"  
                              The filename of generated managed resource files.
