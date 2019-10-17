@@ -21,7 +21,6 @@ import (
 	"go/token"
 	"go/types"
 	"sort"
-	"strings"
 
 	"github.com/dave/jennifer/jen"
 
@@ -154,50 +153,46 @@ func NewGetResourceReference(receiver, core string) New {
 	}
 }
 
-// NewSetNonPortableClassReference returns a NewMethod that writes a
-// SetNonPortableClassReference method for the supplied Object to the supplied
-// file.
-func NewSetNonPortableClassReference(receiver, core string) New {
+// NewSetClassSelector returns a NewMethod that writes a SetClassSelector
+// method for the supplied Object to the supplied file.
+func NewSetClassSelector(receiver, meta string) New {
 	return func(f *jen.File, o types.Object) {
-		f.Commentf("SetNonPortableClassReference of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetNonPortableClassReference").Params(jen.Id("r").Op("*").Qual(core, "ObjectReference")).Block(
-			jen.Id(receiver).Dot(fields.NameSpec).Dot("NonPortableClassReference").Op("=").Id("r"),
+		f.Commentf("SetClassSelector of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetClassSelector").Params(jen.Id("s").Op("*").Qual(meta, "LabelSelector")).Block(
+			jen.Id(receiver).Dot(fields.NameSpec).Dot("ClassSelector").Op("=").Id("s"),
 		)
 	}
 }
 
-// NewGetNonPortableClassReference returns a NewMethod that writes a
-// GetNonPortableClassReference method for the supplied Object to the supplied
-// file.
-func NewGetNonPortableClassReference(receiver, core string) New {
+// NewGetClassSelector returns a NewMethod that writes a GetClassSelector
+// method for the supplied Object to the supplied file.
+func NewGetClassSelector(receiver, meta string) New {
 	return func(f *jen.File, o types.Object) {
-		f.Commentf("GetNonPortableClassReference of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetNonPortableClassReference").Params().Op("*").Qual(core, "ObjectReference").Block(
-			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("NonPortableClassReference")),
+		f.Commentf("GetClassSelector of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetClassSelector").Params().Op("*").Qual(meta, "LabelSelector").Block(
+			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("ClassSelector")),
 		)
 	}
 }
 
-// NewSetPortableClassReference returns a NewMethod that writes a
-// SetPortableClassReference method for the supplied Object to the supplied
-// file.
-func NewSetPortableClassReference(receiver, core string) New {
+// NewSetClassReference returns a NewMethod that writes a SetClassReference
+// method for the supplied Object to the supplied file.
+func NewSetClassReference(receiver, core string) New {
 	return func(f *jen.File, o types.Object) {
-		f.Commentf("SetPortableClassReference of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetPortableClassReference").Params(jen.Id("r").Op("*").Qual(core, "LocalObjectReference")).Block(
-			jen.Id(receiver).Dot(fields.NameSpec).Dot("PortableClassReference").Op("=").Id("r"),
+		f.Commentf("SetClassReference of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetClassReference").Params(jen.Id("r").Op("*").Qual(core, "ObjectReference")).Block(
+			jen.Id(receiver).Dot(fields.NameSpec).Dot("ClassReference").Op("=").Id("r"),
 		)
 	}
 }
 
-// NewGetPortableClassReference returns a NewMethod that writes a
-// GetPortableClassReference method for the supplied Object to the supplied
-// file.
-func NewGetPortableClassReference(receiver, core string) New {
+// NewGetClassReference returns a NewMethod that writes a GetClassReference
+// method for the supplied Object to the supplied file.
+func NewGetClassReference(receiver, core string) New {
 	return func(f *jen.File, o types.Object) {
-		f.Commentf("GetPortableClassReference of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetPortableClassReference").Params().Op("*").Qual(core, "LocalObjectReference").Block(
-			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("PortableClassReference")),
+		f.Commentf("GetClassReference of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetClassReference").Params().Op("*").Qual(core, "ObjectReference").Block(
+			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("ClassReference")),
 		)
 	}
 }
@@ -205,10 +200,10 @@ func NewGetPortableClassReference(receiver, core string) New {
 // NewSetWriteConnectionSecretToReference returns a NewMethod that writes a
 // SetWriteConnectionSecretToReference method for the supplied Object to the
 // supplied file.
-func NewSetWriteConnectionSecretToReference(receiver, core string) New {
+func NewSetWriteConnectionSecretToReference(receiver, runtime string) New {
 	return func(f *jen.File, o types.Object) {
 		f.Commentf("SetWriteConnectionSecretToReference of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetWriteConnectionSecretToReference").Params(jen.Id("r").Qual(core, "LocalObjectReference")).Block(
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetWriteConnectionSecretToReference").Params(jen.Id("r").Op("*").Qual(runtime, "SecretReference")).Block(
 			jen.Id(receiver).Dot(fields.NameSpec).Dot("WriteConnectionSecretToReference").Op("=").Id("r"),
 		)
 	}
@@ -217,10 +212,34 @@ func NewSetWriteConnectionSecretToReference(receiver, core string) New {
 // NewGetWriteConnectionSecretToReference returns a NewMethod that writes a
 // GetWriteConnectionSecretToReference method for the supplied Object to the
 // supplied file.
-func NewGetWriteConnectionSecretToReference(receiver, core string) New {
+func NewGetWriteConnectionSecretToReference(receiver, runtime string) New {
 	return func(f *jen.File, o types.Object) {
 		f.Commentf("GetWriteConnectionSecretToReference of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetWriteConnectionSecretToReference").Params().Qual(core, "LocalObjectReference").Block(
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetWriteConnectionSecretToReference").Params().Op("*").Qual(runtime, "SecretReference").Block(
+			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("WriteConnectionSecretToReference")),
+		)
+	}
+}
+
+// NewLocalSetWriteConnectionSecretToReference returns a NewMethod that writes a
+// SetWriteConnectionSecretToReference method for the supplied Object to the
+// supplied file.
+func NewLocalSetWriteConnectionSecretToReference(receiver, runtime string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("SetWriteConnectionSecretToReference of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetWriteConnectionSecretToReference").Params(jen.Id("r").Op("*").Qual(runtime, "LocalSecretReference")).Block(
+			jen.Id(receiver).Dot(fields.NameSpec).Dot("WriteConnectionSecretToReference").Op("=").Id("r"),
+		)
+	}
+}
+
+// NewLocalGetWriteConnectionSecretToReference returns a NewMethod that writes a
+// GetWriteConnectionSecretToReference method for the supplied Object to the
+// supplied file.
+func NewLocalGetWriteConnectionSecretToReference(receiver, runtime string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("GetWriteConnectionSecretToReference of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetWriteConnectionSecretToReference").Params().Op("*").Qual(runtime, "LocalSecretReference").Block(
 			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("WriteConnectionSecretToReference")),
 		)
 	}
@@ -246,38 +265,6 @@ func NewGetReclaimPolicy(receiver, runtime, field string) New {
 		f.Commentf("GetReclaimPolicy of this %s.", o.Name())
 		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetReclaimPolicy").Params().Qual(runtime, "ReclaimPolicy").Block(
 			jen.Return(jen.Id(receiver).Dot(field).Dot("ReclaimPolicy")),
-		)
-	}
-}
-
-// NewSetPortableClassItems returns a NewMethod that writes a
-// SetPortableClassItems method for the supplied Object to the supplied file.
-func NewSetPortableClassItems(receiver, resource string) New {
-	return func(f *jen.File, o types.Object) {
-		element := strings.TrimSuffix(o.Name(), "List")
-		f.Commentf("SetPortableClassItems of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetPortableClassItems").Params(jen.Id("i").Index().Qual(resource, "PortableClass")).Block(
-			jen.Id(receiver).Dot("Items").Op("=").Make(jen.Index().Id(element), jen.Id("0"), jen.Len(jen.Id("i"))),
-			jen.For(jen.Id("j").Op(":=").Range().Id("i")).Block(
-				jen.If(jen.List(jen.Id("actual"), jen.Id("ok")).Op(":=").Id("i").Index(jen.Id("j")).Assert(jen.Op("*").Id(element)), jen.Id("ok")).Block(
-					jen.Id(receiver).Dot("Items").Op("=").Append(jen.Id(receiver).Dot("Items"), jen.Op("*").Id("actual")),
-				),
-			),
-		)
-	}
-}
-
-// NewGetPortableClassItems returns a NewMethod that writes a
-// GetPortableClassItems method for the supplied Object to the supplied file.
-func NewGetPortableClassItems(receiver, resource string) New {
-	return func(f *jen.File, o types.Object) {
-		f.Commentf("GetPortableClassItems of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetPortableClassItems").Params().Index().Qual(resource, "PortableClass").Block(
-			jen.Id("items").Op(":=").Make(jen.Index().Qual(resource, "PortableClass"), jen.Len(jen.Id(receiver).Dot("Items"))),
-			jen.For(jen.Id("i").Op(":=").Range().Id(receiver).Dot("Items")).Block(
-				jen.Id("items").Index(jen.Id("i")).Op("=").Qual(resource, "PortableClass").Call(jen.Op("&").Id(receiver).Dot("Items").Index(jen.Id("i"))),
-			),
-			jen.Return(jen.Id("items")),
 		)
 	}
 }

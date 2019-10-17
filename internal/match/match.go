@@ -45,15 +45,15 @@ func Managed() Object {
 	}
 }
 
-// NonPortableClass returns an Object matcher that returns true if the supplied
-// Object is a Crossplane non-portable resource class.
-func NonPortableClass() Object {
+// Class returns an Object matcher that returns true if the supplied Object is a
+// Crossplane resource class.
+func Class() Object {
 	return func(o types.Object) bool {
 		return fields.Has(o,
 			fields.IsTypeMeta().And(fields.IsEmbedded()),
 			fields.IsObjectMeta().And(fields.IsEmbedded()),
 			fields.IsSpecTemplate().And(fields.HasFieldThat(
-				fields.IsNonPortableClassSpecTemplate().And(fields.IsEmbedded()),
+				fields.IsClassSpecTemplate().And(fields.IsEmbedded()),
 			)),
 		)
 	}
@@ -70,34 +70,6 @@ func Claim() Object {
 				fields.IsResourceClaimSpec().And(fields.IsEmbedded()),
 			)),
 			fields.IsResourceClaimStatus(),
-		)
-	}
-}
-
-// PortableClass returns an Object matcher that returns true if the supplied
-// Object is a Crossplane portable resource class.
-func PortableClass() Object {
-	return func(o types.Object) bool {
-		return fields.Has(o,
-			fields.IsTypeMeta().And(fields.IsEmbedded()),
-			fields.IsObjectMeta().And(fields.IsEmbedded()),
-			fields.IsPortableClass().And(fields.IsEmbedded()),
-		)
-	}
-}
-
-// PortableClassList returns an Object matcher that returns true if the supplied
-// Object is a Crossplane portable resource class list.
-func PortableClassList() Object {
-	return func(o types.Object) bool {
-		return fields.Has(o,
-			fields.IsTypeMeta().And(fields.IsEmbedded()),
-			fields.IsListMeta().And(fields.IsEmbedded()),
-			fields.IsItems().And(fields.IsSlice()).And(fields.HasFieldThat(
-				fields.IsTypeMeta().And(fields.IsEmbedded()),
-				fields.IsObjectMeta().And(fields.IsEmbedded()),
-				fields.IsPortableClass().And(fields.IsEmbedded()),
-			)),
 		)
 	}
 }

@@ -155,85 +155,86 @@ func (t *Type) GetResourceReference() *core.ObjectReference {
 	}
 }
 
-func TestNewSetNonPortableClassReference(t *testing.T) {
+func TestNewSetClassSelector(t *testing.T) {
 	want := `package pkg
 
-import core "example.org/core"
+import meta "example.org/meta"
 
-// SetNonPortableClassReference of this Type.
-func (t *Type) SetNonPortableClassReference(r *core.ObjectReference) {
-	t.Spec.NonPortableClassReference = r
+// SetClassSelector of this Type.
+func (t *Type) SetClassSelector(s *meta.LabelSelector) {
+	t.Spec.ClassSelector = s
 }
 `
 	f := jen.NewFile("pkg")
-	NewSetNonPortableClassReference("t", "example.org/core")(f, MockObject{Named: "Type"})
+	NewSetClassSelector("t", "example.org/meta")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewSetNonPortableClassReference(): -want, +got\n%s", diff)
+		t.Errorf("NewSetClassSelector(): -want, +got\n%s", diff)
 	}
 }
 
-func TestNewGetNonPortableClassReference(t *testing.T) {
+func TestNewGetClassSelector(t *testing.T) {
 	want := `package pkg
 
-import core "example.org/core"
+import meta "example.org/meta"
 
-// GetNonPortableClassReference of this Type.
-func (t *Type) GetNonPortableClassReference() *core.ObjectReference {
-	return t.Spec.NonPortableClassReference
+// GetClassSelector of this Type.
+func (t *Type) GetClassSelector() *meta.LabelSelector {
+	return t.Spec.ClassSelector
 }
 `
 	f := jen.NewFile("pkg")
-	NewGetNonPortableClassReference("t", "example.org/core")(f, MockObject{Named: "Type"})
+	NewGetClassSelector("t", "example.org/meta")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewGetNonPortableClassReference(): -want, +got\n%s", diff)
-	}
-}
-func TestNewSetPortableClassReference(t *testing.T) {
-	want := `package pkg
-
-import core "example.org/core"
-
-// SetPortableClassReference of this Type.
-func (t *Type) SetPortableClassReference(r *core.LocalObjectReference) {
-	t.Spec.PortableClassReference = r
-}
-`
-	f := jen.NewFile("pkg")
-	NewSetPortableClassReference("t", "example.org/core")(f, MockObject{Named: "Type"})
-	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewSetPortableClassReference(): -want, +got\n%s", diff)
+		t.Errorf("NewGetClassSelector(): -want, +got\n%s", diff)
 	}
 }
 
-func TestNewGetPortableClassReference(t *testing.T) {
+func TestNewSetClassReference(t *testing.T) {
 	want := `package pkg
 
 import core "example.org/core"
 
-// GetPortableClassReference of this Type.
-func (t *Type) GetPortableClassReference() *core.LocalObjectReference {
-	return t.Spec.PortableClassReference
+// SetClassReference of this Type.
+func (t *Type) SetClassReference(r *core.ObjectReference) {
+	t.Spec.ClassReference = r
 }
 `
 	f := jen.NewFile("pkg")
-	NewGetPortableClassReference("t", "example.org/core")(f, MockObject{Named: "Type"})
+	NewSetClassReference("t", "example.org/core")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewGetPortableClassReference(): -want, +got\n%s", diff)
+		t.Errorf("NewSetClassReference(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewGetClassReference(t *testing.T) {
+	want := `package pkg
+
+import core "example.org/core"
+
+// GetClassReference of this Type.
+func (t *Type) GetClassReference() *core.ObjectReference {
+	return t.Spec.ClassReference
+}
+`
+	f := jen.NewFile("pkg")
+	NewGetClassReference("t", "example.org/core")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewGetClassReference(): -want, +got\n%s", diff)
 	}
 }
 
 func TestNewSetWriteConnectionSecretToReference(t *testing.T) {
 	want := `package pkg
 
-import core "example.org/core"
+import runtime "example.org/runtime"
 
 // SetWriteConnectionSecretToReference of this Type.
-func (t *Type) SetWriteConnectionSecretToReference(r core.LocalObjectReference) {
+func (t *Type) SetWriteConnectionSecretToReference(r *runtime.SecretReference) {
 	t.Spec.WriteConnectionSecretToReference = r
 }
 `
 	f := jen.NewFile("pkg")
-	NewSetWriteConnectionSecretToReference("t", "example.org/core")(f, MockObject{Named: "Type"})
+	NewSetWriteConnectionSecretToReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewSetWriteConnectionSecretToReference(): -want, +got\n%s", diff)
 	}
@@ -242,15 +243,49 @@ func (t *Type) SetWriteConnectionSecretToReference(r core.LocalObjectReference) 
 func TestNewGetWriteConnectionSecretToReference(t *testing.T) {
 	want := `package pkg
 
-import core "example.org/core"
+import runtime "example.org/runtime"
 
 // GetWriteConnectionSecretToReference of this Type.
-func (t *Type) GetWriteConnectionSecretToReference() core.LocalObjectReference {
+func (t *Type) GetWriteConnectionSecretToReference() *runtime.SecretReference {
 	return t.Spec.WriteConnectionSecretToReference
 }
 `
 	f := jen.NewFile("pkg")
-	NewGetWriteConnectionSecretToReference("t", "example.org/core")(f, MockObject{Named: "Type"})
+	NewGetWriteConnectionSecretToReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewGetWriteConnectionSecretToLocalReference(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewLocalSetWriteConnectionSecretToReference(t *testing.T) {
+	want := `package pkg
+
+import runtime "example.org/runtime"
+
+// SetWriteConnectionSecretToReference of this Type.
+func (t *Type) SetWriteConnectionSecretToReference(r *runtime.LocalSecretReference) {
+	t.Spec.WriteConnectionSecretToReference = r
+}
+`
+	f := jen.NewFile("pkg")
+	NewLocalSetWriteConnectionSecretToReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewSetWriteConnectionSecretToLocalReference(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewLocalGetWriteConnectionSecretToReference(t *testing.T) {
+	want := `package pkg
+
+import runtime "example.org/runtime"
+
+// GetWriteConnectionSecretToReference of this Type.
+func (t *Type) GetWriteConnectionSecretToReference() *runtime.LocalSecretReference {
+	return t.Spec.WriteConnectionSecretToReference
+}
+`
+	f := jen.NewFile("pkg")
+	NewLocalGetWriteConnectionSecretToReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewGetWriteConnectionSecretToReference(): -want, +got\n%s", diff)
 	}
@@ -287,48 +322,5 @@ func (t *Type) GetReclaimPolicy() runtime.ReclaimPolicy {
 	NewGetReclaimPolicy("t", "example.org/runtime", fields.NameSpec)(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewGetReclaimPolicy(): -want, +got\n%s", diff)
-	}
-}
-
-func TestNewSetPortableClassItems(t *testing.T) {
-	want := `package pkg
-
-import resource "example.org/resource"
-
-// SetPortableClassItems of this TypeList.
-func (tl *TypeList) SetPortableClassItems(i []resource.PortableClass) {
-	tl.Items = make([]Type, 0, len(i))
-	for j := range i {
-		if actual, ok := i[j].(*Type); ok {
-			tl.Items = append(tl.Items, *actual)
-		}
-	}
-}
-`
-	f := jen.NewFile("pkg")
-	NewSetPortableClassItems("tl", "example.org/resource")(f, MockObject{Named: "TypeList"})
-	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewSetPortableClassItems(): -want, +got\n%s", diff)
-	}
-}
-
-func TestNewGetPortableClassItems(t *testing.T) {
-	want := `package pkg
-
-import resource "example.org/resource"
-
-// GetPortableClassItems of this Type.
-func (t *Type) GetPortableClassItems() []resource.PortableClass {
-	items := make([]resource.PortableClass, len(t.Items))
-	for i := range t.Items {
-		items[i] = resource.PortableClass(&t.Items[i])
-	}
-	return items
-}
-`
-	f := jen.NewFile("pkg")
-	NewGetPortableClassItems("t", "example.org/resource")(f, MockObject{Named: "Type"})
-	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewGetPortableClassItems(): -want, +got\n%s", diff)
 	}
 }
