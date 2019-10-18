@@ -54,6 +54,23 @@ func (t *Type) SetConditions(c ...runtime.Condition) {
 	}
 }
 
+func TestNewGetCondition(t *testing.T) {
+	want := `package pkg
+
+import runtime "example.org/runtime"
+
+// GetCondition of this Type.
+func (t *Type) GetCondition(c ...runtime.Condition) {
+	t.Status.GetCondition(c...)
+}
+`
+	f := jen.NewFile("pkg")
+	NewGetCondition("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewGetCondition(): -want, +got\n%s", diff)
+	}
+}
+
 func TestNewSetBindingPhase(t *testing.T) {
 	want := `package pkg
 
