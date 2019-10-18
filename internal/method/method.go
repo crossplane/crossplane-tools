@@ -88,17 +88,6 @@ func NewSetConditions(receiver, runtime string) New {
 	}
 }
 
-// NewGetCondition returns a NewMethod that writes a GetCondition method for
-// the supplied Object to the supplied file.
-func NewGetCondition(receiver, runtime string) New {
-	return func(f *jen.File, o types.Object) {
-		f.Commentf("GetCondition of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetCondition").Params(jen.Id("ct").Qual(runtime, "ConditionType")).Qual(runtime, "Condition").Block(
-			jen.Id(receiver).Dot(fields.NameStatus).Dot("GetCondition").Call(jen.Id("ct")),
-		)
-	}
-}
-
 // NewSetBindingPhase returns a NewMethod that writes a SetBindingPhase method
 // for the supplied Object to the supplied file.
 func NewSetBindingPhase(receiver, runtime string) New {

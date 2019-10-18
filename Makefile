@@ -23,7 +23,6 @@ GO_TEST_PARALLEL := $(shell echo $$(( $(NPROCS) / 2 )))
 GO_STATIC_PACKAGES = $(GO_PROJECT)/cmd/angryjet
 GO_LDFLAGS += -X $(GO_PROJECT)/pkg/version.Version=$(VERSION)
 GO_SUBDIRS += cmd internal
-GO111MODULE = on
 -include build/makelib/golang.mk
 
 # We want submodules to be set up the first time `make` is run.

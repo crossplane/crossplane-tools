@@ -95,7 +95,6 @@ func GenerateManaged(filename, header string, p *packages.Package) error {
 
 	methods := method.Set{
 		"SetConditions":                       method.NewSetConditions(receiver, RuntimeImport),
-		"GetCondition":                        method.NewGetCondition(receiver, RuntimeImport),
 		"SetBindingPhase":                     method.NewSetBindingPhase(receiver, RuntimeImport),
 		"GetBindingPhase":                     method.NewGetBindingPhase(receiver, RuntimeImport),
 		"SetClaimReference":                   method.NewSetClaimReference(receiver, CoreImport),
@@ -129,7 +128,6 @@ func GenerateClaim(filename, header string, p *packages.Package) error {
 
 	methods := method.Set{
 		"SetConditions":                       method.NewSetConditions(receiver, RuntimeImport),
-		"GetCondition":                        method.NewGetCondition(receiver, RuntimeImport),
 		"SetBindingPhase":                     method.NewSetBindingPhase(receiver, RuntimeImport),
 		"GetBindingPhase":                     method.NewGetBindingPhase(receiver, RuntimeImport),
 		"SetResourceReference":                method.NewSetResourceReference(receiver, CoreImport),

@@ -17,6 +17,3 @@ vendor/
 .cache
 .work
 _output
-
-# IDE folder
-.vscode
