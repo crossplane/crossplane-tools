@@ -24,34 +24,32 @@ import (
 
 // Field names.
 const (
-	NameTypeMeta                     = "TypeMeta"
-	NameObjectMeta                   = "ObjectMeta"
-	NameListMeta                     = "ListMeta"
-	NameSpec                         = "Spec"
-	NameSpecTemplate                 = "SpecTemplate"
-	NameStatus                       = "Status"
-	NameResourceSpec                 = "ResourceSpec"
-	NameResourceStatus               = "ResourceStatus"
-	NameResourceClaimSpec            = "ResourceClaimSpec"
-	NameNonPortableClassSpecTemplate = "NonPortableClassSpecTemplate"
-	NamePortableClass                = "PortableClass"
-	NameItems                        = "Items"
+	NameTypeMeta          = "TypeMeta"
+	NameObjectMeta        = "ObjectMeta"
+	NameListMeta          = "ListMeta"
+	NameSpec              = "Spec"
+	NameSpecTemplate      = "SpecTemplate"
+	NameStatus            = "Status"
+	NameResourceSpec      = "ResourceSpec"
+	NameResourceStatus    = "ResourceStatus"
+	NameResourceClaimSpec = "ResourceClaimSpec"
+	NameClassSpecTemplate = "ClassSpecTemplate"
+	NameItems             = "Items"
 )
 
 // Field type suffixes.
 const (
-	TypeSuffixTypeMeta                     = "k8s.io/apimachinery/pkg/apis/meta/v1.TypeMeta"
-	TypeSuffixObjectMeta                   = "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"
-	TypeSuffixListMeta                     = "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"
-	TypeSuffixSpec                         = NameSpec
-	TypeSuffixSpecTemplate                 = NameSpecTemplate
-	TypeSuffixStatus                       = NameStatus
-	TypeSuffixResourceSpec                 = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1.ResourceSpec"
-	TypeSuffixResourceStatus               = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1.ResourceStatus"
-	TypeSuffixResourceClaimSpec            = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1.ResourceClaimSpec"
-	TypeSuffixResourceClaimStatus          = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1.ResourceClaimStatus"
-	TypeSuffixNonPortableClassSpecTemplate = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1.NonPortableClassSpecTemplate"
-	TypeSuffixPortableClass                = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1.PortableClass"
+	TypeSuffixTypeMeta            = "k8s.io/apimachinery/pkg/apis/meta/v1.TypeMeta"
+	TypeSuffixObjectMeta          = "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"
+	TypeSuffixListMeta            = "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"
+	TypeSuffixSpec                = NameSpec
+	TypeSuffixSpecTemplate        = NameSpecTemplate
+	TypeSuffixStatus              = NameStatus
+	TypeSuffixResourceSpec        = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1.ResourceSpec"
+	TypeSuffixResourceStatus      = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1.ResourceStatus"
+	TypeSuffixResourceClaimSpec   = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1.ResourceClaimSpec"
+	TypeSuffixResourceClaimStatus = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1.ResourceClaimStatus"
+	TypeSuffixClassSpecTemplate   = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1.ClassSpecTemplate"
 )
 
 func matches(s *types.Struct, m Matcher) bool {
@@ -199,17 +197,10 @@ func IsResourceClaimStatus() Matcher {
 	return IsTypeNamed(TypeSuffixResourceClaimStatus, NameStatus)
 }
 
-// IsNonPortableClassSpecTemplate returns a Matcher that returns true if the
-// supplied field appears to be a Crossplane non-portable resource class spec
-// template.
-func IsNonPortableClassSpecTemplate() Matcher {
-	return IsTypeNamed(TypeSuffixNonPortableClassSpecTemplate, NameNonPortableClassSpecTemplate)
-}
-
-// IsPortableClass returns a Matcher that returns true if the supplied field
-// appears to be a Crossplane portable resource class.
-func IsPortableClass() Matcher {
-	return IsTypeNamed(TypeSuffixPortableClass, NamePortableClass)
+// IsClassSpecTemplate returns a Matcher that returns true if the supplied field
+// appears to be a Crossplane resource class spec template.
+func IsClassSpecTemplate() Matcher {
+	return IsTypeNamed(TypeSuffixClassSpecTemplate, NameClassSpecTemplate)
 }
 
 // IsItems returns a Matcher that returns true if the supplied field appears to

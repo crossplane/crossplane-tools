@@ -46,24 +46,23 @@ const (
 	CoreAlias  = "corev1"
 	CoreImport = "k8s.io/api/core/v1"
 
+	MetaAlias  = "metav1"
+	MetaImport = "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	RuntimeAlias  = "runtimev1alpha1"
 	RuntimeImport = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1"
-
-	ResourceImport = "github.com/crossplaneio/crossplane-runtime/pkg/resource"
 )
 
 func main() {
 	var (
 		app = kingpin.New(filepath.Base(os.Args[0]), "Generates Crossplane API type methods.").DefaultEnvars()
 
-		methodsets                = app.Command("generate-methodsets", "Generate a Crossplane method sets.")
-		headerFile                = methodsets.Flag("header-file", "The contents of this file will be added to the top of all generated files.").ExistingFile()
-		filenameManaged           = methodsets.Flag("filename-managed", "The filename of generated managed resource files.").Default("zz_generated.managed.go").String()
-		filenameClaim             = methodsets.Flag("filename-claim", "The filename of generated resource claim files.").Default("zz_generated.claim.go").String()
-		filenamePortableClass     = methodsets.Flag("filename-portable-class", "The filename of generated portable class files.").Default("zz_generated.portableclass.go").String()
-		filenamePortableClassList = methodsets.Flag("filename-portable-class-list", "The filename of generated portable class list files.").Default("zz_generated.portableclasslist.go").String()
-		filenameNonPortableClass  = methodsets.Flag("filename-non-portable-class", "The filename of generated non-portable class files.").Default("zz_generated.nonportableclass.go").String()
-		pattern                   = methodsets.Arg("packages", "Package(s) for which to generate methods, for example github.com/crossplaneio/crossplane/apis/...").String()
+		methodsets      = app.Command("generate-methodsets", "Generate a Crossplane method sets.")
+		headerFile      = methodsets.Flag("header-file", "The contents of this file will be added to the top of all generated files.").ExistingFile()
+		filenameManaged = methodsets.Flag("filename-managed", "The filename of generated managed resource files.").Default("zz_generated.managed.go").String()
+		filenameClaim   = methodsets.Flag("filename-claim", "The filename of generated resource claim files.").Default("zz_generated.claim.go").String()
+		filenameClass   = methodsets.Flag("filename-class", "The filename of generated resource class files.").Default("zz_generated.class.go").String()
+		pattern         = methodsets.Arg("packages", "Package(s) for which to generate methods, for example github.com/crossplaneio/crossplane/apis/...").String()
 	)
 	kingpin.MustParse(app.Parse(os.Args[1:]))
 
@@ -83,9 +82,7 @@ func main() {
 		}
 		kingpin.FatalIfError(GenerateManaged(*filenameManaged, header, p), "cannot write managed resource method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateClaim(*filenameClaim, header, p), "cannot write resource claim method set for package %s", p.PkgPath)
-		kingpin.FatalIfError(GeneratePortableClass(*filenamePortableClass, header, p), "cannot write portable class method set for package %s", p.PkgPath)
-		kingpin.FatalIfError(GeneratePortableClassList(*filenamePortableClassList, header, p), "cannot write portable class list method set for package %s", p.PkgPath)
-		kingpin.FatalIfError(GenerateNonPortableClass(*filenameNonPortableClass, header, p), "cannot write non portable class method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateClass(*filenameClass, header, p), "cannot write resource class method set for package %s", p.PkgPath)
 	}
 }
 
@@ -100,10 +97,10 @@ func GenerateManaged(filename, header string, p *packages.Package) error {
 		"GetBindingPhase":                     method.NewGetBindingPhase(receiver, RuntimeImport),
 		"SetClaimReference":                   method.NewSetClaimReference(receiver, CoreImport),
 		"GetClaimReference":                   method.NewGetClaimReference(receiver, CoreImport),
-		"SetNonPortableClassReference":        method.NewSetNonPortableClassReference(receiver, CoreImport),
-		"GetNonPortableClassReference":        method.NewGetNonPortableClassReference(receiver, CoreImport),
-		"SetWriteConnectionSecretToReference": method.NewSetWriteConnectionSecretToReference(receiver, CoreImport),
-		"GetWriteConnectionSecretToReference": method.NewGetWriteConnectionSecretToReference(receiver, CoreImport),
+		"SetClassReference":                   method.NewSetClassReference(receiver, CoreImport),
+		"GetClassReference":                   method.NewGetClassReference(receiver, CoreImport),
+		"SetWriteConnectionSecretToReference": method.NewSetWriteConnectionSecretToReference(receiver, RuntimeImport),
+		"GetWriteConnectionSecretToReference": method.NewGetWriteConnectionSecretToReference(receiver, RuntimeImport),
 		"SetReclaimPolicy":                    method.NewSetReclaimPolicy(receiver, RuntimeImport, fields.NameSpec),
 		"GetReclaimPolicy":                    method.NewGetReclaimPolicy(receiver, RuntimeImport, fields.NameSpec),
 	}
@@ -132,18 +129,21 @@ func GenerateClaim(filename, header string, p *packages.Package) error {
 		"GetCondition":                        method.NewGetCondition(receiver, RuntimeImport),
 		"SetBindingPhase":                     method.NewSetBindingPhase(receiver, RuntimeImport),
 		"GetBindingPhase":                     method.NewGetBindingPhase(receiver, RuntimeImport),
+		"SetClassSelector":                    method.NewSetClassSelector(receiver, MetaImport),
+		"GetClassSelector":                    method.NewGetClassSelector(receiver, MetaImport),
+		"SetClassReference":                   method.NewSetClassReference(receiver, CoreImport),
+		"GetClassReference":                   method.NewGetClassReference(receiver, CoreImport),
 		"SetResourceReference":                method.NewSetResourceReference(receiver, CoreImport),
 		"GetResourceReference":                method.NewGetResourceReference(receiver, CoreImport),
-		"SetPortableClassReference":           method.NewSetPortableClassReference(receiver, CoreImport),
-		"GetPortableClassReference":           method.NewGetPortableClassReference(receiver, CoreImport),
-		"SetWriteConnectionSecretToReference": method.NewSetWriteConnectionSecretToReference(receiver, CoreImport),
-		"GetWriteConnectionSecretToReference": method.NewGetWriteConnectionSecretToReference(receiver, CoreImport),
+		"SetWriteConnectionSecretToReference": method.NewLocalSetWriteConnectionSecretToReference(receiver, RuntimeImport),
+		"GetWriteConnectionSecretToReference": method.NewLocalGetWriteConnectionSecretToReference(receiver, RuntimeImport),
 	}
 
 	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
 		generate.WithHeaders(header),
 		generate.WithImportAliases(map[string]string{
 			CoreImport:    CoreAlias,
+			MetaImport:    MetaAlias,
 			RuntimeImport: RuntimeAlias,
 		}),
 		generate.WithMatcher(match.AllOf(
@@ -155,49 +155,8 @@ func GenerateClaim(filename, header string, p *packages.Package) error {
 	return errors.Wrap(err, "cannot write resource claim methods")
 }
 
-// GeneratePortableClass generates the resource.PortableClass method set.
-func GeneratePortableClass(filename, header string, p *packages.Package) error {
-	receiver := "cs"
-
-	methods := method.Set{
-		"SetNonPortableClassReference": method.NewSetNonPortableClassReference(receiver, CoreImport),
-		"GetNonPortableClassReference": method.NewGetNonPortableClassReference(receiver, CoreImport),
-	}
-
-	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
-		generate.WithHeaders(header),
-		generate.WithImportAliases(map[string]string{CoreImport: CoreAlias}),
-		generate.WithMatcher(match.AllOf(
-			match.PortableClass(),
-			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
-		),
-	)
-
-	return errors.Wrap(err, "cannot write portable class methods")
-}
-
-// GeneratePortableClassList generates the resource.PortableClassList method set.
-func GeneratePortableClassList(filename, header string, p *packages.Package) error {
-	receiver := "csl"
-
-	methods := method.Set{
-		"SetPortableClassItems": method.NewSetPortableClassItems(receiver, ResourceImport),
-		"GetPortableClassItems": method.NewGetPortableClassItems(receiver, ResourceImport),
-	}
-
-	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
-		generate.WithHeaders(header),
-		generate.WithMatcher(match.AllOf(
-			match.PortableClassList(),
-			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
-		),
-	)
-
-	return errors.Wrap(err, "cannot write portable class methods")
-}
-
-// GenerateNonPortableClass generates the resource.NonPortableClass method set.
-func GenerateNonPortableClass(filename, header string, p *packages.Package) error {
+// GenerateClass generates the resource.Class method set.
+func GenerateClass(filename, header string, p *packages.Package) error {
 	receiver := "cs"
 
 	methods := method.Set{
@@ -209,10 +168,10 @@ func GenerateNonPortableClass(filename, header string, p *packages.Package) erro
 		generate.WithHeaders(header),
 		generate.WithImportAliases(map[string]string{RuntimeImport: RuntimeAlias}),
 		generate.WithMatcher(match.AllOf(
-			match.NonPortableClass(),
+			match.Class(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
 		),
 	)
 
-	return errors.Wrap(err, "cannot write non-portable class methods")
+	return errors.Wrap(err, "cannot write resource class methods")
 }
