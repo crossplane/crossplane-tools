@@ -57,12 +57,13 @@ func main() {
 	var (
 		app = kingpin.New(filepath.Base(os.Args[0]), "Generates Crossplane API type methods.").DefaultEnvars()
 
-		methodsets      = app.Command("generate-methodsets", "Generate a Crossplane method sets.")
-		headerFile      = methodsets.Flag("header-file", "The contents of this file will be added to the top of all generated files.").ExistingFile()
-		filenameManaged = methodsets.Flag("filename-managed", "The filename of generated managed resource files.").Default("zz_generated.managed.go").String()
-		filenameClaim   = methodsets.Flag("filename-claim", "The filename of generated resource claim files.").Default("zz_generated.claim.go").String()
-		filenameClass   = methodsets.Flag("filename-class", "The filename of generated resource class files.").Default("zz_generated.class.go").String()
-		pattern         = methodsets.Arg("packages", "Package(s) for which to generate methods, for example github.com/crossplaneio/crossplane/apis/...").String()
+		methodsets       = app.Command("generate-methodsets", "Generate a Crossplane method sets.")
+		headerFile       = methodsets.Flag("header-file", "The contents of this file will be added to the top of all generated files.").ExistingFile()
+		filenameManaged  = methodsets.Flag("filename-managed", "The filename of generated managed resource files.").Default("zz_generated.managed.go").String()
+		filenameClaim    = methodsets.Flag("filename-claim", "The filename of generated resource claim files.").Default("zz_generated.claim.go").String()
+		filenameClass    = methodsets.Flag("filename-class", "The filename of generated resource class files.").Default("zz_generated.class.go").String()
+		filenameProvider = methodsets.Flag("filename-provider", "The filename of generated provider files.").Default("zz_generated.provider.go").String()
+		pattern          = methodsets.Arg("packages", "Package(s) for which to generate methods, for example github.com/crossplaneio/crossplane/apis/...").String()
 	)
 	kingpin.MustParse(app.Parse(os.Args[1:]))
 
@@ -83,6 +84,7 @@ func main() {
 		kingpin.FatalIfError(GenerateManaged(*filenameManaged, header, p), "cannot write managed resource method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateClaim(*filenameClaim, header, p), "cannot write resource claim method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateClass(*filenameClass, header, p), "cannot write resource class method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateProvider(*filenameProvider, header, p), "cannot write provider method set for package %s", p.PkgPath)
 	}
 }
 
@@ -174,4 +176,25 @@ func GenerateClass(filename, header string, p *packages.Package) error {
 	)
 
 	return errors.Wrap(err, "cannot write resource class methods")
+}
+
+// GenerateProvider generates the resource.Provider method set.
+func GenerateProvider(filename, header string, p *packages.Package) error {
+	receiver := "p"
+
+	methods := method.Set{
+		"SetCredentialsSecretReference": method.NewSetCredentialsSecretReference(receiver, RuntimeImport),
+		"GetCredentialsSecretReference": method.NewGetCredentialsSecretReference(receiver, RuntimeImport),
+	}
+
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
+		generate.WithHeaders(header),
+		generate.WithImportAliases(map[string]string{RuntimeImport: RuntimeAlias}),
+		generate.WithMatcher(match.AllOf(
+			match.Provider(),
+			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
+		),
+	)
+
+	return errors.Wrap(err, "cannot write provider methods")
 }

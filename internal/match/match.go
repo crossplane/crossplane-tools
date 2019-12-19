@@ -74,6 +74,20 @@ func Claim() Object {
 	}
 }
 
+// Provider returns an Object matcher that returns true if the supplied Object is a
+// Crossplane Provider.
+func Provider() Object {
+	return func(o types.Object) bool {
+		return fields.Has(o,
+			fields.IsTypeMeta().And(fields.IsEmbedded()),
+			fields.IsObjectMeta().And(fields.IsEmbedded()),
+			fields.IsSpec().And(fields.HasFieldThat(
+				fields.IsProviderSpec().And(fields.IsEmbedded()),
+			)),
+		)
+	}
+}
+
 // HasMarker returns an Object matcher that returns true if the supplied Object
 // has a comment marker k with the value v. Comment markers are read from the
 // supplied Comments.
