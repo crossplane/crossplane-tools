@@ -34,6 +34,7 @@ const (
 	NameResourceStatus    = "ResourceStatus"
 	NameResourceClaimSpec = "ResourceClaimSpec"
 	NameClassSpecTemplate = "ClassSpecTemplate"
+	NameProviderSpec      = "ProviderSpec"
 	NameItems             = "Items"
 )
 
@@ -50,6 +51,7 @@ const (
 	TypeSuffixResourceClaimSpec   = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1.ResourceClaimSpec"
 	TypeSuffixResourceClaimStatus = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1.ResourceClaimStatus"
 	TypeSuffixClassSpecTemplate   = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1.ClassSpecTemplate"
+	TypeSuffixProviderSpec        = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1.ProviderSpec"
 )
 
 func matches(s *types.Struct, m Matcher) bool {
@@ -201,6 +203,12 @@ func IsResourceClaimStatus() Matcher {
 // appears to be a Crossplane resource class spec template.
 func IsClassSpecTemplate() Matcher {
 	return IsTypeNamed(TypeSuffixClassSpecTemplate, NameClassSpecTemplate)
+}
+
+// IsProviderSpec returns a Matcher that returns true if the supplied field
+// appears to be a Crossplane provider spec.
+func IsProviderSpec() Matcher {
+	return IsTypeNamed(TypeSuffixProviderSpec, NameProviderSpec)
 }
 
 // IsItems returns a Matcher that returns true if the supplied field appears to
