@@ -285,7 +285,7 @@ func NewGetReclaimPolicy(receiver, runtime, field string) New {
 func NewGetCredentialsSecretReference(receiver, runtime string) New {
 	return func(f *jen.File, o types.Object) {
 		f.Commentf("GetCredentialsSecretReference of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetCredentialsSecretReference").Params().Qual(runtime, "SecretKeySelector").Block(
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetCredentialsSecretReference").Params().Op("*").Qual(runtime, "SecretKeySelector").Block(
 			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("CredentialsSecretRef")),
 		)
 	}
@@ -296,7 +296,7 @@ func NewGetCredentialsSecretReference(receiver, runtime string) New {
 func NewSetCredentialsSecretReference(receiver, runtime string) New {
 	return func(f *jen.File, o types.Object) {
 		f.Commentf("SetCredentialsSecretReference of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetCredentialsSecretReference").Params(jen.Id("r").Qual(runtime, "SecretKeySelector")).Block(
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetCredentialsSecretReference").Params(jen.Id("r").Op("*").Qual(runtime, "SecretKeySelector")).Block(
 			jen.Id(receiver).Dot(fields.NameSpec).Dot("CredentialsSecretRef").Op("=").Id("r"),
 		)
 	}
