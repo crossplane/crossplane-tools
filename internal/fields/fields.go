@@ -46,12 +46,12 @@ const (
 	TypeSuffixSpec                = NameSpec
 	TypeSuffixSpecTemplate        = NameSpecTemplate
 	TypeSuffixStatus              = NameStatus
-	TypeSuffixResourceSpec        = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1.ResourceSpec"
-	TypeSuffixResourceStatus      = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1.ResourceStatus"
-	TypeSuffixResourceClaimSpec   = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1.ResourceClaimSpec"
-	TypeSuffixResourceClaimStatus = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1.ResourceClaimStatus"
-	TypeSuffixClassSpecTemplate   = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1.ClassSpecTemplate"
-	TypeSuffixProviderSpec        = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1.ProviderSpec"
+	TypeSuffixResourceSpec        = "github.com/crossplane/crossplane-runtime/apis/core/v1alpha1.ResourceSpec"
+	TypeSuffixResourceStatus      = "github.com/crossplane/crossplane-runtime/apis/core/v1alpha1.ResourceStatus"
+	TypeSuffixResourceClaimSpec   = "github.com/crossplane/crossplane-runtime/apis/core/v1alpha1.ResourceClaimSpec"
+	TypeSuffixResourceClaimStatus = "github.com/crossplane/crossplane-runtime/apis/core/v1alpha1.ResourceClaimStatus"
+	TypeSuffixClassSpecTemplate   = "github.com/crossplane/crossplane-runtime/apis/core/v1alpha1.ClassSpecTemplate"
+	TypeSuffixProviderSpec        = "github.com/crossplane/crossplane-runtime/apis/core/v1alpha1.ProviderSpec"
 )
 
 func matches(s *types.Struct, m Matcher) bool {

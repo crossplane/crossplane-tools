@@ -1,4 +1,4 @@
-module github.com/crossplaneio/crossplane-tools
+module github.com/crossplane/crossplane-tools
 
 go 1.12
 

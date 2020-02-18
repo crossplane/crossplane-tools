@@ -1,5 +1,5 @@
 PROJECT_NAME := crossplane-tools
-PROJECT_REPO := github.com/crossplaneio/$(PROJECT_NAME)
+PROJECT_REPO := github.com/crossplane/$(PROJECT_NAME)
 
 PLATFORMS ?= linux_amd64 darwin_amd64
 # -include will silently skip missing files, which allows us

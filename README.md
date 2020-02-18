@@ -1,4 +1,4 @@
-# crossplane-tools [![Godoc](https://img.shields.io/badge/godoc-reference-blue.svg)](https://godoc.org/github.com/crossplaneio/crossplane-tools)
+# crossplane-tools [![Godoc](https://img.shields.io/badge/godoc-reference-blue.svg)](https://godoc.org/github.com/crossplane/crossplane-tools)
 
 Experimental code generators for [Crossplane] controllers.
 
@@ -21,7 +21,7 @@ the top level of your `api/` directory, for example:
 
 ```go
 // Generate crossplane-runtime methodsets (resource.Claim, etc)
-//go:generate go run ../vendor/github.com/crossplaneio/crossplane-tools/cmd/angryjet/main.go generate-methodsets ./...
+//go:generate go run ../vendor/github.com/crossplane/crossplane-tools/cmd/angryjet/main.go generate-methodsets ./...
 ```
 
 ```console
@@ -45,11 +45,11 @@ Flags:
                              The filename of generated non-portable class files.
 
 Args:
-  [<packages>]  Package(s) for which to generate methods, for example github.com/crossplaneio/crossplane/apis/...
+  [<packages>]  Package(s) for which to generate methods, for example github.com/crossplane/crossplane/apis/...
 ```
 
 [Crossplane]: https://crossplane.io
-[`resource.Managed`]: https://godoc.org/github.com/crossplaneio/crossplane-runtime/pkg/resource#Managed
-[`ResourceSpec`]: https://godoc.org/github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1#ResourceSpec
-[`ResourceStatus`]: https://godoc.org/github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1#ResourceStatus
+[`resource.Managed`]: https://godoc.org/github.com/crossplane/crossplane-runtime/pkg/resource#Managed
+[`ResourceSpec`]: https://godoc.org/github.com/crossplane/crossplane-runtime/apis/core/v1alpha1#ResourceSpec
+[`ResourceStatus`]: https://godoc.org/github.com/crossplane/crossplane-runtime/apis/core/v1alpha1#ResourceStatus
 [Crossplane Services Developer Guide]: https://crossplane.io/docs/v0.3/services-developer-guide.html#defining-resource-kinds

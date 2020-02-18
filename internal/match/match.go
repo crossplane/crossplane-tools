@@ -20,8 +20,8 @@ package match
 import (
 	"go/types"
 
-	"github.com/crossplaneio/crossplane-tools/internal/comments"
-	"github.com/crossplaneio/crossplane-tools/internal/fields"
+	"github.com/crossplane/crossplane-tools/internal/comments"
+	"github.com/crossplane/crossplane-tools/internal/fields"
 )
 
 // An Object matcher is a function that returns true if the supplied object
