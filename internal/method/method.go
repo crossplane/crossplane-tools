@@ -24,7 +24,7 @@ import (
 
 	"github.com/dave/jennifer/jen"
 
-	"github.com/crossplaneio/crossplane-tools/internal/fields"
+	"github.com/crossplane/crossplane-tools/internal/fields"
 )
 
 // New is a function that adds a method on the supplied object in the

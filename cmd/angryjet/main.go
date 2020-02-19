@@ -24,11 +24,11 @@ import (
 	"golang.org/x/tools/go/packages"
 	"gopkg.in/alecthomas/kingpin.v2"
 
-	"github.com/crossplaneio/crossplane-tools/internal/comments"
-	"github.com/crossplaneio/crossplane-tools/internal/fields"
-	"github.com/crossplaneio/crossplane-tools/internal/generate"
-	"github.com/crossplaneio/crossplane-tools/internal/match"
-	"github.com/crossplaneio/crossplane-tools/internal/method"
+	"github.com/crossplane/crossplane-tools/internal/comments"
+	"github.com/crossplane/crossplane-tools/internal/fields"
+	"github.com/crossplane/crossplane-tools/internal/generate"
+	"github.com/crossplane/crossplane-tools/internal/match"
+	"github.com/crossplane/crossplane-tools/internal/method"
 )
 
 const (
@@ -50,7 +50,7 @@ const (
 	MetaImport = "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	RuntimeAlias  = "runtimev1alpha1"
-	RuntimeImport = "github.com/crossplaneio/crossplane-runtime/apis/core/v1alpha1"
+	RuntimeImport = "github.com/crossplane/crossplane-runtime/apis/core/v1alpha1"
 )
 
 func main() {
@@ -63,7 +63,7 @@ func main() {
 		filenameClaim    = methodsets.Flag("filename-claim", "The filename of generated resource claim files.").Default("zz_generated.claim.go").String()
 		filenameClass    = methodsets.Flag("filename-class", "The filename of generated resource class files.").Default("zz_generated.class.go").String()
 		filenameProvider = methodsets.Flag("filename-provider", "The filename of generated provider files.").Default("zz_generated.provider.go").String()
-		pattern          = methodsets.Arg("packages", "Package(s) for which to generate methods, for example github.com/crossplaneio/crossplane/apis/...").String()
+		pattern          = methodsets.Arg("packages", "Package(s) for which to generate methods, for example github.com/crossplane/crossplane/apis/...").String()
 	)
 	kingpin.MustParse(app.Parse(os.Args[1:]))
 
