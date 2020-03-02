@@ -208,6 +208,28 @@ func NewGetClassReference(receiver, core string) New {
 	}
 }
 
+// NewSetProviderReference returns a NewMethod that writes a SetProviderReference
+// method for the supplied Object to the supplied file.
+func NewSetProviderReference(receiver, core string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("SetProviderReference of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetProviderReference").Params(jen.Id("r").Op("*").Qual(core, "ObjectReference")).Block(
+			jen.Id(receiver).Dot(fields.NameSpec).Dot("ProviderReference").Op("=").Id("r"),
+		)
+	}
+}
+
+// NewGetProviderReference returns a NewMethod that writes a GetProviderReference
+// method for the supplied Object to the supplied file.
+func NewGetProviderReference(receiver, core string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("GetProviderReference of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetProviderReference").Params().Op("*").Qual(core, "ObjectReference").Block(
+			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("ProviderReference")),
+		)
+	}
+}
+
 // NewSetWriteConnectionSecretToReference returns a NewMethod that writes a
 // SetWriteConnectionSecretToReference method for the supplied Object to the
 // supplied file.

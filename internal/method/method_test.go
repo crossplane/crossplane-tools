@@ -240,6 +240,40 @@ func (t *Type) GetClassReference() *core.ObjectReference {
 	}
 }
 
+func TestNewSetProviderReference(t *testing.T) {
+	want := `package pkg
+
+import core "example.org/core"
+
+// SetProviderReference of this Type.
+func (t *Type) SetProviderReference(r *core.ObjectReference) {
+	t.Spec.ProviderReference = r
+}
+`
+	f := jen.NewFile("pkg")
+	NewSetProviderReference("t", "example.org/core")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewSetProviderReference(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewGetProviderReference(t *testing.T) {
+	want := `package pkg
+
+import core "example.org/core"
+
+// GetProviderReference of this Type.
+func (t *Type) GetProviderReference() *core.ObjectReference {
+	return t.Spec.ProviderReference
+}
+`
+	f := jen.NewFile("pkg")
+	NewGetProviderReference("t", "example.org/core")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewGetProviderReference(): -want, +got\n%s", diff)
+	}
+}
+
 func TestNewSetWriteConnectionSecretToReference(t *testing.T) {
 	want := `package pkg
 
