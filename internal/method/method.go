@@ -303,7 +303,8 @@ func NewGetReclaimPolicy(receiver, runtime, field string) New {
 }
 
 // NewGetCredentialsSecretReference returns a NewMethod that writes a
-// GetCredentialsSecretReference method for the supplied Object to the supplied file.
+// GetCredentialsSecretReference method for the supplied Object to the supplied
+// file.
 func NewGetCredentialsSecretReference(receiver, runtime string) New {
 	return func(f *jen.File, o types.Object) {
 		f.Commentf("GetCredentialsSecretReference of this %s.", o.Name())
@@ -314,12 +315,58 @@ func NewGetCredentialsSecretReference(receiver, runtime string) New {
 }
 
 // NewSetCredentialsSecretReference returns a NewMethod that writes a
-// SetCredentialsSecretReference method for the supplied Object to the supplied file.
+// SetCredentialsSecretReference method for the supplied Object to the supplied
+// file.
 func NewSetCredentialsSecretReference(receiver, runtime string) New {
 	return func(f *jen.File, o types.Object) {
 		f.Commentf("SetCredentialsSecretReference of this %s.", o.Name())
 		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetCredentialsSecretReference").Params(jen.Id("r").Op("*").Qual(runtime, "SecretKeySelector")).Block(
 			jen.Id(receiver).Dot(fields.NameSpec).Dot("CredentialsSecretRef").Op("=").Id("r"),
+		)
+	}
+}
+
+// NewManagedGetItems returns a New that writes a GetItems method for the
+// supplied object to the supplied file.
+func NewManagedGetItems(receiver, resource string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("GetItems of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetItems").Params().Index().Qual(resource, "Managed").Block(
+			jen.Id("items").Op(":=").Make(jen.Index().Qual(resource, "Managed"), jen.Len(jen.Id(receiver).Dot("Items"))),
+			jen.For(jen.Id("i").Op(":=").Range().Id(receiver).Dot("Items")).Block(
+				jen.Id("items").Index(jen.Id("i")).Op("=").Op("&").Id(receiver).Dot("Items").Index(jen.Id("i")),
+			),
+			jen.Return(jen.Id("items")),
+		)
+	}
+}
+
+// NewClaimGetItems returns a New that writes a GetItems method for the supplied
+// object to the supplied file.
+func NewClaimGetItems(receiver, resource string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("GetItems of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetItems").Params().Index().Qual(resource, "Claim").Block(
+			jen.Id("items").Op(":=").Make(jen.Index().Qual(resource, "Claim"), jen.Len(jen.Id(receiver).Dot("Items"))),
+			jen.For(jen.Id("i").Op(":=").Range().Id(receiver).Dot("Items")).Block(
+				jen.Id("items").Index(jen.Id("i")).Op("=").Op("&").Id(receiver).Dot("Items").Index(jen.Id("i")),
+			),
+			jen.Return(jen.Id("items")),
+		)
+	}
+}
+
+// NewClassGetItems returns a New that writes a GetItems method for the supplied
+// object to the supplied file.
+func NewClassGetItems(receiver, resource string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("GetItems of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetItems").Params().Index().Qual(resource, "Class").Block(
+			jen.Id("items").Op(":=").Make(jen.Index().Qual(resource, "Class"), jen.Len(jen.Id(receiver).Dot("Items"))),
+			jen.For(jen.Id("i").Op(":=").Range().Id(receiver).Dot("Items")).Block(
+				jen.Id("items").Index(jen.Id("i")).Op("=").Op("&").Id(receiver).Dot("Items").Index(jen.Id("i")),
+			),
+			jen.Return(jen.Id("items")),
 		)
 	}
 }

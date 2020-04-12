@@ -375,3 +375,66 @@ func (t *Type) GetReclaimPolicy() runtime.ReclaimPolicy {
 		t.Errorf("NewGetReclaimPolicy(): -want, +got\n%s", diff)
 	}
 }
+
+func TestNewManagedGetItems(t *testing.T) {
+	want := `package pkg
+
+import resource "example.org/resource"
+
+// GetItems of this Type.
+func (t *Type) GetItems() []resource.Managed {
+	items := make([]resource.Managed, len(t.Items))
+	for i := range t.Items {
+		items[i] = &t.Items[i]
+	}
+	return items
+}
+`
+	f := jen.NewFile("pkg")
+	NewManagedGetItems("t", "example.org/resource")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewManagedGetItems(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewClaimGetItems(t *testing.T) {
+	want := `package pkg
+
+import resource "example.org/resource"
+
+// GetItems of this Type.
+func (t *Type) GetItems() []resource.Claim {
+	items := make([]resource.Claim, len(t.Items))
+	for i := range t.Items {
+		items[i] = &t.Items[i]
+	}
+	return items
+}
+`
+	f := jen.NewFile("pkg")
+	NewClaimGetItems("t", "example.org/resource")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewClaimGetItems(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewClassGetItems(t *testing.T) {
+	want := `package pkg
+
+import resource "example.org/resource"
+
+// GetItems of this Type.
+func (t *Type) GetItems() []resource.Class {
+	items := make([]resource.Class, len(t.Items))
+	for i := range t.Items {
+		items[i] = &t.Items[i]
+	}
+	return items
+}
+`
+	f := jen.NewFile("pkg")
+	NewClassGetItems("t", "example.org/resource")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewClassGetItems(): -want, +got\n%s", diff)
+	}
+}
