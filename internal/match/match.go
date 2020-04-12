@@ -45,6 +45,26 @@ func Managed() Object {
 	}
 }
 
+// ManagedList returns an Object matcher that returns true if the supplied
+// Object is a list of Crossplane managed resource.
+func ManagedList() Object {
+	return func(o types.Object) bool {
+		return fields.Has(o,
+			fields.IsTypeMeta().And(fields.IsEmbedded()),
+			fields.IsItems().And(fields.IsSlice()).And(fields.HasFieldThat(
+				fields.IsTypeMeta().And(fields.IsEmbedded()),
+				fields.IsObjectMeta().And(fields.IsEmbedded()),
+				fields.IsSpec().And(fields.HasFieldThat(
+					fields.IsResourceSpec().And(fields.IsEmbedded()),
+				)),
+				fields.IsStatus().And(fields.HasFieldThat(
+					fields.IsResourceStatus().And(fields.IsEmbedded()),
+				)),
+			)),
+		)
+	}
+}
+
 // Class returns an Object matcher that returns true if the supplied Object is a
 // Crossplane resource class.
 func Class() Object {
@@ -54,6 +74,23 @@ func Class() Object {
 			fields.IsObjectMeta().And(fields.IsEmbedded()),
 			fields.IsSpecTemplate().And(fields.HasFieldThat(
 				fields.IsClassSpecTemplate().And(fields.IsEmbedded()),
+			)),
+		)
+	}
+}
+
+// ClassList returns an Object matcher that returns true if the supplied
+// Object is a list of Crossplane resource classes.
+func ClassList() Object {
+	return func(o types.Object) bool {
+		return fields.Has(o,
+			fields.IsTypeMeta().And(fields.IsEmbedded()),
+			fields.IsItems().And(fields.IsSlice()).And(fields.HasFieldThat(
+				fields.IsTypeMeta().And(fields.IsEmbedded()),
+				fields.IsObjectMeta().And(fields.IsEmbedded()),
+				fields.IsSpecTemplate().And(fields.HasFieldThat(
+					fields.IsClassSpecTemplate().And(fields.IsEmbedded()),
+				)),
 			)),
 		)
 	}
@@ -70,6 +107,24 @@ func Claim() Object {
 				fields.IsResourceClaimSpec().And(fields.IsEmbedded()),
 			)),
 			fields.IsResourceClaimStatus(),
+		)
+	}
+}
+
+// ClaimList returns an Object matcher that returns true if the supplied
+// Object is a list of Crossplane resource claims.
+func ClaimList() Object {
+	return func(o types.Object) bool {
+		return fields.Has(o,
+			fields.IsTypeMeta().And(fields.IsEmbedded()),
+			fields.IsItems().And(fields.IsSlice()).And(fields.HasFieldThat(
+				fields.IsTypeMeta().And(fields.IsEmbedded()),
+				fields.IsObjectMeta().And(fields.IsEmbedded()),
+				fields.IsSpec().And(fields.HasFieldThat(
+					fields.IsResourceClaimSpec().And(fields.IsEmbedded()),
+				)),
+				fields.IsResourceClaimStatus(),
+			)),
 		)
 	}
 }
