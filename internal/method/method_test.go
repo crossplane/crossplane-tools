@@ -243,15 +243,15 @@ func (t *Type) GetClassReference() *core.ObjectReference {
 func TestNewSetProviderReference(t *testing.T) {
 	want := `package pkg
 
-import core "example.org/core"
+import runtime "example.org/runtime"
 
 // SetProviderReference of this Type.
-func (t *Type) SetProviderReference(r *core.ObjectReference) {
+func (t *Type) SetProviderReference(r runtime.Reference) {
 	t.Spec.ProviderReference = r
 }
 `
 	f := jen.NewFile("pkg")
-	NewSetProviderReference("t", "example.org/core")(f, MockObject{Named: "Type"})
+	NewSetProviderReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewSetProviderReference(): -want, +got\n%s", diff)
 	}
@@ -260,15 +260,15 @@ func (t *Type) SetProviderReference(r *core.ObjectReference) {
 func TestNewGetProviderReference(t *testing.T) {
 	want := `package pkg
 
-import core "example.org/core"
+import runtime "example.org/runtime"
 
 // GetProviderReference of this Type.
-func (t *Type) GetProviderReference() *core.ObjectReference {
+func (t *Type) GetProviderReference() runtime.Reference {
 	return t.Spec.ProviderReference
 }
 `
 	f := jen.NewFile("pkg")
-	NewGetProviderReference("t", "example.org/core")(f, MockObject{Named: "Type"})
+	NewGetProviderReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewGetProviderReference(): -want, +got\n%s", diff)
 	}
