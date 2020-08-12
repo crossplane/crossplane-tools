@@ -376,6 +376,40 @@ func (t *Type) GetReclaimPolicy() runtime.ReclaimPolicy {
 	}
 }
 
+func TestNewSetDeletionPolicy(t *testing.T) {
+	want := `package pkg
+
+import runtime "example.org/runtime"
+
+// SetDeletionPolicy of this Type.
+func (t *Type) SetDeletionPolicy(r runtime.DeletionPolicy) {
+	t.Spec.DeletionPolicy = r
+}
+`
+	f := jen.NewFile("pkg")
+	NewSetDeletionPolicy("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewSetDeletionPolicy(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewGetDeletionPolicy(t *testing.T) {
+	want := `package pkg
+
+import runtime "example.org/runtime"
+
+// GetDeletionPolicy of this Type.
+func (t *Type) GetDeletionPolicy() runtime.DeletionPolicy {
+	return t.Spec.DeletionPolicy
+}
+`
+	f := jen.NewFile("pkg")
+	NewGetDeletionPolicy("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewGetDeletionPolicy(): -want, +got\n%s", diff)
+	}
+}
+
 func TestNewManagedGetItems(t *testing.T) {
 	want := `package pkg
 
