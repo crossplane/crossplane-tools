@@ -116,6 +116,8 @@ func GenerateManaged(filename, header string, p *packages.Package) error {
 		"GetWriteConnectionSecretToReference": method.NewGetWriteConnectionSecretToReference(receiver, RuntimeImport),
 		"SetReclaimPolicy":                    method.NewSetReclaimPolicy(receiver, RuntimeImport, fields.NameSpec),
 		"GetReclaimPolicy":                    method.NewGetReclaimPolicy(receiver, RuntimeImport, fields.NameSpec),
+		"SetDeletionPolicy":                   method.NewSetDeletionPolicy(receiver, RuntimeImport),
+		"GetDeletionPolicy":                   method.NewGetDeletionPolicy(receiver, RuntimeImport),
 	}
 
 	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),

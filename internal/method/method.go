@@ -302,6 +302,28 @@ func NewGetReclaimPolicy(receiver, runtime, field string) New {
 	}
 }
 
+// NewSetDeletionPolicy returns a NewMethod that writes a SetDeletionPolicy
+// method for the supplied Object to the supplied file.
+func NewSetDeletionPolicy(receiver, runtime string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("SetDeletionPolicy of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetDeletionPolicy").Params(jen.Id("r").Qual(runtime, "DeletionPolicy")).Block(
+			jen.Id(receiver).Dot(fields.NameSpec).Dot("DeletionPolicy").Op("=").Id("r"),
+		)
+	}
+}
+
+// NewGetDeletionPolicy returns a NewMethod that writes a GetDeletionPolicy
+// method for the supplied Object to the supplied file.
+func NewGetDeletionPolicy(receiver, runtime string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("GetDeletionPolicy of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetDeletionPolicy").Params().Qual(runtime, "DeletionPolicy").Block(
+			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("DeletionPolicy")),
+		)
+	}
+}
+
 // NewGetCredentialsSecretReference returns a NewMethod that writes a
 // GetCredentialsSecretReference method for the supplied Object to the supplied
 // file.
