@@ -240,13 +240,50 @@ func (t *Type) GetClassReference() *core.ObjectReference {
 	}
 }
 
+func TestNewSetProviderConfigReference(t *testing.T) {
+	want := `package pkg
+
+import runtime "example.org/runtime"
+
+// SetProviderConfigReference of this Type.
+func (t *Type) SetProviderConfigReference(r *runtime.Reference) {
+	t.Spec.ProviderConfigReference = r
+}
+`
+	f := jen.NewFile("pkg")
+	NewSetProviderConfigReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewSetProviderConfigReference(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewGetProviderConfigReference(t *testing.T) {
+	want := `package pkg
+
+import runtime "example.org/runtime"
+
+// GetProviderConfigReference of this Type.
+func (t *Type) GetProviderConfigReference() *runtime.Reference {
+	return t.Spec.ProviderConfigReference
+}
+`
+	f := jen.NewFile("pkg")
+	NewGetProviderConfigReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewGetProviderReference(): -want, +got\n%s", diff)
+	}
+}
+
 func TestNewSetProviderReference(t *testing.T) {
 	want := `package pkg
 
 import runtime "example.org/runtime"
 
-// SetProviderReference of this Type.
-func (t *Type) SetProviderReference(r runtime.Reference) {
+/*
+SetProviderReference of this Type.
+Deprecated: Use SetProviderConfigReference.
+*/
+func (t *Type) SetProviderReference(r *runtime.Reference) {
 	t.Spec.ProviderReference = r
 }
 `
@@ -262,8 +299,11 @@ func TestNewGetProviderReference(t *testing.T) {
 
 import runtime "example.org/runtime"
 
-// GetProviderReference of this Type.
-func (t *Type) GetProviderReference() runtime.Reference {
+/*
+GetProviderReference of this Type.
+Deprecated: Use GetProviderConfigReference.
+*/
+func (t *Type) GetProviderReference() *runtime.Reference {
 	return t.Spec.ProviderReference
 }
 `
