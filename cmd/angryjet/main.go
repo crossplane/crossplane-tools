@@ -112,6 +112,8 @@ func GenerateManaged(filename, header string, p *packages.Package) error {
 		"GetClassReference":                   method.NewGetClassReference(receiver, CoreImport),
 		"GetProviderReference":                method.NewGetProviderReference(receiver, RuntimeImport),
 		"SetProviderReference":                method.NewSetProviderReference(receiver, RuntimeImport),
+		"GetProviderConfigReference":          method.NewGetProviderConfigReference(receiver, RuntimeImport),
+		"SetProviderConfigReference":          method.NewSetProviderConfigReference(receiver, RuntimeImport),
 		"SetWriteConnectionSecretToReference": method.NewSetWriteConnectionSecretToReference(receiver, RuntimeImport),
 		"GetWriteConnectionSecretToReference": method.NewGetWriteConnectionSecretToReference(receiver, RuntimeImport),
 		"SetReclaimPolicy":                    method.NewSetReclaimPolicy(receiver, RuntimeImport, fields.NameSpec),

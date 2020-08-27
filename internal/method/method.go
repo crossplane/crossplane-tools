@@ -212,8 +212,8 @@ func NewGetClassReference(receiver, core string) New {
 // method for the supplied Object to the supplied file.
 func NewSetProviderReference(receiver, runtime string) New {
 	return func(f *jen.File, o types.Object) {
-		f.Commentf("SetProviderReference of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetProviderReference").Params(jen.Id("r").Qual(runtime, "Reference")).Block(
+		f.Commentf("SetProviderReference of this %s.\nDeprecated: Use SetProviderConfigReference.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetProviderReference").Params(jen.Id("r").Op("*").Qual(runtime, "Reference")).Block(
 			jen.Id(receiver).Dot(fields.NameSpec).Dot("ProviderReference").Op("=").Id("r"),
 		)
 	}
@@ -223,9 +223,31 @@ func NewSetProviderReference(receiver, runtime string) New {
 // method for the supplied Object to the supplied file.
 func NewGetProviderReference(receiver, runtime string) New {
 	return func(f *jen.File, o types.Object) {
-		f.Commentf("GetProviderReference of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetProviderReference").Params().Qual(runtime, "Reference").Block(
+		f.Commentf("GetProviderReference of this %s.\nDeprecated: Use GetProviderConfigReference.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetProviderReference").Params().Op("*").Qual(runtime, "Reference").Block(
 			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("ProviderReference")),
+		)
+	}
+}
+
+// NewSetProviderConfigReference returns a NewMethod that writes a SetProviderConfigReference
+// method for the supplied Object to the supplied file.
+func NewSetProviderConfigReference(receiver, runtime string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("SetProviderConfigReference of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetProviderConfigReference").Params(jen.Id("r").Op("*").Qual(runtime, "Reference")).Block(
+			jen.Id(receiver).Dot(fields.NameSpec).Dot("ProviderConfigReference").Op("=").Id("r"),
+		)
+	}
+}
+
+// NewGetProviderConfigReference returns a NewMethod that writes a GetProviderConfigReference
+// method for the supplied Object to the supplied file.
+func NewGetProviderConfigReference(receiver, runtime string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("GetProviderConfigReference of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetProviderConfigReference").Params().Op("*").Qual(runtime, "Reference").Block(
+			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("ProviderConfigReference")),
 		)
 	}
 }
