@@ -98,50 +98,6 @@ func NewGetCondition(receiver, runtime string) New {
 	}
 }
 
-// NewSetBindingPhase returns a NewMethod that writes a SetBindingPhase method
-// for the supplied Object to the supplied file.
-func NewSetBindingPhase(receiver, runtime string) New {
-	return func(f *jen.File, o types.Object) {
-		f.Commentf("SetBindingPhase of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetBindingPhase").Params(jen.Id("p").Qual(runtime, "BindingPhase")).Block(
-			jen.Id(receiver).Dot(fields.NameStatus).Dot("SetBindingPhase").Call(jen.Id("p")),
-		)
-	}
-}
-
-// NewGetBindingPhase returns a NewMethod that writes a GetBindingPhase method
-// for the supplied Object to the supplied file.
-func NewGetBindingPhase(receiver, runtime string) New {
-	return func(f *jen.File, o types.Object) {
-		f.Commentf("GetBindingPhase of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetBindingPhase").Params().Qual(runtime, "BindingPhase").Block(
-			jen.Return(jen.Id(receiver).Dot(fields.NameStatus).Dot("GetBindingPhase").Call()),
-		)
-	}
-}
-
-// NewSetClaimReference returns a NewMethod that writes a SetClaimReference
-// method for the supplied Object to the supplied file.
-func NewSetClaimReference(receiver, core string) New {
-	return func(f *jen.File, o types.Object) {
-		f.Commentf("SetClaimReference of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetClaimReference").Params(jen.Id("r").Op("*").Qual(core, "ObjectReference")).Block(
-			jen.Id(receiver).Dot(fields.NameSpec).Dot("ClaimReference").Op("=").Id("r"),
-		)
-	}
-}
-
-// NewGetClaimReference returns a NewMethod that writes a GetClaimReference
-// method for the supplied Object to the supplied file.
-func NewGetClaimReference(receiver, core string) New {
-	return func(f *jen.File, o types.Object) {
-		f.Commentf("GetClaimReference of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetClaimReference").Params().Op("*").Qual(core, "ObjectReference").Block(
-			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("ClaimReference")),
-		)
-	}
-}
-
 // NewSetResourceReference returns a NewMethod that writes a
 // SetResourceReference method for the supplied Object to the supplied file.
 func NewSetResourceReference(receiver, core string) New {
@@ -160,50 +116,6 @@ func NewGetResourceReference(receiver, core string) New {
 		f.Commentf("GetResourceReference of this %s.", o.Name())
 		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetResourceReference").Params().Op("*").Qual(core, "ObjectReference").Block(
 			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("ResourceReference")),
-		)
-	}
-}
-
-// NewSetClassSelector returns a NewMethod that writes a SetClassSelector
-// method for the supplied Object to the supplied file.
-func NewSetClassSelector(receiver, meta string) New {
-	return func(f *jen.File, o types.Object) {
-		f.Commentf("SetClassSelector of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetClassSelector").Params(jen.Id("s").Op("*").Qual(meta, "LabelSelector")).Block(
-			jen.Id(receiver).Dot(fields.NameSpec).Dot("ClassSelector").Op("=").Id("s"),
-		)
-	}
-}
-
-// NewGetClassSelector returns a NewMethod that writes a GetClassSelector
-// method for the supplied Object to the supplied file.
-func NewGetClassSelector(receiver, meta string) New {
-	return func(f *jen.File, o types.Object) {
-		f.Commentf("GetClassSelector of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetClassSelector").Params().Op("*").Qual(meta, "LabelSelector").Block(
-			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("ClassSelector")),
-		)
-	}
-}
-
-// NewSetClassReference returns a NewMethod that writes a SetClassReference
-// method for the supplied Object to the supplied file.
-func NewSetClassReference(receiver, core string) New {
-	return func(f *jen.File, o types.Object) {
-		f.Commentf("SetClassReference of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetClassReference").Params(jen.Id("r").Op("*").Qual(core, "ObjectReference")).Block(
-			jen.Id(receiver).Dot(fields.NameSpec).Dot("ClassReference").Op("=").Id("r"),
-		)
-	}
-}
-
-// NewGetClassReference returns a NewMethod that writes a GetClassReference
-// method for the supplied Object to the supplied file.
-func NewGetClassReference(receiver, core string) New {
-	return func(f *jen.File, o types.Object) {
-		f.Commentf("GetClassReference of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetClassReference").Params().Op("*").Qual(core, "ObjectReference").Block(
-			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("ClassReference")),
 		)
 	}
 }
@@ -300,30 +212,6 @@ func NewLocalGetWriteConnectionSecretToReference(receiver, runtime string) New {
 	}
 }
 
-// NewSetReclaimPolicy returns a NewMethod that writes a SetReclaimPolicy method
-// for the supplied Object to the supplied file. The ReclaimPolicy is set in the
-// supplied field - typically Spec or SpecTemplate.
-func NewSetReclaimPolicy(receiver, core, field string) New {
-	return func(f *jen.File, o types.Object) {
-		f.Commentf("SetReclaimPolicy of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetReclaimPolicy").Params(jen.Id("r").Qual(core, "ReclaimPolicy")).Block(
-			jen.Id(receiver).Dot(field).Dot("ReclaimPolicy").Op("=").Id("r"),
-		)
-	}
-}
-
-// NewGetReclaimPolicy returns a NewMethod that writes a GetReclaimPolicy method
-// for the supplied Object to the supplied file. The ReclaimPolicy is returned
-// from the supplied field - typically Spec or SpecTemplate.
-func NewGetReclaimPolicy(receiver, runtime, field string) New {
-	return func(f *jen.File, o types.Object) {
-		f.Commentf("GetReclaimPolicy of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetReclaimPolicy").Params().Qual(runtime, "ReclaimPolicy").Block(
-			jen.Return(jen.Id(receiver).Dot(field).Dot("ReclaimPolicy")),
-		)
-	}
-}
-
 // NewSetDeletionPolicy returns a NewMethod that writes a SetDeletionPolicy
 // method for the supplied Object to the supplied file.
 func NewSetDeletionPolicy(receiver, runtime string) New {
@@ -377,36 +265,6 @@ func NewManagedGetItems(receiver, resource string) New {
 		f.Commentf("GetItems of this %s.", o.Name())
 		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetItems").Params().Index().Qual(resource, "Managed").Block(
 			jen.Id("items").Op(":=").Make(jen.Index().Qual(resource, "Managed"), jen.Len(jen.Id(receiver).Dot("Items"))),
-			jen.For(jen.Id("i").Op(":=").Range().Id(receiver).Dot("Items")).Block(
-				jen.Id("items").Index(jen.Id("i")).Op("=").Op("&").Id(receiver).Dot("Items").Index(jen.Id("i")),
-			),
-			jen.Return(jen.Id("items")),
-		)
-	}
-}
-
-// NewClaimGetItems returns a New that writes a GetItems method for the supplied
-// object to the supplied file.
-func NewClaimGetItems(receiver, resource string) New {
-	return func(f *jen.File, o types.Object) {
-		f.Commentf("GetItems of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetItems").Params().Index().Qual(resource, "Claim").Block(
-			jen.Id("items").Op(":=").Make(jen.Index().Qual(resource, "Claim"), jen.Len(jen.Id(receiver).Dot("Items"))),
-			jen.For(jen.Id("i").Op(":=").Range().Id(receiver).Dot("Items")).Block(
-				jen.Id("items").Index(jen.Id("i")).Op("=").Op("&").Id(receiver).Dot("Items").Index(jen.Id("i")),
-			),
-			jen.Return(jen.Id("items")),
-		)
-	}
-}
-
-// NewClassGetItems returns a New that writes a GetItems method for the supplied
-// object to the supplied file.
-func NewClassGetItems(receiver, resource string) New {
-	return func(f *jen.File, o types.Object) {
-		f.Commentf("GetItems of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetItems").Params().Index().Qual(resource, "Class").Block(
-			jen.Id("items").Op(":=").Make(jen.Index().Qual(resource, "Class"), jen.Len(jen.Id(receiver).Dot("Items"))),
 			jen.For(jen.Id("i").Op(":=").Range().Id(receiver).Dot("Items")).Block(
 				jen.Id("items").Index(jen.Id("i")).Op("=").Op("&").Id(receiver).Dot("Items").Index(jen.Id("i")),
 			),
