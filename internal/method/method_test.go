@@ -23,8 +23,6 @@ import (
 
 	"github.com/dave/jennifer/jen"
 	"github.com/google/go-cmp/cmp"
-
-	"github.com/crossplane/crossplane-tools/internal/fields"
 )
 
 type MockObject struct {
@@ -71,73 +69,6 @@ func (t *Type) GetCondition(ct runtime.ConditionType) runtime.Condition {
 	}
 }
 
-func TestNewSetBindingPhase(t *testing.T) {
-	want := `package pkg
-
-import runtime "example.org/runtime"
-
-// SetBindingPhase of this Type.
-func (t *Type) SetBindingPhase(p runtime.BindingPhase) {
-	t.Status.SetBindingPhase(p)
-}
-`
-	f := jen.NewFile("pkg")
-	NewSetBindingPhase("t", "example.org/runtime")(f, MockObject{Named: "Type"})
-	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewSetBindingPhase(): -want, +got\n%s", diff)
-	}
-}
-
-func TestNewGetBindingPhase(t *testing.T) {
-	want := `package pkg
-
-import runtime "example.org/runtime"
-
-// GetBindingPhase of this Type.
-func (t *Type) GetBindingPhase() runtime.BindingPhase {
-	return t.Status.GetBindingPhase()
-}
-`
-	f := jen.NewFile("pkg")
-	NewGetBindingPhase("t", "example.org/runtime")(f, MockObject{Named: "Type"})
-	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewGetBindingPhase(): -want, +got\n%s", diff)
-	}
-}
-
-func TestNewSetClaimReference(t *testing.T) {
-	want := `package pkg
-
-import core "example.org/core"
-
-// SetClaimReference of this Type.
-func (t *Type) SetClaimReference(r *core.ObjectReference) {
-	t.Spec.ClaimReference = r
-}
-`
-	f := jen.NewFile("pkg")
-	NewSetClaimReference("t", "example.org/core")(f, MockObject{Named: "Type"})
-	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewSetClaimReference(): -want, +got\n%s", diff)
-	}
-}
-
-func TestNewGetClaimReference(t *testing.T) {
-	want := `package pkg
-
-import core "example.org/core"
-
-// GetClaimReference of this Type.
-func (t *Type) GetClaimReference() *core.ObjectReference {
-	return t.Spec.ClaimReference
-}
-`
-	f := jen.NewFile("pkg")
-	NewGetClaimReference("t", "example.org/core")(f, MockObject{Named: "Type"})
-	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewGetClaimReference(): -want, +got\n%s", diff)
-	}
-}
 func TestNewSetResourceReference(t *testing.T) {
 	want := `package pkg
 
@@ -169,74 +100,6 @@ func (t *Type) GetResourceReference() *core.ObjectReference {
 	NewGetResourceReference("t", "example.org/core")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewGetResourceReference(): -want, +got\n%s", diff)
-	}
-}
-
-func TestNewSetClassSelector(t *testing.T) {
-	want := `package pkg
-
-import meta "example.org/meta"
-
-// SetClassSelector of this Type.
-func (t *Type) SetClassSelector(s *meta.LabelSelector) {
-	t.Spec.ClassSelector = s
-}
-`
-	f := jen.NewFile("pkg")
-	NewSetClassSelector("t", "example.org/meta")(f, MockObject{Named: "Type"})
-	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewSetClassSelector(): -want, +got\n%s", diff)
-	}
-}
-
-func TestNewGetClassSelector(t *testing.T) {
-	want := `package pkg
-
-import meta "example.org/meta"
-
-// GetClassSelector of this Type.
-func (t *Type) GetClassSelector() *meta.LabelSelector {
-	return t.Spec.ClassSelector
-}
-`
-	f := jen.NewFile("pkg")
-	NewGetClassSelector("t", "example.org/meta")(f, MockObject{Named: "Type"})
-	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewGetClassSelector(): -want, +got\n%s", diff)
-	}
-}
-
-func TestNewSetClassReference(t *testing.T) {
-	want := `package pkg
-
-import core "example.org/core"
-
-// SetClassReference of this Type.
-func (t *Type) SetClassReference(r *core.ObjectReference) {
-	t.Spec.ClassReference = r
-}
-`
-	f := jen.NewFile("pkg")
-	NewSetClassReference("t", "example.org/core")(f, MockObject{Named: "Type"})
-	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewSetClassReference(): -want, +got\n%s", diff)
-	}
-}
-
-func TestNewGetClassReference(t *testing.T) {
-	want := `package pkg
-
-import core "example.org/core"
-
-// GetClassReference of this Type.
-func (t *Type) GetClassReference() *core.ObjectReference {
-	return t.Spec.ClassReference
-}
-`
-	f := jen.NewFile("pkg")
-	NewGetClassReference("t", "example.org/core")(f, MockObject{Named: "Type"})
-	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewGetClassReference(): -want, +got\n%s", diff)
 	}
 }
 
@@ -382,40 +245,6 @@ func (t *Type) GetWriteConnectionSecretToReference() *runtime.LocalSecretReferen
 	}
 }
 
-func TestNewSetReclaimPolicy(t *testing.T) {
-	want := `package pkg
-
-import runtime "example.org/runtime"
-
-// SetReclaimPolicy of this Type.
-func (t *Type) SetReclaimPolicy(r runtime.ReclaimPolicy) {
-	t.Spec.ReclaimPolicy = r
-}
-`
-	f := jen.NewFile("pkg")
-	NewSetReclaimPolicy("t", "example.org/runtime", fields.NameSpec)(f, MockObject{Named: "Type"})
-	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewSetReclaimPolicy(): -want, +got\n%s", diff)
-	}
-}
-
-func TestNewGetReclaimPolicy(t *testing.T) {
-	want := `package pkg
-
-import runtime "example.org/runtime"
-
-// GetReclaimPolicy of this Type.
-func (t *Type) GetReclaimPolicy() runtime.ReclaimPolicy {
-	return t.Spec.ReclaimPolicy
-}
-`
-	f := jen.NewFile("pkg")
-	NewGetReclaimPolicy("t", "example.org/runtime", fields.NameSpec)(f, MockObject{Named: "Type"})
-	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewGetReclaimPolicy(): -want, +got\n%s", diff)
-	}
-}
-
 func TestNewSetDeletionPolicy(t *testing.T) {
 	want := `package pkg
 
@@ -468,47 +297,5 @@ func (t *Type) GetItems() []resource.Managed {
 	NewManagedGetItems("t", "example.org/resource")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewManagedGetItems(): -want, +got\n%s", diff)
-	}
-}
-
-func TestNewClaimGetItems(t *testing.T) {
-	want := `package pkg
-
-import resource "example.org/resource"
-
-// GetItems of this Type.
-func (t *Type) GetItems() []resource.Claim {
-	items := make([]resource.Claim, len(t.Items))
-	for i := range t.Items {
-		items[i] = &t.Items[i]
-	}
-	return items
-}
-`
-	f := jen.NewFile("pkg")
-	NewClaimGetItems("t", "example.org/resource")(f, MockObject{Named: "Type"})
-	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewClaimGetItems(): -want, +got\n%s", diff)
-	}
-}
-
-func TestNewClassGetItems(t *testing.T) {
-	want := `package pkg
-
-import resource "example.org/resource"
-
-// GetItems of this Type.
-func (t *Type) GetItems() []resource.Class {
-	items := make([]resource.Class, len(t.Items))
-	for i := range t.Items {
-		items[i] = &t.Items[i]
-	}
-	return items
-}
-`
-	f := jen.NewFile("pkg")
-	NewClassGetItems("t", "example.org/resource")(f, MockObject{Named: "Type"})
-	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewClassGetItems(): -want, +got\n%s", diff)
 	}
 }
