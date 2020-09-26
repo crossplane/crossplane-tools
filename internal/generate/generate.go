@@ -111,7 +111,9 @@ func WriteMethods(p *packages.Package, ms method.Set, file string, wo ...WriteOp
 		return nil
 	}
 
-	return errors.Wrap(ioutil.WriteFile(file, b.Bytes(), 0644), "cannot write Go file")
+	// gosec would prefer this to be written as 0600, but we're comfortable with
+	// it being world readable.
+	return errors.Wrap(ioutil.WriteFile(file, b.Bytes(), 0644), "cannot write Go file") // nolint:gosec
 
 }
 
