@@ -279,6 +279,70 @@ func (t *Type) GetDeletionPolicy() runtime.DeletionPolicy {
 	}
 }
 
+func TestNewSetCredentialsSecretReference(t *testing.T) {
+	want := `package pkg
+
+import runtime "example.org/runtime"
+
+// SetCredentialsSecretReference of this Type.
+func (t *Type) SetCredentialsSecretReference(r *runtime.SecretKeySelector) {
+	t.Spec.CredentialsSecretRef = r
+}
+`
+	f := jen.NewFile("pkg")
+	NewSetCredentialsSecretReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewSetCredentialsSecretReference(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewGetCredentialsSecretReference(t *testing.T) {
+	want := `package pkg
+
+import runtime "example.org/runtime"
+
+// GetCredentialsSecretReference of this Type.
+func (t *Type) GetCredentialsSecretReference() *runtime.SecretKeySelector {
+	return t.Spec.CredentialsSecretRef
+}
+`
+	f := jen.NewFile("pkg")
+	NewGetCredentialsSecretReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewGetCredentialsSecretLocalReference(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewSetUsers(t *testing.T) {
+	want := `package pkg
+
+// SetUsers of this Type.
+func (t *Type) SetUsers(i int64) {
+	t.Status.Users = i
+}
+`
+	f := jen.NewFile("pkg")
+	NewSetUsers("t")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewSetUsers(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewGetUsers(t *testing.T) {
+	want := `package pkg
+
+// GetUsers of this Type.
+func (t *Type) GetUsers() int64 {
+	return t.Status.Users
+}
+`
+	f := jen.NewFile("pkg")
+	NewGetUsers("t")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewGetUsers(): -want, +got\n%s", diff)
+	}
+}
+
 func TestNewManagedGetItems(t *testing.T) {
 	want := `package pkg
 
@@ -297,5 +361,94 @@ func (t *Type) GetItems() []resource.Managed {
 	NewManagedGetItems("t", "example.org/resource")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewManagedGetItems(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewSetRootProviderConfigReference(t *testing.T) {
+	want := `package pkg
+
+import runtime "example.org/runtime"
+
+// SetProviderConfigReference of this Type.
+func (t *Type) SetProviderConfigReference(r runtime.Reference) {
+	t.ProviderConfigReference = r
+}
+`
+	f := jen.NewFile("pkg")
+	NewSetRootProviderConfigReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewSetRootProviderConfigReference(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewGetRootProviderConfigReference(t *testing.T) {
+	want := `package pkg
+
+import runtime "example.org/runtime"
+
+// GetProviderConfigReference of this Type.
+func (t *Type) GetProviderConfigReference() runtime.Reference {
+	return t.ProviderConfigReference
+}
+`
+	f := jen.NewFile("pkg")
+	NewGetRootProviderConfigReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewGetRootProviderReference(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewSetRootResourceReference(t *testing.T) {
+	want := `package pkg
+
+import runtime "example.org/runtime"
+
+// SetResourceReference of this Type.
+func (t *Type) SetResourceReference(r runtime.TypedReference) {
+	t.ResourceReference = r
+}
+`
+	f := jen.NewFile("pkg")
+	NewSetRootResourceReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewSetRootResourceReference(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewGetRootResourceReference(t *testing.T) {
+	want := `package pkg
+
+import runtime "example.org/runtime"
+
+// GetResourceReference of this Type.
+func (t *Type) GetResourceReference() runtime.TypedReference {
+	return t.ResourceReference
+}
+`
+	f := jen.NewFile("pkg")
+	NewGetRootResourceReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewGetRootProviderReference(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewProviderConfigUsageGetItems(t *testing.T) {
+	want := `package pkg
+
+import resource "example.org/resource"
+
+// GetItems of this Type.
+func (t *Type) GetItems() []resource.ProviderConfigUsage {
+	items := make([]resource.ProviderConfigUsage, len(t.Items))
+	for i := range t.Items {
+		items[i] = &t.Items[i]
+	}
+	return items
+}
+`
+	f := jen.NewFile("pkg")
+	NewProviderConfigUsageGetItems("t", "example.org/resource")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewProviderConfigUsageGetItems(): -want, +got\n%s", diff)
 	}
 }

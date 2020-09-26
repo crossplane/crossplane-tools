@@ -60,7 +60,9 @@ func main() {
 		headerFile          = methodsets.Flag("header-file", "The contents of this file will be added to the top of all generated files.").ExistingFile()
 		filenameManaged     = methodsets.Flag("filename-managed", "The filename of generated managed resource files.").Default("zz_generated.managed.go").String()
 		filenameManagedList = methodsets.Flag("filename-managed-list", "The filename of generated managed list resource files.").Default("zz_generated.managedlist.go").String()
-		filenameProvider    = methodsets.Flag("filename-provider", "The filename of generated provider files.").Default("zz_generated.provider.go").String()
+		filenamePC          = methodsets.Flag("filename-pc", "The filename of generated provider config files.").Default("zz_generated.pc.go").String()
+		filenamePCU         = methodsets.Flag("filename-pcu", "The filename of generated provider config usage files.").Default("zz_generated.pcu.go").String()
+		filenamePCUList     = methodsets.Flag("filename-pcu-list", "The filename of generated provider config usage files.").Default("zz_generated.pculist.go").String()
 		pattern             = methodsets.Arg("packages", "Package(s) for which to generate methods, for example github.com/crossplane/crossplane/apis/...").String()
 	)
 	kingpin.MustParse(app.Parse(os.Args[1:]))
@@ -81,7 +83,9 @@ func main() {
 		}
 		kingpin.FatalIfError(GenerateManaged(*filenameManaged, header, p), "cannot write managed resource method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateManagedList(*filenameManagedList, header, p), "cannot write managed resource list method set for package %s", p.PkgPath)
-		kingpin.FatalIfError(GenerateProvider(*filenameProvider, header, p), "cannot write provider method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateProviderConfig(*filenamePC, header, p), "cannot write provider config method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateProviderConfigUsage(*filenamePCU, header, p), "cannot write provider config usage method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateProviderConfigUsageList(*filenamePCUList, header, p), "cannot write provider config usage list method set for package %s", p.PkgPath)
 	}
 }
 
@@ -139,23 +143,69 @@ func GenerateManagedList(filename, header string, p *packages.Package) error {
 	return errors.Wrap(err, "cannot write managed resource list methods")
 }
 
-// GenerateProvider generates the resource.Provider method set.
-func GenerateProvider(filename, header string, p *packages.Package) error {
+// GenerateProviderConfig generates the resource.ProviderConfig method set.
+func GenerateProviderConfig(filename, header string, p *packages.Package) error {
 	receiver := "p"
 
 	methods := method.Set{
 		"SetCredentialsSecretReference": method.NewSetCredentialsSecretReference(receiver, RuntimeImport),
 		"GetCredentialsSecretReference": method.NewGetCredentialsSecretReference(receiver, RuntimeImport),
+		"SetUsers":                      method.NewSetUsers(receiver),
+		"GetUsers":                      method.NewGetUsers(receiver),
 	}
 
 	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
 		generate.WithHeaders(header),
 		generate.WithImportAliases(map[string]string{RuntimeImport: RuntimeAlias}),
 		generate.WithMatcher(match.AllOf(
-			match.Provider(),
+			match.ProviderConfig(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
 		),
 	)
 
-	return errors.Wrap(err, "cannot write provider methods")
+	return errors.Wrap(err, "cannot write provider config methods")
+}
+
+// GenerateProviderConfigUsage generates the resource.ProviderConfigUsage method set.
+func GenerateProviderConfigUsage(filename, header string, p *packages.Package) error {
+	receiver := "p"
+
+	methods := method.Set{
+		"SetProviderConfigReference": method.NewSetRootProviderConfigReference(receiver, RuntimeImport),
+		"GetProviderConfigReference": method.NewGetRootProviderConfigReference(receiver, RuntimeImport),
+		"SetResourceReference":       method.NewSetRootResourceReference(receiver, RuntimeImport),
+		"GetResourceReference":       method.NewGetRootResourceReference(receiver, RuntimeImport),
+	}
+
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
+		generate.WithHeaders(header),
+		generate.WithImportAliases(map[string]string{RuntimeImport: RuntimeAlias}),
+		generate.WithMatcher(match.AllOf(
+			match.ProviderConfigUsage(),
+			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
+		),
+	)
+
+	return errors.Wrap(err, "cannot write provider config usage methods")
+}
+
+// GenerateProviderConfigUsageList generates the
+// resource.ProviderConfigUsageList method set.
+func GenerateProviderConfigUsageList(filename, header string, p *packages.Package) error {
+	receiver := "p"
+
+	methods := method.Set{
+		"GetItems": method.NewProviderConfigUsageGetItems(receiver, ResourceImport),
+	}
+
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
+		generate.WithHeaders(header),
+		generate.WithImportAliases(map[string]string{RuntimeImport: RuntimeAlias}),
+		generate.WithMatcher(match.AllOf(
+			match.ProviderConfigUsageList(),
+			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
+		),
+	)
+
+	return errors.Wrap(err, "cannot write provider config usage list methods")
 }

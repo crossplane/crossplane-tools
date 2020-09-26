@@ -258,6 +258,28 @@ func NewSetCredentialsSecretReference(receiver, runtime string) New {
 	}
 }
 
+// NewSetUsers returns a NewMethod that writes a SetUsers method for the
+// supplied Object to the supplied file.
+func NewSetUsers(receiver string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("SetUsers of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetUsers").Params(jen.Id("i").Int64()).Block(
+			jen.Id(receiver).Dot(fields.NameStatus).Dot("Users").Op("=").Id("i"),
+		)
+	}
+}
+
+// NewGetUsers returns a NewMethod that writes a GetUsers method for the
+// supplied Object to the supplied file.
+func NewGetUsers(receiver string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("GetUsers of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetUsers").Params().Int64().Block(
+			jen.Return(jen.Id(receiver).Dot(fields.NameStatus).Dot("Users")),
+		)
+	}
+}
+
 // NewManagedGetItems returns a New that writes a GetItems method for the
 // supplied object to the supplied file.
 func NewManagedGetItems(receiver, resource string) New {
@@ -265,6 +287,71 @@ func NewManagedGetItems(receiver, resource string) New {
 		f.Commentf("GetItems of this %s.", o.Name())
 		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetItems").Params().Index().Qual(resource, "Managed").Block(
 			jen.Id("items").Op(":=").Make(jen.Index().Qual(resource, "Managed"), jen.Len(jen.Id(receiver).Dot("Items"))),
+			jen.For(jen.Id("i").Op(":=").Range().Id(receiver).Dot("Items")).Block(
+				jen.Id("items").Index(jen.Id("i")).Op("=").Op("&").Id(receiver).Dot("Items").Index(jen.Id("i")),
+			),
+			jen.Return(jen.Id("items")),
+		)
+	}
+}
+
+// NewSetRootProviderConfigReference returns a NewMethod that writes a
+// SetProviderConfigReference method for the supplied Object to the supplied
+// file. Note that unlike NewSetProviderConfigReference the generated method
+// expects the ProviderConfigReference to be at the root of the struct, not
+// under its Spec field.
+func NewSetRootProviderConfigReference(receiver, runtime string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("SetProviderConfigReference of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetProviderConfigReference").Params(jen.Id("r").Qual(runtime, "Reference")).Block(
+			jen.Id(receiver).Dot("ProviderConfigReference").Op("=").Id("r"),
+		)
+	}
+}
+
+// NewGetRootProviderConfigReference returns a NewMethod that writes a
+// GetProviderConfigReference method for the supplied Object to the supplied
+// file. file. Note that unlike NewGetProviderConfigReference the generated
+// method expects the ProviderConfigReference to be at the root of the struct,
+// not under its Spec field.
+func NewGetRootProviderConfigReference(receiver, runtime string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("GetProviderConfigReference of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetProviderConfigReference").Params().Qual(runtime, "Reference").Block(
+			jen.Return(jen.Id(receiver).Dot("ProviderConfigReference")),
+		)
+	}
+}
+
+// NewSetRootResourceReference returns a NewMethod that writes a
+// SetRootResourceReference method for the supplied Object to the supplied file.
+func NewSetRootResourceReference(receiver, runtime string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("SetResourceReference of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetResourceReference").Params(jen.Id("r").Qual(runtime, "TypedReference")).Block(
+			jen.Id(receiver).Dot("ResourceReference").Op("=").Id("r"),
+		)
+	}
+}
+
+// NewGetRootResourceReference returns a NewMethod that writes a
+// GetRootResourceReference method for the supplied Object to the supplied file.
+func NewGetRootResourceReference(receiver, runtime string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("GetResourceReference of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetResourceReference").Params().Qual(runtime, "TypedReference").Block(
+			jen.Return(jen.Id(receiver).Dot("ResourceReference")),
+		)
+	}
+}
+
+// NewProviderConfigUsageGetItems returns a New that writes a GetItems method for the
+// supplied object to the supplied file.
+func NewProviderConfigUsageGetItems(receiver, resource string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("GetItems of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetItems").Params().Index().Qual(resource, "ProviderConfigUsage").Block(
+			jen.Id("items").Op(":=").Make(jen.Index().Qual(resource, "ProviderConfigUsage"), jen.Len(jen.Id(receiver).Dot("Items"))),
 			jen.For(jen.Id("i").Op(":=").Range().Id(receiver).Dot("Items")).Block(
 				jen.Id("items").Index(jen.Id("i")).Op("=").Op("&").Id(receiver).Dot("Items").Index(jen.Id("i")),
 			),

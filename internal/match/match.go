@@ -65,17 +65,45 @@ func ManagedList() Object {
 	}
 }
 
-// Class returns an Object matcher that returns true if the supplied Object is a
-
-// Provider returns an Object matcher that returns true if the supplied Object is a
-// Crossplane Provider.
-func Provider() Object {
+// ProviderConfig returns an Object matcher that returns true if the supplied
+// Object is a Crossplane ProviderConfig.
+func ProviderConfig() Object {
 	return func(o types.Object) bool {
 		return fields.Has(o,
 			fields.IsTypeMeta().And(fields.IsEmbedded()),
 			fields.IsObjectMeta().And(fields.IsEmbedded()),
 			fields.IsSpec().And(fields.HasFieldThat(
-				fields.IsProviderSpec().And(fields.IsEmbedded()),
+				fields.IsProviderConfigSpec().And(fields.IsEmbedded()),
+			)),
+			fields.IsStatus().And(fields.HasFieldThat(
+				fields.IsProviderConfigStatus().And(fields.IsEmbedded()),
+			)),
+		)
+	}
+}
+
+// ProviderConfigUsage returns an Object matcher that returns true if the supplied
+// Object is a Crossplane ProviderConfigUsage.
+func ProviderConfigUsage() Object {
+	return func(o types.Object) bool {
+		return fields.Has(o,
+			fields.IsTypeMeta().And(fields.IsEmbedded()),
+			fields.IsObjectMeta().And(fields.IsEmbedded()),
+			fields.IsProviderConfigUsage().And(fields.IsEmbedded()),
+		)
+	}
+}
+
+// ProviderConfigUsageList returns an Object matcher that returns true if the
+// supplied Object is a list of Crossplane provider config usages.
+func ProviderConfigUsageList() Object {
+	return func(o types.Object) bool {
+		return fields.Has(o,
+			fields.IsTypeMeta().And(fields.IsEmbedded()),
+			fields.IsItems().And(fields.IsSlice()).And(fields.HasFieldThat(
+				fields.IsTypeMeta().And(fields.IsEmbedded()),
+				fields.IsObjectMeta().And(fields.IsEmbedded()),
+				fields.IsProviderConfigUsage().And(fields.IsEmbedded()),
 			)),
 		)
 	}
