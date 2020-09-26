@@ -66,68 +66,6 @@ func ManagedList() Object {
 }
 
 // Class returns an Object matcher that returns true if the supplied Object is a
-// Crossplane resource class.
-func Class() Object {
-	return func(o types.Object) bool {
-		return fields.Has(o,
-			fields.IsTypeMeta().And(fields.IsEmbedded()),
-			fields.IsObjectMeta().And(fields.IsEmbedded()),
-			fields.IsSpecTemplate().And(fields.HasFieldThat(
-				fields.IsClassSpecTemplate().And(fields.IsEmbedded()),
-			)),
-		)
-	}
-}
-
-// ClassList returns an Object matcher that returns true if the supplied
-// Object is a list of Crossplane resource classes.
-func ClassList() Object {
-	return func(o types.Object) bool {
-		return fields.Has(o,
-			fields.IsTypeMeta().And(fields.IsEmbedded()),
-			fields.IsItems().And(fields.IsSlice()).And(fields.HasFieldThat(
-				fields.IsTypeMeta().And(fields.IsEmbedded()),
-				fields.IsObjectMeta().And(fields.IsEmbedded()),
-				fields.IsSpecTemplate().And(fields.HasFieldThat(
-					fields.IsClassSpecTemplate().And(fields.IsEmbedded()),
-				)),
-			)),
-		)
-	}
-}
-
-// Claim returns an Object matcher that returns true if the supplied Object is a
-// Crossplane resource claim.
-func Claim() Object {
-	return func(o types.Object) bool {
-		return fields.Has(o,
-			fields.IsTypeMeta().And(fields.IsEmbedded()),
-			fields.IsObjectMeta().And(fields.IsEmbedded()),
-			fields.IsSpec().And(fields.HasFieldThat(
-				fields.IsResourceClaimSpec().And(fields.IsEmbedded()),
-			)),
-			fields.IsResourceClaimStatus(),
-		)
-	}
-}
-
-// ClaimList returns an Object matcher that returns true if the supplied
-// Object is a list of Crossplane resource claims.
-func ClaimList() Object {
-	return func(o types.Object) bool {
-		return fields.Has(o,
-			fields.IsTypeMeta().And(fields.IsEmbedded()),
-			fields.IsItems().And(fields.IsSlice()).And(fields.HasFieldThat(
-				fields.IsTypeMeta().And(fields.IsEmbedded()),
-				fields.IsObjectMeta().And(fields.IsEmbedded()),
-				fields.IsSpec().And(fields.HasFieldThat(
-					fields.IsResourceClaimSpec().And(fields.IsEmbedded()),
-				)),
-				fields.IsResourceClaimStatus(),
-			)),
-		)
-	}
-}
 
 // Provider returns an Object matcher that returns true if the supplied Object is a
 // Crossplane Provider.
