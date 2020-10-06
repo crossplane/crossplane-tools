@@ -148,12 +148,10 @@ func GenerateProviderConfig(filename, header string, p *packages.Package) error 
 	receiver := "p"
 
 	methods := method.Set{
-		"SetCredentialsSecretReference": method.NewSetCredentialsSecretReference(receiver, RuntimeImport),
-		"GetCredentialsSecretReference": method.NewGetCredentialsSecretReference(receiver, RuntimeImport),
-		"SetUsers":                      method.NewSetUsers(receiver),
-		"GetUsers":                      method.NewGetUsers(receiver),
-		"SetConditions":                 method.NewSetConditions(receiver, RuntimeImport),
-		"GetCondition":                  method.NewGetCondition(receiver, RuntimeImport),
+		"SetUsers":      method.NewSetUsers(receiver),
+		"GetUsers":      method.NewGetUsers(receiver),
+		"SetConditions": method.NewSetConditions(receiver, RuntimeImport),
+		"GetCondition":  method.NewGetCondition(receiver, RuntimeImport),
 	}
 
 	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
