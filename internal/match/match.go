@@ -72,9 +72,7 @@ func ProviderConfig() Object {
 		return fields.Has(o,
 			fields.IsTypeMeta().And(fields.IsEmbedded()),
 			fields.IsObjectMeta().And(fields.IsEmbedded()),
-			fields.IsSpec().And(fields.HasFieldThat(
-				fields.IsProviderConfigSpec().And(fields.IsEmbedded()),
-			)),
+			fields.IsSpec(),
 			fields.IsStatus().And(fields.HasFieldThat(
 				fields.IsProviderConfigStatus().And(fields.IsEmbedded()),
 			)),

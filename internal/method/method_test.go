@@ -279,40 +279,6 @@ func (t *Type) GetDeletionPolicy() runtime.DeletionPolicy {
 	}
 }
 
-func TestNewSetCredentialsSecretReference(t *testing.T) {
-	want := `package pkg
-
-import runtime "example.org/runtime"
-
-// SetCredentialsSecretReference of this Type.
-func (t *Type) SetCredentialsSecretReference(r *runtime.SecretKeySelector) {
-	t.Spec.CredentialsSecretRef = r
-}
-`
-	f := jen.NewFile("pkg")
-	NewSetCredentialsSecretReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
-	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewSetCredentialsSecretReference(): -want, +got\n%s", diff)
-	}
-}
-
-func TestNewGetCredentialsSecretReference(t *testing.T) {
-	want := `package pkg
-
-import runtime "example.org/runtime"
-
-// GetCredentialsSecretReference of this Type.
-func (t *Type) GetCredentialsSecretReference() *runtime.SecretKeySelector {
-	return t.Spec.CredentialsSecretRef
-}
-`
-	f := jen.NewFile("pkg")
-	NewGetCredentialsSecretReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
-	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewGetCredentialsSecretLocalReference(): -want, +got\n%s", diff)
-	}
-}
-
 func TestNewSetUsers(t *testing.T) {
 	want := `package pkg
 

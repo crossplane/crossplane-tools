@@ -234,30 +234,6 @@ func NewGetDeletionPolicy(receiver, runtime string) New {
 	}
 }
 
-// NewGetCredentialsSecretReference returns a NewMethod that writes a
-// GetCredentialsSecretReference method for the supplied Object to the supplied
-// file.
-func NewGetCredentialsSecretReference(receiver, runtime string) New {
-	return func(f *jen.File, o types.Object) {
-		f.Commentf("GetCredentialsSecretReference of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetCredentialsSecretReference").Params().Op("*").Qual(runtime, "SecretKeySelector").Block(
-			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("CredentialsSecretRef")),
-		)
-	}
-}
-
-// NewSetCredentialsSecretReference returns a NewMethod that writes a
-// SetCredentialsSecretReference method for the supplied Object to the supplied
-// file.
-func NewSetCredentialsSecretReference(receiver, runtime string) New {
-	return func(f *jen.File, o types.Object) {
-		f.Commentf("SetCredentialsSecretReference of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetCredentialsSecretReference").Params(jen.Id("r").Op("*").Qual(runtime, "SecretKeySelector")).Block(
-			jen.Id(receiver).Dot(fields.NameSpec).Dot("CredentialsSecretRef").Op("=").Id("r"),
-		)
-	}
-}
-
 // NewSetUsers returns a NewMethod that writes a SetUsers method for the
 // supplied Object to the supplied file.
 func NewSetUsers(receiver string) New {
