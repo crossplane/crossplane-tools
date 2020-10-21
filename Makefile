@@ -52,7 +52,13 @@ submodules:
 	@git submodule sync
 	@git submodule update --init --recursive
 
-.PHONY: cobertura reviewable submodules fallthrough
+# Ensure branch is clean.
+check-diff: reviewable
+	@$(INFO) checking that branch is clean
+	@test -z "$$(git status --porcelain)" || $(FAIL)
+	@$(OK) branch is clea
+
+.PHONY: cobertura reviewable submodules fallthrough check-diff
 
 # Special Targets
 
