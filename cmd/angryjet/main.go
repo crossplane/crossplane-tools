@@ -45,8 +45,8 @@ const (
 	CoreAlias  = "corev1"
 	CoreImport = "k8s.io/api/core/v1"
 
-	RuntimeAlias  = "runtimev1alpha1"
-	RuntimeImport = "github.com/crossplane/crossplane-runtime/apis/core/v1alpha1"
+	RuntimeAlias  = "xpv1"
+	RuntimeImport = "github.com/crossplane/crossplane-runtime/apis/common/v1"
 
 	ResourceAlias  = "resource"
 	ResourceImport = "github.com/crossplane/crossplane-runtime/pkg/resource"
