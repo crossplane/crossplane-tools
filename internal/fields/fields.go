@@ -46,11 +46,11 @@ const (
 	TypeSuffixSpec                 = NameSpec
 	TypeSuffixSpecTemplate         = NameSpecTemplate
 	TypeSuffixStatus               = NameStatus
-	TypeSuffixResourceSpec         = "github.com/crossplane/crossplane-runtime/apis/core/v1alpha1.ResourceSpec"
-	TypeSuffixResourceStatus       = "github.com/crossplane/crossplane-runtime/apis/core/v1alpha1.ResourceStatus"
-	TypeSuffixProviderConfigSpec   = "github.com/crossplane/crossplane-runtime/apis/core/v1alpha1.ProviderConfigSpec"
-	TypeSuffixProviderConfigStatus = "github.com/crossplane/crossplane-runtime/apis/core/v1alpha1.ProviderConfigStatus"
-	TypeSuffixProviderConfigUsage  = "github.com/crossplane/crossplane-runtime/apis/core/v1alpha1.ProviderConfigUsage"
+	TypeSuffixResourceSpec         = "github.com/crossplane/crossplane-runtime/apis/common/v1.ResourceSpec"
+	TypeSuffixResourceStatus       = "github.com/crossplane/crossplane-runtime/apis/common/v1.ResourceStatus"
+	TypeSuffixProviderConfigSpec   = "github.com/crossplane/crossplane-runtime/apis/common/v1.ProviderConfigSpec"
+	TypeSuffixProviderConfigStatus = "github.com/crossplane/crossplane-runtime/apis/common/v1.ProviderConfigStatus"
+	TypeSuffixProviderConfigUsage  = "github.com/crossplane/crossplane-runtime/apis/common/v1.ProviderConfigUsage"
 )
 
 func matches(s *types.Struct, m Matcher) bool {
