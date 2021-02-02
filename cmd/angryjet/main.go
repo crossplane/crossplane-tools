@@ -96,8 +96,6 @@ func GenerateManaged(filename, header string, p *packages.Package) error {
 	methods := method.Set{
 		"SetConditions":                       method.NewSetConditions(receiver, RuntimeImport),
 		"GetCondition":                        method.NewGetCondition(receiver, RuntimeImport),
-		"GetProviderReference":                method.NewGetProviderReference(receiver, RuntimeImport),
-		"SetProviderReference":                method.NewSetProviderReference(receiver, RuntimeImport),
 		"GetProviderConfigReference":          method.NewGetProviderConfigReference(receiver, RuntimeImport),
 		"SetProviderConfigReference":          method.NewSetProviderConfigReference(receiver, RuntimeImport),
 		"SetWriteConnectionSecretToReference": method.NewSetWriteConnectionSecretToReference(receiver, RuntimeImport),

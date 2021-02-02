@@ -137,46 +137,6 @@ func (t *Type) GetProviderConfigReference() *runtime.Reference {
 	}
 }
 
-func TestNewSetProviderReference(t *testing.T) {
-	want := `package pkg
-
-import runtime "example.org/runtime"
-
-/*
-SetProviderReference of this Type.
-Deprecated: Use SetProviderConfigReference.
-*/
-func (t *Type) SetProviderReference(r *runtime.Reference) {
-	t.Spec.ProviderReference = r
-}
-`
-	f := jen.NewFile("pkg")
-	NewSetProviderReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
-	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewSetProviderReference(): -want, +got\n%s", diff)
-	}
-}
-
-func TestNewGetProviderReference(t *testing.T) {
-	want := `package pkg
-
-import runtime "example.org/runtime"
-
-/*
-GetProviderReference of this Type.
-Deprecated: Use GetProviderConfigReference.
-*/
-func (t *Type) GetProviderReference() *runtime.Reference {
-	return t.Spec.ProviderReference
-}
-`
-	f := jen.NewFile("pkg")
-	NewGetProviderReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
-	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewGetProviderReference(): -want, +got\n%s", diff)
-	}
-}
-
 func TestNewSetWriteConnectionSecretToReference(t *testing.T) {
 	want := `package pkg
 
