@@ -133,7 +133,7 @@ func (t *Type) GetProviderConfigReference() *runtime.Reference {
 	f := jen.NewFile("pkg")
 	NewGetProviderConfigReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewGetProviderReference(): -want, +got\n%s", diff)
+		t.Errorf("NewGetProviderConfigReference(): -want, +got\n%s", diff)
 	}
 }
 
@@ -320,7 +320,7 @@ func (t *Type) GetProviderConfigReference() runtime.Reference {
 	f := jen.NewFile("pkg")
 	NewGetRootProviderConfigReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewGetRootProviderReference(): -want, +got\n%s", diff)
+		t.Errorf("NewGetRootProviderConfigReference(): -want, +got\n%s", diff)
 	}
 }
 
@@ -354,7 +354,7 @@ func (t *Type) GetResourceReference() runtime.TypedReference {
 	f := jen.NewFile("pkg")
 	NewGetRootResourceReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
-		t.Errorf("NewGetRootProviderReference(): -want, +got\n%s", diff)
+		t.Errorf("NewGetRootResourceReference(): -want, +got\n%s", diff)
 	}
 }
 
