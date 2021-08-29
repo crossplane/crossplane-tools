@@ -27,16 +27,23 @@ import (
 	"github.com/dave/jennifer/jen"
 )
 
+const (
+	ReferenceTypeMarker               = "crossplane:generate:reference:type"
+	ReferenceExtractorMarker          = "crossplane:generate:reference:extractor"
+	ReferenceReferenceFieldNameMarker = "crossplane:generate:reference:refFieldName"
+	ReferenceSelectorFieldNameMarker  = "crossplane:generate:reference:selectorFieldName"
+)
+
 // NewResolveReferences returns a NewMethod that writes a SetProviderConfigReference
 // method for the supplied Object to the supplied file.
-func NewResolveReferences(comm comments.Comments, refTypeMarker, refExtractorMarker, receiver, clientPath, referencePath string) New {
+func NewResolveReferences(comm comments.Comments, receiver, clientPath, referencePath string) New {
 	return func(f *jen.File, o types.Object) {
 		n, ok := o.Type().(*types.Named)
 		if !ok {
 			return
 		}
 		defaultExtractor := jen.Qual(referencePath, "ExternalName").Call()
-		rs := NewReferenceSearcher(comm, defaultExtractor, refTypeMarker, refExtractorMarker)
+		rs := NewReferenceSearcher(comm, defaultExtractor)
 		refs, err := rs.Search(n)
 		if err != nil {
 			panic(errors.Wrapf(err, "cannot search for references of %s", n.Obj().Name()))
@@ -166,20 +173,16 @@ type Reference struct {
 	IsPointer           bool
 }
 
-func NewReferenceSearcher(comm comments.Comments, defaultExtractor *jen.Statement, refTypeMarker, refExtractorMarker string) *ReferenceSearcher {
+func NewReferenceSearcher(comm comments.Comments, defaultExtractor *jen.Statement) *ReferenceSearcher {
 	return &ReferenceSearcher{
-		Comments:                 comm,
-		DefaultExtractor:         defaultExtractor,
-		ReferenceTypeMarker:      refTypeMarker,
-		ReferenceExtractorMarker: refExtractorMarker,
+		Comments:         comm,
+		DefaultExtractor: defaultExtractor,
 	}
 }
 
 type ReferenceSearcher struct {
-	Comments                 comments.Comments
-	ReferenceTypeMarker      string
-	ReferenceExtractorMarker string
-	DefaultExtractor         *jen.Statement
+	Comments         comments.Comments
+	DefaultExtractor *jen.Statement
 
 	refs []Reference
 }
@@ -225,34 +228,49 @@ func (rs *ReferenceSearcher) search(n *types.Named, fields ...string) error {
 			}
 		}
 		markers := comments.ParseMarkers(rs.Comments.For(field))
-		refTypeValues := markers[rs.ReferenceTypeMarker]
+		refTypeValues := markers[ReferenceTypeMarker]
 		if len(refTypeValues) == 0 {
 			continue
 		}
 		refType := refTypeValues[0]
 
-		extractorValues := markers[rs.ReferenceExtractorMarker]
+		extractorValues := markers[ReferenceExtractorMarker]
 		extractorPath := rs.DefaultExtractor
 		if len(extractorValues) != 0 {
 			extractorPath = getTypeCodeFromPath(extractorValues[0])
 		}
 		fieldPath := strings.Join(append(fields, field.Name()), ".")
-		refFieldPath := fieldPath + "Ref"
-		if isList {
-			refFieldPath = fieldPath + "Refs"
-		}
 		rs.refs = append(rs.refs, Reference{
 			RemoteType:          getTypeCodeFromPath(refType),
 			RemoteListType:      getTypeCodeFromPath(refType, "List"),
 			Extractor:           extractorPath,
 			GoValueFieldPath:    fieldPath,
-			GoRefFieldPath:      refFieldPath,
-			GoSelectorFieldPath: fieldPath + "Selector",
+			GoRefFieldPath:      getRefFieldName(markers, fieldPath, isList),
+			GoSelectorFieldPath: getSelectorFieldName(markers, fieldPath),
 			IsPointer:           isPointer,
 			IsList:              isList,
 		})
 	}
 	return nil
+}
+
+func getRefFieldName(markers comments.Markers, valueFieldPath string, isList bool) string {
+	if vals, ok := markers[ReferenceReferenceFieldNameMarker]; ok {
+		f := strings.Split(valueFieldPath, ".")
+		return strings.Join(f[:len(f)-1], ".") + "." + vals[0]
+	}
+	if isList {
+		return valueFieldPath + "Refs"
+	}
+	return valueFieldPath + "Ref"
+}
+
+func getSelectorFieldName(markers comments.Markers, valueFieldPath string) string {
+	if vals, ok := markers[ReferenceSelectorFieldNameMarker]; ok {
+		f := strings.Split(valueFieldPath, ".")
+		return strings.Join(f[:len(f)-1], ".") + "." + vals[0]
+	}
+	return valueFieldPath + "Selector"
 }
 
 func getTypeCodeFromPath(path string, nameSuffix ...string) *jen.Statement {

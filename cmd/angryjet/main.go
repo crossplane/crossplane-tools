@@ -37,9 +37,7 @@ const (
 	// DisableMarker used to disable generation of managed resource methods for
 	// a type that otherwise appears to be a managed resource that is missing a
 	// subnet of its methods.
-	DisableMarker            = "crossplane:generate:methods"
-	ReferenceTypeMarker      = "crossplane:generate:reference:type"
-	ReferenceExtractorMarker = "crossplane:generate:reference:extractor"
+	DisableMarker = "crossplane:generate:methods"
 )
 
 // Imports used in generated code.
@@ -228,8 +226,6 @@ func GenerateReferences(filename, header string, p *packages.Package) error {
 	methods := method.Set{
 		"ResolveReferences": method.NewResolveReferences(
 			comm,
-			ReferenceTypeMarker,
-			ReferenceExtractorMarker,
 			receiver,
 			ClientImport,
 			ReferenceImport),
