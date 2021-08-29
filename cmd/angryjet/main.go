@@ -37,7 +37,9 @@ const (
 	// DisableMarker used to disable generation of managed resource methods for
 	// a type that otherwise appears to be a managed resource that is missing a
 	// subnet of its methods.
-	DisableMarker = "crossplane:generate:methods"
+	DisableMarker            = "crossplane:generate:methods"
+	ReferenceTypeMarker      = "crossplane:generate:reference:type"
+	ReferenceExtractorMarker = "crossplane:generate:reference:extractor"
 )
 
 // Imports used in generated code.
@@ -65,6 +67,7 @@ func main() {
 		methodsets          = app.Command("generate-methodsets", "Generate a Crossplane method sets.")
 		headerFile          = methodsets.Flag("header-file", "The contents of this file will be added to the top of all generated files.").ExistingFile()
 		filenameManaged     = methodsets.Flag("filename-managed", "The filename of generated managed resource files.").Default("zz_generated.managed.go").String()
+		filenameResolvers   = methodsets.Flag("filename-resolvers", "The filename of generated reference resolver files.").Default("zz_generated.resolvers.go").String()
 		filenameManagedList = methodsets.Flag("filename-managed-list", "The filename of generated managed list resource files.").Default("zz_generated.managedlist.go").String()
 		filenamePC          = methodsets.Flag("filename-pc", "The filename of generated provider config files.").Default("zz_generated.pc.go").String()
 		filenamePCU         = methodsets.Flag("filename-pcu", "The filename of generated provider config usage files.").Default("zz_generated.pcu.go").String()
@@ -87,6 +90,7 @@ func main() {
 		for _, err := range p.Errors {
 			kingpin.FatalIfError(err, "error loading packages using pattern %s", *pattern)
 		}
+		kingpin.FatalIfError(GenerateReferences(*filenameResolvers, header, p), "cannot write reference resolvers for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateManaged(*filenameManaged, header, p), "cannot write managed resource method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateManagedList(*filenameManagedList, header, p), "cannot write managed resource list method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateProviderConfig(*filenamePC, header, p), "cannot write provider config method set for package %s", p.PkgPath)
@@ -219,9 +223,16 @@ func GenerateProviderConfigUsageList(filename, header string, p *packages.Packag
 // GenerateReferences generates reference resolver calls.
 func GenerateReferences(filename, header string, p *packages.Package) error {
 	receiver := "mg"
+	comm := comments.In(p)
 
 	methods := method.Set{
-		"ResolveReferences": method.NewResolveReferences(receiver, ClientImport, ReferenceImport),
+		"ResolveReferences": method.NewResolveReferences(
+			comm,
+			ReferenceTypeMarker,
+			ReferenceExtractorMarker,
+			receiver,
+			ClientImport,
+			ReferenceImport),
 	}
 
 	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
@@ -232,7 +243,7 @@ func GenerateReferences(filename, header string, p *packages.Package) error {
 		}),
 		generate.WithMatcher(match.AllOf(
 			match.Managed(),
-			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
+			match.DoesNotHaveMarker(comm, DisableMarker, "false")),
 		),
 	)
 
