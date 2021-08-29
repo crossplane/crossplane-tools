@@ -45,11 +45,17 @@ const (
 	CoreAlias  = "corev1"
 	CoreImport = "k8s.io/api/core/v1"
 
+	ClientAlias  = "client"
+	ClientImport = "sigs.k8s.io/controller-runtime/pkg/client"
+
 	RuntimeAlias  = "xpv1"
 	RuntimeImport = "github.com/crossplane/crossplane-runtime/apis/common/v1"
 
 	ResourceAlias  = "resource"
 	ResourceImport = "github.com/crossplane/crossplane-runtime/pkg/resource"
+
+	ReferenceAlias  = "reference"
+	ReferenceImport = "github.com/crossplane/crossplane-runtime/pkg/reference"
 )
 
 func main() {
@@ -208,4 +214,27 @@ func GenerateProviderConfigUsageList(filename, header string, p *packages.Packag
 	)
 
 	return errors.Wrap(err, "cannot write provider config usage list methods")
+}
+
+// GenerateReferences generates reference resolver calls.
+func GenerateReferences(filename, header string, p *packages.Package) error {
+	receiver := "mg"
+
+	methods := method.Set{
+		"ResolveReferences": method.NewResolveReferences(receiver, ClientImport, ReferenceImport),
+	}
+
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
+		generate.WithHeaders(header),
+		generate.WithImportAliases(map[string]string{
+			ClientImport:    ClientAlias,
+			ReferenceImport: ReferenceAlias,
+		}),
+		generate.WithMatcher(match.AllOf(
+			match.Managed(),
+			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
+		),
+	)
+
+	return errors.Wrap(err, "cannot write reference resolver methods")
 }
