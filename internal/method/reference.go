@@ -44,16 +44,18 @@ func NewResolveReferences(comm comments.Comments, refTypeMarker, refExtractorMar
 		if len(refs) == 0 {
 			return
 		}
+		hasMultiResolution := false
+		hasSingleResolution := false
 		resolverCalls := make(jen.Statement, len(refs))
 		for i, ref := range refs {
+			if ref.IsList {
+				hasMultiResolution = true
+			} else {
+				hasSingleResolution = true
+			}
 			currentValuePath := jen.Id(receiver)
 			for _, fieldName := range strings.Split(ref.GoValueFieldPath, ".") {
 				currentValuePath = currentValuePath.Dot(fieldName)
-			}
-			setResolvedValue := currentValuePath.Clone().Op("=").Id("resp").Dot("ResolvedValue")
-			if ref.IsPointer {
-				setResolvedValue = currentValuePath.Clone().Op("=").Qual(referencePath, "ToPtrValue").Call(jen.Id("resp").Dot("ResolvedValue"))
-				currentValuePath = jen.Qual(referencePath, "FromPtrValue").Call(currentValuePath)
 			}
 			referenceFieldPath := jen.Id(receiver)
 			for _, fieldName := range strings.Split(ref.GoRefFieldPath, ".") {
@@ -63,32 +65,73 @@ func NewResolveReferences(comm comments.Comments, refTypeMarker, refExtractorMar
 			for _, fieldName := range strings.Split(ref.GoSelectorFieldPath, ".") {
 				selectorFieldPath = selectorFieldPath.Dot(fieldName)
 			}
-			code := &jen.Statement{
-				jen.List(jen.Id("resp"), jen.Err()).Op("=").Id("r").Dot("Resolve").Call(
-					jen.Id("ctx"),
-					jen.Qual(referencePath, "ResolutionRequest").Values(jen.Dict{
-						jen.Id("CurrentValue"): currentValuePath,
-						jen.Id("Reference"):    referenceFieldPath,
-						jen.Id("Selector"):     selectorFieldPath,
-						jen.Id("To"): jen.Qual(referencePath, "To").Values(jen.Dict{
-							jen.Id("Managed"): ref.RemoteType,
-							jen.Id("List"):    ref.RemoteListType,
-						}),
-						jen.Id("Extract"): ref.Extractor,
-					},
+			var code *jen.Statement
+			if ref.IsList {
+				code = &jen.Statement{
+					jen.List(jen.Id("mrsp"), jen.Err()).Op("=").Id("r").Dot("ResolveMultiple").Call(
+						jen.Id("ctx"),
+						jen.Qual(referencePath, "MultiResolutionRequest").Values(jen.Dict{
+							jen.Id("CurrentValues"): currentValuePath,
+							jen.Id("References"):    referenceFieldPath,
+							jen.Id("Selector"):      selectorFieldPath,
+							jen.Id("To"): jen.Qual(referencePath, "To").Values(jen.Dict{
+								jen.Id("Managed"): ref.RemoteType,
+								jen.Id("List"):    ref.RemoteListType,
+							}),
+							jen.Id("Extract"): ref.Extractor,
+						},
+						),
 					),
-				),
-				jen.Line(),
-				jen.If(jen.Err().Op("!=").Nil()).Block(
-					jen.Return(jen.Qual("github.com/pkg/errors", "Wrapf").Call(jen.Err(), jen.Lit(ref.GoValueFieldPath))),
-				),
-				jen.Line(),
-				setResolvedValue,
-				jen.Line(),
-				referenceFieldPath.Clone().Op("=").Id("resp").Dot("ResolvedReference"),
-				jen.Line(),
+					jen.Line(),
+					jen.If(jen.Err().Op("!=").Nil()).Block(
+						jen.Return(jen.Qual("github.com/pkg/errors", "Wrapf").Call(jen.Err(), jen.Lit(ref.GoValueFieldPath))),
+					),
+					jen.Line(),
+					currentValuePath.Clone().Op("=").Id("mrsp").Dot("ResolvedValues"),
+					jen.Line(),
+					referenceFieldPath.Clone().Op("=").Id("mrsp").Dot("ResolvedReferences"),
+					jen.Line(),
+				}
+			} else {
+				setResolvedValue := currentValuePath.Clone().Op("=").Id("rsp").Dot("ResolvedValue")
+				if ref.IsPointer {
+					setResolvedValue = currentValuePath.Clone().Op("=").Qual(referencePath, "ToPtrValue").Call(jen.Id("rsp").Dot("ResolvedValue"))
+					currentValuePath = jen.Qual(referencePath, "FromPtrValue").Call(currentValuePath)
+				}
+				code = &jen.Statement{
+					jen.List(jen.Id("rsp"), jen.Err()).Op("=").Id("r").Dot("Resolve").Call(
+						jen.Id("ctx"),
+						jen.Qual(referencePath, "ResolutionRequest").Values(jen.Dict{
+							jen.Id("CurrentValue"): currentValuePath,
+							jen.Id("Reference"):    referenceFieldPath,
+							jen.Id("Selector"):     selectorFieldPath,
+							jen.Id("To"): jen.Qual(referencePath, "To").Values(jen.Dict{
+								jen.Id("Managed"): ref.RemoteType,
+								jen.Id("List"):    ref.RemoteListType,
+							}),
+							jen.Id("Extract"): ref.Extractor,
+						},
+						),
+					),
+					jen.Line(),
+					jen.If(jen.Err().Op("!=").Nil()).Block(
+						jen.Return(jen.Qual("github.com/pkg/errors", "Wrapf").Call(jen.Err(), jen.Lit(ref.GoValueFieldPath))),
+					),
+					jen.Line(),
+					setResolvedValue,
+					jen.Line(),
+					referenceFieldPath.Clone().Op("=").Id("rsp").Dot("ResolvedReference"),
+					jen.Line(),
+				}
 			}
 			resolverCalls[i] = code
+		}
+		var initStatements jen.Statement
+		if hasSingleResolution {
+			initStatements = append(initStatements, jen.Var().Id("rsp").Qual(referencePath, "ResolutionResponse"), jen.Line())
+		}
+		if hasMultiResolution {
+			initStatements = append(initStatements, jen.Var().Id("mrsp").Qual(referencePath, "MultiResolutionResponse"))
 		}
 
 		f.Commentf("ResolveReferences of this %s.", o.Name())
@@ -99,7 +142,7 @@ func NewResolveReferences(comm comments.Comments, refTypeMarker, refExtractorMar
 			).Error().Block(
 			jen.Id("r").Op(":=").Qual(referencePath, "NewAPIResolver").Call(jen.Id("c"), jen.Id(receiver)),
 			jen.Line(),
-			jen.Var().Id("resp").Qual(referencePath, "ResolutionResponse"),
+			&initStatements,
 			jen.Var().Err().Error(),
 			jen.Line(),
 			&resolverCalls,
@@ -178,14 +221,7 @@ func (rs *ReferenceSearcher) search(n *types.Named, fields ...string) error {
 				if err := rs.search(elemType, append(fields, "[]"+field.Name())...); err != nil {
 					return errors.Wrapf(err, "cannot search for references in %s", elemType.Obj().Name())
 				}
-			// []*Type
-			case *types.Pointer:
-				switch elemElemType := elemType.Elem().(type) {
-				case *types.Named:
-					if err := rs.search(elemElemType, append(fields, "[]*"+field.Name())...); err != nil {
-						return errors.Wrapf(err, "cannot search for references in %s", elemElemType.Obj().Name())
-					}
-				}
+				// There could be []*Type but we don't support if for now.
 			}
 		}
 		markers := comments.ParseMarkers(rs.Comments.For(field))
@@ -201,12 +237,16 @@ func (rs *ReferenceSearcher) search(n *types.Named, fields ...string) error {
 			extractorPath = getTypeCodeFromPath(extractorValues[0])
 		}
 		fieldPath := strings.Join(append(fields, field.Name()), ".")
+		refFieldPath := fieldPath + "Ref"
+		if isList {
+			refFieldPath = fieldPath + "Refs"
+		}
 		rs.refs = append(rs.refs, Reference{
 			RemoteType:          getTypeCodeFromPath(refType),
 			RemoteListType:      getTypeCodeFromPath(refType, "List"),
 			Extractor:           extractorPath,
 			GoValueFieldPath:    fieldPath,
-			GoRefFieldPath:      fieldPath + "Ref",
+			GoRefFieldPath:      refFieldPath,
 			GoSelectorFieldPath: fieldPath + "Selector",
 			IsPointer:           isPointer,
 			IsList:              isList,
@@ -221,6 +261,6 @@ func getTypeCodeFromPath(path string, nameSuffix ...string) *jen.Statement {
 		return jen.Op("&").Id(path + strings.Join(nameSuffix, "")).Values()
 	}
 	name := words[len(words)-1] + strings.Join(nameSuffix, "")
-	pkg := strings.TrimSuffix(path, "."+name)
+	pkg := strings.TrimSuffix(path, "."+words[len(words)-1])
 	return jen.Op("&").Qual(pkg, name).Values()
 }
