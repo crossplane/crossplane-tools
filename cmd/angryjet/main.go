@@ -20,6 +20,7 @@ import (
 	"os"
 	"path/filepath"
 
+	twpackages "github.com/muvaf/typewriter/pkg/packages"
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
 	"gopkg.in/alecthomas/kingpin.v2"
@@ -225,7 +226,7 @@ func GenerateReferences(filename, header string, p *packages.Package) error {
 
 	methods := method.Set{
 		"ResolveReferences": method.NewResolveReferences(
-			comm,
+			twpackages.NewCache(p),
 			receiver,
 			ClientImport,
 			ReferenceImport),

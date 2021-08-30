@@ -20,34 +20,29 @@ import (
 	"go/types"
 	"strings"
 
-	"github.com/pkg/errors"
-
-	"github.com/crossplane/crossplane-tools/internal/comments"
+	twpackages "github.com/muvaf/typewriter/pkg/packages"
 
 	"github.com/dave/jennifer/jen"
-)
-
-const (
-	ReferenceTypeMarker               = "crossplane:generate:reference:type"
-	ReferenceExtractorMarker          = "crossplane:generate:reference:extractor"
-	ReferenceReferenceFieldNameMarker = "crossplane:generate:reference:refFieldName"
-	ReferenceSelectorFieldNameMarker  = "crossplane:generate:reference:selectorFieldName"
+	twtypes "github.com/muvaf/typewriter/pkg/types"
 )
 
 // NewResolveReferences returns a NewMethod that writes a SetProviderConfigReference
 // method for the supplied Object to the supplied file.
-func NewResolveReferences(comm comments.Comments, receiver, clientPath, referencePath string) New {
+func NewResolveReferences(cache *twpackages.Cache, receiver, clientPath, referencePath string) New {
 	return func(f *jen.File, o types.Object) {
 		n, ok := o.Type().(*types.Named)
 		if !ok {
 			return
 		}
 		defaultExtractor := jen.Qual(referencePath, "ExternalName").Call()
-		rs := NewReferenceSearcher(comm, defaultExtractor)
-		refs, err := rs.Search(n)
-		if err != nil {
-			panic(errors.Wrapf(err, "cannot search for references of %s", n.Obj().Name()))
+		refProcessor := NewReferenceProcessor(defaultExtractor)
+		tr := twtypes.NewTraverser(cache,
+			twtypes.WithFieldProcessor(refProcessor),
+		)
+		if err := tr.Traverse(n); err != nil {
+			panic("cannot traverse the type tree")
 		}
+		refs := refProcessor.GetReferences()
 		if len(refs) == 0 {
 			return
 		}
@@ -157,128 +152,4 @@ func NewResolveReferences(comm comments.Comments, receiver, clientPath, referenc
 			jen.Return(jen.Nil()),
 		)
 	}
-}
-
-// Target type string
-
-type Reference struct {
-	RemoteType *jen.Statement
-	Extractor  *jen.Statement
-
-	RemoteListType      *jen.Statement
-	GoValueFieldPath    string
-	GoRefFieldPath      string
-	GoSelectorFieldPath string
-	IsList              bool
-	IsPointer           bool
-}
-
-func NewReferenceSearcher(comm comments.Comments, defaultExtractor *jen.Statement) *ReferenceSearcher {
-	return &ReferenceSearcher{
-		Comments:         comm,
-		DefaultExtractor: defaultExtractor,
-	}
-}
-
-type ReferenceSearcher struct {
-	Comments         comments.Comments
-	DefaultExtractor *jen.Statement
-
-	refs []Reference
-}
-
-func (rs *ReferenceSearcher) Search(n *types.Named) ([]Reference, error) {
-	return rs.refs, errors.Wrap(rs.search(n), "search for references failed")
-}
-
-func (rs *ReferenceSearcher) search(n *types.Named, fields ...string) error {
-	s, ok := n.Underlying().(*types.Struct)
-	if !ok {
-		return nil
-	}
-
-	for i := 0; i < s.NumFields(); i++ {
-		field := s.Field(i)
-		isPointer := false
-		isList := false
-		switch ft := field.Type().(type) {
-		// Type
-		case *types.Named:
-			if err := rs.search(ft, append(fields, field.Name())...); err != nil {
-				return errors.Wrapf(err, "cannot search for references in %s", ft.Obj().Name())
-			}
-		// *Type
-		case *types.Pointer:
-			isPointer = true
-			switch elemType := ft.Elem().(type) {
-			case *types.Named:
-				if err := rs.search(elemType, append(fields, "*"+field.Name())...); err != nil {
-					return errors.Wrapf(err, "cannot search for references in %s", elemType.Obj().Name())
-				}
-			}
-		case *types.Slice:
-			isList = true
-			switch elemType := ft.Elem().(type) {
-			// []Type
-			case *types.Named:
-				if err := rs.search(elemType, append(fields, "[]"+field.Name())...); err != nil {
-					return errors.Wrapf(err, "cannot search for references in %s", elemType.Obj().Name())
-				}
-				// There could be []*Type but we don't support if for now.
-			}
-		}
-		markers := comments.ParseMarkers(rs.Comments.For(field))
-		refTypeValues := markers[ReferenceTypeMarker]
-		if len(refTypeValues) == 0 {
-			continue
-		}
-		refType := refTypeValues[0]
-
-		extractorValues := markers[ReferenceExtractorMarker]
-		extractorPath := rs.DefaultExtractor
-		if len(extractorValues) != 0 {
-			extractorPath = getTypeCodeFromPath(extractorValues[0])
-		}
-		fieldPath := strings.Join(append(fields, field.Name()), ".")
-		rs.refs = append(rs.refs, Reference{
-			RemoteType:          getTypeCodeFromPath(refType),
-			RemoteListType:      getTypeCodeFromPath(refType, "List"),
-			Extractor:           extractorPath,
-			GoValueFieldPath:    fieldPath,
-			GoRefFieldPath:      getRefFieldName(markers, fieldPath, isList),
-			GoSelectorFieldPath: getSelectorFieldName(markers, fieldPath),
-			IsPointer:           isPointer,
-			IsList:              isList,
-		})
-	}
-	return nil
-}
-
-func getRefFieldName(markers comments.Markers, valueFieldPath string, isList bool) string {
-	if vals, ok := markers[ReferenceReferenceFieldNameMarker]; ok {
-		f := strings.Split(valueFieldPath, ".")
-		return strings.Join(f[:len(f)-1], ".") + "." + vals[0]
-	}
-	if isList {
-		return valueFieldPath + "Refs"
-	}
-	return valueFieldPath + "Ref"
-}
-
-func getSelectorFieldName(markers comments.Markers, valueFieldPath string) string {
-	if vals, ok := markers[ReferenceSelectorFieldNameMarker]; ok {
-		f := strings.Split(valueFieldPath, ".")
-		return strings.Join(f[:len(f)-1], ".") + "." + vals[0]
-	}
-	return valueFieldPath + "Selector"
-}
-
-func getTypeCodeFromPath(path string, nameSuffix ...string) *jen.Statement {
-	words := strings.Split(path, ".")
-	if len(words) == 1 {
-		return jen.Op("&").Id(path + strings.Join(nameSuffix, "")).Values()
-	}
-	name := words[len(words)-1] + strings.Join(nameSuffix, "")
-	pkg := strings.TrimSuffix(path, "."+words[len(words)-1])
-	return jen.Op("&").Qual(pkg, name).Values()
 }
