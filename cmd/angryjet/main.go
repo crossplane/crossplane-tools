@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package main
 
 import (
@@ -20,7 +21,6 @@ import (
 	"os"
 	"path/filepath"
 
-	twpackages "github.com/muvaf/typewriter/pkg/packages"
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
 	"gopkg.in/alecthomas/kingpin.v2"
@@ -89,12 +89,12 @@ func main() {
 		for _, err := range p.Errors {
 			kingpin.FatalIfError(err, "error loading packages using pattern %s", *pattern)
 		}
-		kingpin.FatalIfError(GenerateReferences(*filenameResolvers, header, p), "cannot write reference resolvers for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateManaged(*filenameManaged, header, p), "cannot write managed resource method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateManagedList(*filenameManagedList, header, p), "cannot write managed resource list method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateProviderConfig(*filenamePC, header, p), "cannot write provider config method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateProviderConfigUsage(*filenamePCU, header, p), "cannot write provider config usage method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateProviderConfigUsageList(*filenamePCUList, header, p), "cannot write provider config usage list method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateReferences(*filenameResolvers, header, p), "cannot write reference resolvers for package %s", p.PkgPath)
 	}
 }
 
@@ -226,7 +226,7 @@ func GenerateReferences(filename, header string, p *packages.Package) error {
 
 	methods := method.Set{
 		"ResolveReferences": method.NewResolveReferences(
-			twpackages.NewCache(p),
+			comm,
 			receiver,
 			ClientImport,
 			ReferenceImport),

@@ -64,13 +64,19 @@ func (rp *ReferenceProcessor) Process(_ *types.Named, f *types.Var, _ string, co
 	refType := refTypeValues[0]
 	isPointer := false
 	isList := false
-	switch f.Type().(type) {
+	// We don't support *[]string.
+	switch t := f.Type().(type) {
 	// *string
 	case *types.Pointer:
 		isPointer = true
-	// []string. We don't support either *[]string or []*string.
+	// []string.
 	case *types.Slice:
 		isList = true
+		switch t.Elem().(type) {
+		// []*string
+		case *types.Pointer:
+			isPointer = true
+		}
 	}
 
 	extractorValues := markers[ReferenceExtractorMarker]

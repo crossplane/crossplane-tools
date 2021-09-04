@@ -11,8 +11,8 @@ github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/google/addlicense v0.0.0-20210428195630-6d92264d7170/go.mod h1:EMjYTRimagHs1FwlIqKyX3wAM0u3rA+McvlIIWmSamA=
 github.com/google/go-cmp v0.5.4 h1:L8R9j+yAqZuZjsqh/z+F1NCffTKKLShY6zXTItVIZ8M=
 github.com/google/go-cmp v0.5.4/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
-github.com/muvaf/typewriter v0.0.0-20210830125036-2204b298ddcf h1:Ttdh/5sZ+jN5ojGA4CwAdjNHhOmzM2E2tc3pERsHgQ4=
-github.com/muvaf/typewriter v0.0.0-20210830125036-2204b298ddcf/go.mod h1:SAAdeMEiFXR8LcHffvIdiLI1w243DCH2DuHq7UrA5YQ=
+github.com/muvaf/typewriter v0.0.0-20210830172935-781d614a5ba4 h1:AEcmE4qynpZXAKiIbqQCdWJAr5qihfykHn4E5d/3JjA=
+github.com/muvaf/typewriter v0.0.0-20210830172935-781d614a5ba4/go.mod h1:SAAdeMEiFXR8LcHffvIdiLI1w243DCH2DuHq7UrA5YQ=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
