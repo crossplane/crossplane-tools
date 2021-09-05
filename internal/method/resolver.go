@@ -37,8 +37,7 @@ func NewResolveReferences(comments comments.Comments, receiver, clientPath, refe
 		}
 		defaultExtractor := jen.Qual(referencePkgPath, "ExternalName").Call()
 		refProcessor := NewReferenceProcessor(defaultExtractor)
-		tr := xptypes.NewTraverser(comments, xptypes.WithFieldProcessor(refProcessor))
-		if err := tr.Traverse(n); err != nil {
+		if err := xptypes.NewTraverser(comments, xptypes.WithFieldProcessor(refProcessor)).Traverse(n); err != nil {
 			panic(fmt.Sprintf("cannot traverse the type tree of %s", n.Obj().Name()))
 		}
 		refs := refProcessor.GetReferences()
@@ -62,7 +61,7 @@ func NewResolveReferences(comments comments.Comments, receiver, clientPath, refe
 		}
 		var initStatements jen.Statement
 		if hasSingleResolution {
-			initStatements = append(initStatements, jen.Var().Id("rsp").Qual(referencePkgPath, "ResolutionResponse"), jen.Line())
+			initStatements = append(initStatements, jen.Var().Id("rsp").Qual(referencePkgPath, "ResolutionResponse"))
 		}
 		if hasMultiResolution {
 			initStatements = append(initStatements, jen.Var().Id("mrsp").Qual(referencePkgPath, "MultiResolutionResponse"))
@@ -91,9 +90,9 @@ var cleaner = strings.NewReplacer(
 	"*", "",
 )
 
-type ResolutionCallFn func(formerFields []string) *jen.Statement
+type resolutionCallFn func(formerFields []string) *jen.Statement
 
-func encapsulate(index int, fields []string, contentFn ResolutionCallFn) *jen.Statement {
+func encapsulate(index int, fields []string, contentFn resolutionCallFn) *jen.Statement {
 	if len(fields) <= index {
 		return contentFn(fields)
 	}
@@ -118,7 +117,7 @@ func encapsulate(index int, fields []string, contentFn ResolutionCallFn) *jen.St
 	}
 }
 
-func singleResolutionCall(ref Reference, referencePkgPath string) ResolutionCallFn {
+func singleResolutionCall(ref Reference, referencePkgPath string) resolutionCallFn {
 	return func(fields []string) *jen.Statement {
 		prefixPath := jen.Id(fields[0])
 		for i := 1; i < len(fields)-1; i++ {
@@ -166,7 +165,7 @@ func singleResolutionCall(ref Reference, referencePkgPath string) ResolutionCall
 	}
 }
 
-func multiResolutionCall(ref Reference, referencePkgPath string) ResolutionCallFn {
+func multiResolutionCall(ref Reference, referencePkgPath string) resolutionCallFn {
 	return func(fields []string) *jen.Statement {
 		prefixPath := jen.Id(fields[0])
 		for i := 1; i < len(fields)-1; i++ {

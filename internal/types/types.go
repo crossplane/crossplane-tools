@@ -24,9 +24,9 @@ import (
 	"github.com/crossplane/crossplane-tools/internal/comments"
 )
 
-type TypeProcessorChain []TypeProcessor
+type NamedProcessorChain []NamedProcessor
 
-func (tpc TypeProcessorChain) Process(n *types.Named, comment string) error {
+func (tpc NamedProcessorChain) Process(n *types.Named, comment string) error {
 	for i, tp := range tpc {
 		if err := tp.Process(n, comment); err != nil {
 			return errors.Errorf("type processor at index %d failed", i)
@@ -35,7 +35,7 @@ func (tpc TypeProcessorChain) Process(n *types.Named, comment string) error {
 	return nil
 }
 
-type TypeProcessor interface {
+type NamedProcessor interface {
 	Process(n *types.Named, comment string) error
 }
 
@@ -60,9 +60,9 @@ func WithFieldProcessor(fp FieldProcessor) TraverserOption {
 	}
 }
 
-func WithTypeProcessor(tp TypeProcessor) TraverserOption {
+func WithNamedProcessor(tp NamedProcessor) TraverserOption {
 	return func(t *Traverser) {
-		t.TypeProcessors = tp
+		t.NamedProcessors = tp
 	}
 }
 
@@ -70,7 +70,7 @@ type TraverserOption func(*Traverser)
 
 func NewTraverser(comments comments.Comments, opts ...TraverserOption) *Traverser {
 	t := &Traverser{
-		TypeProcessors:  TypeProcessorChain{},
+		NamedProcessors: NamedProcessorChain{},
 		FieldProcessors: FieldProcessorChain{},
 		comments:        comments,
 	}
@@ -81,14 +81,17 @@ func NewTraverser(comments comments.Comments, opts ...TraverserOption) *Traverse
 }
 
 type Traverser struct {
-	TypeProcessors  TypeProcessor
+	NamedProcessors NamedProcessor
 	FieldProcessors FieldProcessor
 
 	comments comments.Comments
 }
 
+// NOTE(muvaf): We return an error but currently there isn't really anything
+// constructing an error. But we keep that for future type and field processors.
+
 func (t *Traverser) Traverse(n *types.Named, formerFields ...string) error {
-	if err := t.TypeProcessors.Process(n, t.comments.For(n.Obj())); err != nil {
+	if err := t.NamedProcessors.Process(n, t.comments.For(n.Obj())); err != nil {
 		return errors.Wrapf(err, "type processors failed to run for type %s", n.Obj().Name())
 	}
 	st, ok := n.Underlying().(*types.Struct)
@@ -123,33 +126,6 @@ func (t *Traverser) Traverse(n *types.Named, formerFields ...string) error {
 				switch elemElemType := elemType.Elem().(type) {
 				case *types.Named:
 					if err := t.Traverse(elemElemType, append(formerFields, "[]"+"*"+field.Name())...); err != nil {
-						return errors.Wrapf(err, "failed to traverse type of field %s", field.Name())
-					}
-				}
-			}
-		case *types.Map:
-			switch elemType := ft.Elem().(type) {
-			case *types.Named:
-				if err := t.Traverse(elemType, append(formerFields, "[mapvalue]"+field.Name())...); err != nil {
-					return errors.Wrapf(err, "failed to traverse type of field %s", field.Name())
-				}
-			case *types.Pointer:
-				switch elemElemType := elemType.Elem().(type) {
-				case *types.Named:
-					if err := t.Traverse(elemElemType, append(formerFields, "[mapvalue]"+"*"+field.Name())...); err != nil {
-						return errors.Wrapf(err, "failed to traverse type of field %s", field.Name())
-					}
-				}
-			}
-			switch keyType := ft.Key().(type) {
-			case *types.Named:
-				if err := t.Traverse(keyType, append(formerFields, "[mapkey]"+field.Name())...); err != nil {
-					return errors.Wrapf(err, "failed to traverse type of field %s", field.Name())
-				}
-			case *types.Pointer:
-				switch elemKeyType := keyType.Elem().(type) {
-				case *types.Named:
-					if err := t.Traverse(elemKeyType, append(formerFields, "[mapkey]"+"*"+field.Name())...); err != nil {
 						return errors.Wrapf(err, "failed to traverse type of field %s", field.Name())
 					}
 				}
