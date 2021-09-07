@@ -22,45 +22,223 @@ import (
 
 	"github.com/dave/jennifer/jen"
 	"github.com/google/go-cmp/cmp"
+	"golang.org/x/tools/go/packages"
+	"golang.org/x/tools/go/packages/packagestest"
+
+	"github.com/crossplane/crossplane-tools/internal/comments"
 )
 
-func TestNewResolveReferences(t *testing.T) {
-	want := `package pkg
+const (
+	source = `
+package v1alpha1
+
+type ModelParameters struct {
+	// +crossplane:generate:reference:type=Apigatewayv2Api
+	APIID string
+
+	// +crossplane:generate:reference:type=SecurityGroup
+	SecurityGroupID *string
+
+	// +crossplane:generate:reference:type=github.com/crossplane/provider-aws/apis/identity/v1beta1.IAM
+	// +crossplane:generate:reference:extractor=github.com/crossplane/provider-aws/apis/identity/v1beta1.IAMRoleARN()
+	IAMRoleARN *string
+
+	Network *NetworkSpec
+
+	OtherSetting []OtherSpec
+
+	// +crossplane:generate:reference:type=Subnet
+	// +crossplane:generate:reference:refFieldName=SubnetIDRefs
+	// +crossplane:generate:reference:selectorFieldName=SubnetIDSelector
+	SubnetIDs []string
+
+	// +crossplane:generate:reference:type=RouteTable
+	RouteTableIDs []*string
+
+	UnrelatedField string
+}
+
+type NetworkSpec struct {
+	// +crossplane:generate:reference:type=github.com/crossplane/provider-aws/apis/ec2/v1beta1.VPC
+	VPCID string
+}
+
+type OtherSpec struct {
+	// +crossplane:generate:reference:type=Cluster
+	OtherID string
+}
+
+type ModelSpec struct {
+	ForProvider       ModelParameters
+}
+
+type ModelObservation struct {}
+
+type ModelStatus struct {
+	AtProvider          ModelObservation
+}
+
+type Model struct {
+	Spec              ModelSpec
+	Status            ModelStatus
+}
+`
+	generated = `package v1alpha1
 
 import (
 	"context"
 	client "example.org/client"
 	reference "example.org/reference"
+	v1beta11 "github.com/crossplane/provider-aws/apis/ec2/v1beta1"
+	v1beta1 "github.com/crossplane/provider-aws/apis/identity/v1beta1"
 	errors "github.com/pkg/errors"
 )
 
-// ResolveReferences of this Type.
-func (t *Type) ResolveReferences(ctx context.Context, c client.Reader) {
-	r := reference.NewAPIResolver(c, t)
+// ResolveReferences of this Model.
+func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
+	r := reference.NewAPIResolver(c, mg)
 
-	resp, err := r.Resolve(ctx, reference.ResolutionRequest{
-		CurrentValue: t.Spec.ForProvider.ApiId,
+	var rsp reference.ResolutionResponse
+	var mrsp reference.MultiResolutionResponse
+	var err error
+
+	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+		CurrentValue: mg.Spec.ForProvider.APIID,
 		Extract:      reference.ExternalName(),
-		Reference:    t.Spec.ForProvider.ApiIdRef,
-		Selector:     t.Spec.ForProvider.ApiIdSelector,
+		Reference:    mg.Spec.ForProvider.APIIDRef,
+		Selector:     mg.Spec.ForProvider.APIIDSelector,
 		To: reference.To{
 			List:    &Apigatewayv2ApiList{},
 			Managed: &Apigatewayv2Api{},
 		},
 	})
 	if err != nil {
-		return errors.Wrap(err, "Spec.ForProvider.ApiId")
+		return errors.Wrap(err, "mg.Spec.ForProvider.APIID")
 	}
+	mg.Spec.ForProvider.APIID = rsp.ResolvedValue
+	mg.Spec.ForProvider.APIIDRef = rsp.ResolvedReference
 
-	t.Spec.ForProvider.ApiId = resp.ResolvedValue
-	t.Spec.ForProvider.ApiIdRef = resp.ResolvedReference
+	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.SecurityGroupID),
+		Extract:      reference.ExternalName(),
+		Reference:    mg.Spec.ForProvider.SecurityGroupIDRef,
+		Selector:     mg.Spec.ForProvider.SecurityGroupIDSelector,
+		To: reference.To{
+			List:    &SecurityGroupList{},
+			Managed: &SecurityGroup{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.ForProvider.SecurityGroupID")
+	}
+	mg.Spec.ForProvider.SecurityGroupID = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.ForProvider.SecurityGroupIDRef = rsp.ResolvedReference
+
+	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.IAMRoleARN),
+		Extract:      v1beta1.IAMRoleARN(),
+		Reference:    mg.Spec.ForProvider.IAMRoleARNRef,
+		Selector:     mg.Spec.ForProvider.IAMRoleARNSelector,
+		To: reference.To{
+			List:    &v1beta1.IAMList{},
+			Managed: &v1beta1.IAM{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.ForProvider.IAMRoleARN")
+	}
+	mg.Spec.ForProvider.IAMRoleARN = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.ForProvider.IAMRoleARNRef = rsp.ResolvedReference
+
+	if mg.Spec.ForProvider.Network != nil {
+		rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+			CurrentValue: mg.Spec.ForProvider.Network.VPCID,
+			Extract:      reference.ExternalName(),
+			Reference:    mg.Spec.ForProvider.Network.VPCIDRef,
+			Selector:     mg.Spec.ForProvider.Network.VPCIDSelector,
+			To: reference.To{
+				List:    &v1beta11.VPCList{},
+				Managed: &v1beta11.VPC{},
+			},
+		})
+		if err != nil {
+			return errors.Wrap(err, "mg.Spec.ForProvider.Network.VPCID")
+		}
+		mg.Spec.ForProvider.Network.VPCID = rsp.ResolvedValue
+		mg.Spec.ForProvider.Network.VPCIDRef = rsp.ResolvedReference
+
+	}
+	for i3 := 0; i3 < len(mg.Spec.ForProvider.OtherSetting); i3++ {
+		rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+			CurrentValue: mg.Spec.ForProvider.OtherSetting[i3].OtherID,
+			Extract:      reference.ExternalName(),
+			Reference:    mg.Spec.ForProvider.OtherSetting[i3].OtherIDRef,
+			Selector:     mg.Spec.ForProvider.OtherSetting[i3].OtherIDSelector,
+			To: reference.To{
+				List:    &ClusterList{},
+				Managed: &Cluster{},
+			},
+		})
+		if err != nil {
+			return errors.Wrap(err, "mg.Spec.ForProvider.OtherSetting[i3].OtherID")
+		}
+		mg.Spec.ForProvider.OtherSetting[i3].OtherID = rsp.ResolvedValue
+		mg.Spec.ForProvider.OtherSetting[i3].OtherIDRef = rsp.ResolvedReference
+
+	}
+	mrsp, err = r.ResolveMultiple(ctx, reference.MultiResolutionRequest{
+		CurrentValues: mg.Spec.ForProvider.SubnetIDs,
+		Extract:       reference.ExternalName(),
+		References:    mg.Spec.ForProvider.SubnetIDRefs,
+		Selector:      mg.Spec.ForProvider.SubnetIDSelector,
+		To: reference.To{
+			List:    &SubnetList{},
+			Managed: &Subnet{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.ForProvider.SubnetIDs")
+	}
+	mg.Spec.ForProvider.SubnetIDs = mrsp.ResolvedValues
+	mg.Spec.ForProvider.SubnetIDRefs = mrsp.ResolvedReferences
+
+	mrsp, err = r.ResolveMultiple(ctx, reference.MultiResolutionRequest{
+		CurrentValues: reference.FromPtrValues(mg.Spec.ForProvider.RouteTableIDs),
+		Extract:       reference.ExternalName(),
+		References:    mg.Spec.ForProvider.RouteTableIDsRefs,
+		Selector:      mg.Spec.ForProvider.RouteTableIDsSelector,
+		To: reference.To{
+			List:    &RouteTableList{},
+			Managed: &RouteTable{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.ForProvider.RouteTableIDs")
+	}
+	mg.Spec.ForProvider.RouteTableIDs = reference.ToPtrValues(mrsp.ResolvedValues)
+	mg.Spec.ForProvider.RouteTableIDsRefs = mrsp.ResolvedReferences
 
 	return nil
 }
 `
-	f := jen.NewFile("pkg")
-	NewResolveReferences("t", "example.org/client", "example.org/reference")(f, MockObject{Named: "Type"})
-	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+)
+
+func TestNewResolveReferences(t *testing.T) {
+	exported := packagestest.Export(t, packagestest.Modules, []packagestest.Module{{
+		Name: "golang.org/fake",
+		Files: map[string]interface{}{
+			"v1alpha1/model.go": source,
+		},
+	}})
+	defer exported.Cleanup()
+	exported.Config.Mode = packages.NeedName | packages.NeedFiles | packages.NeedImports | packages.NeedDeps | packages.NeedTypes | packages.NeedSyntax
+	pkgs, err := packages.Load(exported.Config, fmt.Sprintf("file=%s", exported.File("golang.org/fake", "v1alpha1/model.go")))
+	if err != nil {
+		t.Error(err)
+	}
+	f := jen.NewFile("v1alpha1")
+	NewResolveReferences(comments.In(pkgs[0]), "mg", "example.org/client", "example.org/reference")(f, pkgs[0].Types.Scope().Lookup("Model"))
+	if diff := cmp.Diff(generated, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewResolveReferences(): -want, +got\n%s", diff)
 	}
 }
