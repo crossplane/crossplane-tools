@@ -26,16 +26,22 @@ import (
 	"github.com/dave/jennifer/jen"
 )
 
-// NewResolveReferences returns a NewMethod that writes a SetProviderConfigReference
-// method for the supplied Object to the supplied file.
+// NewResolveReferences returns a NewMethod that writes a ResolveReferences for
+// given managed resource, if needed.
 func NewResolveReferences(traverser *xptypes.Traverser, receiver, clientPath, referencePkgPath string) New {
 	return func(f *jen.File, o types.Object) {
 		n, ok := o.Type().(*types.Named)
 		if !ok {
 			return
 		}
-		refProcessor := NewReferenceProcessor(WithDefaultExtractor(jen.Qual(referencePkgPath, "ExternalName").Call()))
-		if err := traverser.Traverse(n, xptypes.NewTraverseConfig(xptypes.WithFieldProcessor(refProcessor))); err != nil {
+		refProcessor := NewReferenceProcessor(receiver,
+			WithDefaultExtractor(jen.Qual(referencePkgPath, "ExternalName").Call()),
+		)
+		cfg := &xptypes.ProcessorConfig{
+			Field: refProcessor,
+			Named: xptypes.NamedProcessorChain{},
+		}
+		if err := traverser.Traverse(n, cfg); err != nil {
 			panic(fmt.Sprintf("cannot traverse the type tree of %s", n.Obj().Name()))
 		}
 		refs := refProcessor.GetReferences()
@@ -46,7 +52,6 @@ func NewResolveReferences(traverser *xptypes.Traverser, receiver, clientPath, re
 		hasSingleResolution := false
 		resolverCalls := make(jen.Statement, len(refs))
 		for i, ref := range refs {
-			ref.GoValueFieldPath = append([]string{receiver}, ref.GoValueFieldPath...)
 			if ref.IsList {
 				hasMultiResolution = true
 				resolverCalls[i] = encapsulate(0, ref.GoValueFieldPath, multiResolutionCall(ref, referencePkgPath)).Line()
@@ -88,6 +93,8 @@ var cleaner = strings.NewReplacer(
 
 type resolutionCallFn func(formerFields []string) *jen.Statement
 
+// encapsulate goes through the fields and encapsulates the final call with nil
+// guard and/or for loops.
 func encapsulate(index int, fields []string, contentFn resolutionCallFn) *jen.Statement {
 	if len(fields) <= index {
 		return contentFn(fields)
@@ -113,7 +120,7 @@ func encapsulate(index int, fields []string, contentFn resolutionCallFn) *jen.St
 	}
 }
 
-func singleResolutionCall(ref reference, referencePkgPath string) resolutionCallFn {
+func singleResolutionCall(ref Reference, referencePkgPath string) resolutionCallFn {
 	return func(fields []string) *jen.Statement {
 		prefixPath := jen.Id(fields[0])
 		for i := 1; i < len(fields)-1; i++ {
@@ -156,7 +163,7 @@ func singleResolutionCall(ref reference, referencePkgPath string) resolutionCall
 	}
 }
 
-func multiResolutionCall(ref reference, referencePkgPath string) resolutionCallFn {
+func multiResolutionCall(ref Reference, referencePkgPath string) resolutionCallFn {
 	return func(fields []string) *jen.Statement {
 		prefixPath := jen.Id(fields[0])
 		for i := 1; i < len(fields)-1; i++ {

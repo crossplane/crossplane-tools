@@ -33,9 +33,9 @@ const (
 	ReferenceSelectorFieldNameMarker  = "crossplane:generate:reference:selectorFieldName"
 )
 
-// reference is the internal representation that has enough information to let
+// Reference is the internal representation that has enough information to let
 // us generate the resolver.
-type reference struct {
+type Reference struct {
 	RemoteType *jen.Statement
 	Extractor  *jen.Statement
 
@@ -50,26 +50,38 @@ type reference struct {
 // ReferenceProcessorOption is used to configure ReferenceProcessor.
 type ReferenceProcessorOption func(*ReferenceProcessor)
 
+// WithDefaultExtractor returns an option that sets the extractor to given
+// call.
 func WithDefaultExtractor(ext *jen.Statement) ReferenceProcessorOption {
 	return func(rp *ReferenceProcessor) {
 		rp.DefaultExtractor = ext
 	}
 }
 
-func NewReferenceProcessor(opts ...ReferenceProcessorOption) *ReferenceProcessor {
-	rp := &ReferenceProcessor{}
+// NewReferenceProcessor returns a new *ReferenceProcessor .
+func NewReferenceProcessor(receiver string, opts ...ReferenceProcessorOption) *ReferenceProcessor {
+	rp := &ReferenceProcessor{
+		Receiver: receiver,
+	}
 	for _, f := range opts {
 		f(rp)
 	}
 	return rp
 }
 
+// ReferenceProcessor detects whether the field is marked as referencer and
+// composes the internal representation of that reference.
 type ReferenceProcessor struct {
+	// DefaultExtractor is used when the extractor is not overridden.
 	DefaultExtractor *jen.Statement
 
-	refs []reference
+	// Receiver is prepended to all field paths.
+	Receiver string
+
+	refs []Reference
 }
 
+// Process stores the reference information of the given field, if any.
 func (rp *ReferenceProcessor) Process(_ *types.Named, f *types.Var, _ string, comment string, formerFields []string) error {
 	markers := comments.ParseMarkers(comment)
 	refTypeValues := markers[ReferenceTypeMarker]
@@ -87,9 +99,8 @@ func (rp *ReferenceProcessor) Process(_ *types.Named, f *types.Var, _ string, co
 	// []string.
 	case *types.Slice:
 		isList = true
-		switch t.Elem().(type) {
 		// []*string
-		case *types.Pointer:
+		if _, ok := t.Elem().(*types.Pointer); ok {
 			isPointer = true
 		}
 	}
@@ -111,11 +122,12 @@ func (rp *ReferenceProcessor) Process(_ *types.Named, f *types.Var, _ string, co
 	if values, ok := markers[ReferenceSelectorFieldNameMarker]; ok {
 		selectorFieldName = values[0]
 	}
-	rp.refs = append(rp.refs, reference{
+	path := append([]string{rp.Receiver}, formerFields...)
+	rp.refs = append(rp.refs, Reference{
 		RemoteType:          getTypeCodeFromPath(refType),
 		RemoteListType:      getTypeCodeFromPath(refType, "List"),
 		Extractor:           extractorPath,
-		GoValueFieldPath:    append(formerFields, f.Name()),
+		GoValueFieldPath:    append(path, f.Name()),
 		GoRefFieldName:      refFieldName,
 		GoSelectorFieldName: selectorFieldName,
 		IsPointer:           isPointer,
@@ -124,7 +136,8 @@ func (rp *ReferenceProcessor) Process(_ *types.Named, f *types.Var, _ string, co
 	return nil
 }
 
-func (rp *ReferenceProcessor) GetReferences() []reference {
+// GetReferences returns all the references accumulated so far from processing.
+func (rp *ReferenceProcessor) GetReferences() []Reference {
 	return rp.refs
 }
 
