@@ -54,44 +54,51 @@ type FieldProcessor interface {
 	Process(n *types.Named, f *types.Var, tag string, comment string, formerFields []string) error
 }
 
-func WithFieldProcessor(fp FieldProcessor) TraverserOption {
-	return func(t *Traverser) {
+func WithFieldProcessor(fp FieldProcessor) TraverseConfigOption {
+	return func(t *TraverseConfig) {
 		t.FieldProcessors = fp
 	}
 }
 
-func WithNamedProcessor(tp NamedProcessor) TraverserOption {
-	return func(t *Traverser) {
+func WithNamedProcessor(tp NamedProcessor) TraverseConfigOption {
+	return func(t *TraverseConfig) {
 		t.NamedProcessors = tp
 	}
 }
 
-type TraverserOption func(*Traverser)
+type TraverseConfigOption func(*TraverseConfig)
 
-func NewTraverser(comments comments.Comments, opts ...TraverserOption) *Traverser {
-	t := &Traverser{
+func NewTraverseConfig(opts ...TraverseConfigOption) *TraverseConfig {
+	tc := &TraverseConfig{
 		NamedProcessors: NamedProcessorChain{},
 		FieldProcessors: FieldProcessorChain{},
-		comments:        comments,
 	}
 	for _, f := range opts {
-		f(t)
+		f(tc)
 	}
-	return t
+	return tc
+}
+
+type TraverseConfig struct {
+	NamedProcessors NamedProcessor
+	FieldProcessors FieldProcessor
+}
+
+func NewTraverser(comments comments.Comments) *Traverser {
+	return &Traverser{
+		comments: comments,
+	}
 }
 
 type Traverser struct {
-	NamedProcessors NamedProcessor
-	FieldProcessors FieldProcessor
-
 	comments comments.Comments
 }
 
 // NOTE(muvaf): We return an error but currently there isn't really anything
 // constructing an error. But we keep that for future type and field processors.
 
-func (t *Traverser) Traverse(n *types.Named, formerFields ...string) error {
-	if err := t.NamedProcessors.Process(n, t.comments.For(n.Obj())); err != nil {
+func (t *Traverser) Traverse(n *types.Named, cfg *TraverseConfig, formerFields ...string) error {
+	if err := cfg.NamedProcessors.Process(n, t.comments.For(n.Obj())); err != nil {
 		return errors.Wrapf(err, "type processors failed to run for type %s", n.Obj().Name())
 	}
 	st, ok := n.Underlying().(*types.Struct)
@@ -101,31 +108,31 @@ func (t *Traverser) Traverse(n *types.Named, formerFields ...string) error {
 	for i := 0; i < st.NumFields(); i++ {
 		field := st.Field(i)
 		tag := st.Tag(i)
-		if err := t.FieldProcessors.Process(n, field, tag, t.comments.For(field), formerFields); err != nil {
+		if err := cfg.FieldProcessors.Process(n, field, tag, t.comments.For(field), formerFields); err != nil {
 			return errors.Wrapf(err, "field processors failed to run for field %s of type %s", field.Name(), n.Obj().Name())
 		}
 		switch ft := field.Type().(type) {
 		case *types.Named:
-			if err := t.Traverse(ft, append(formerFields, field.Name())...); err != nil {
+			if err := t.Traverse(ft, cfg, append(formerFields, field.Name())...); err != nil {
 				return errors.Wrapf(err, "failed to traverse type of field %s", field.Name())
 			}
 		case *types.Pointer:
 			switch elemType := ft.Elem().(type) {
 			case *types.Named:
-				if err := t.Traverse(elemType, append(formerFields, "*"+field.Name())...); err != nil {
+				if err := t.Traverse(elemType, cfg, append(formerFields, "*"+field.Name())...); err != nil {
 					return errors.Wrapf(err, "failed to traverse type of field %s", field.Name())
 				}
 			}
 		case *types.Slice:
 			switch elemType := ft.Elem().(type) {
 			case *types.Named:
-				if err := t.Traverse(elemType, append(formerFields, "[]"+field.Name())...); err != nil {
+				if err := t.Traverse(elemType, cfg, append(formerFields, "[]"+field.Name())...); err != nil {
 					return errors.Wrapf(err, "failed to traverse type of field %s", field.Name())
 				}
 			case *types.Pointer:
 				switch elemElemType := elemType.Elem().(type) {
 				case *types.Named:
-					if err := t.Traverse(elemElemType, append(formerFields, "[]"+"*"+field.Name())...); err != nil {
+					if err := t.Traverse(elemElemType, cfg, append(formerFields, "[]"+"*"+field.Name())...); err != nil {
 						return errors.Wrapf(err, "failed to traverse type of field %s", field.Name())
 					}
 				}

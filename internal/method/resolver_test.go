@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"testing"
 
+	xptypes "github.com/crossplane/crossplane-tools/internal/types"
+
 	"github.com/dave/jennifer/jen"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/tools/go/packages"
@@ -237,7 +239,7 @@ func TestNewResolveReferences(t *testing.T) {
 		t.Error(err)
 	}
 	f := jen.NewFile("v1alpha1")
-	NewResolveReferences(comments.In(pkgs[0]), "mg", "example.org/client", "example.org/reference")(f, pkgs[0].Types.Scope().Lookup("Model"))
+	NewResolveReferences(xptypes.NewTraverser(comments.In(pkgs[0])), "mg", "example.org/client", "example.org/reference")(f, pkgs[0].Types.Scope().Lookup("Model"))
 	if diff := cmp.Diff(generated, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewResolveReferences(): -want, +got\n%s", diff)
 	}

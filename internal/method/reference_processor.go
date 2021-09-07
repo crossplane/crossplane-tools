@@ -25,6 +25,7 @@ import (
 	"github.com/crossplane/crossplane-tools/internal/comments"
 )
 
+// Comment markers used by ReferenceProcessor
 const (
 	ReferenceTypeMarker               = "crossplane:generate:reference:type"
 	ReferenceExtractorMarker          = "crossplane:generate:reference:extractor"
@@ -32,7 +33,9 @@ const (
 	ReferenceSelectorFieldNameMarker  = "crossplane:generate:reference:selectorFieldName"
 )
 
-type Reference struct {
+// reference is the internal representation that has enough information to let
+// us generate the resolver.
+type reference struct {
 	RemoteType *jen.Statement
 	Extractor  *jen.Statement
 
@@ -44,16 +47,27 @@ type Reference struct {
 	IsPointer           bool
 }
 
-func NewReferenceProcessor(defaultExtractor *jen.Statement) *ReferenceProcessor {
-	return &ReferenceProcessor{
-		DefaultExtractor: defaultExtractor,
+// ReferenceProcessorOption is used to configure ReferenceProcessor.
+type ReferenceProcessorOption func(*ReferenceProcessor)
+
+func WithDefaultExtractor(ext *jen.Statement) ReferenceProcessorOption {
+	return func(rp *ReferenceProcessor) {
+		rp.DefaultExtractor = ext
 	}
+}
+
+func NewReferenceProcessor(opts ...ReferenceProcessorOption) *ReferenceProcessor {
+	rp := &ReferenceProcessor{}
+	for _, f := range opts {
+		f(rp)
+	}
+	return rp
 }
 
 type ReferenceProcessor struct {
 	DefaultExtractor *jen.Statement
 
-	refs []Reference
+	refs []reference
 }
 
 func (rp *ReferenceProcessor) Process(_ *types.Named, f *types.Var, _ string, comment string, formerFields []string) error {
@@ -97,13 +111,11 @@ func (rp *ReferenceProcessor) Process(_ *types.Named, f *types.Var, _ string, co
 	if values, ok := markers[ReferenceSelectorFieldNameMarker]; ok {
 		selectorFieldName = values[0]
 	}
-
-	fieldPath := append(formerFields, f.Name())
-	rp.refs = append(rp.refs, Reference{
+	rp.refs = append(rp.refs, reference{
 		RemoteType:          getTypeCodeFromPath(refType),
 		RemoteListType:      getTypeCodeFromPath(refType, "List"),
 		Extractor:           extractorPath,
-		GoValueFieldPath:    fieldPath,
+		GoValueFieldPath:    append(formerFields, f.Name()),
 		GoRefFieldName:      refFieldName,
 		GoSelectorFieldName: selectorFieldName,
 		IsPointer:           isPointer,
@@ -112,7 +124,7 @@ func (rp *ReferenceProcessor) Process(_ *types.Named, f *types.Var, _ string, co
 	return nil
 }
 
-func (rp *ReferenceProcessor) GetReferences() []Reference {
+func (rp *ReferenceProcessor) GetReferences() []reference {
 	return rp.refs
 }
 

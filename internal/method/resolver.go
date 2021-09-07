@@ -21,23 +21,21 @@ import (
 	"go/types"
 	"strings"
 
-	"github.com/dave/jennifer/jen"
-
-	"github.com/crossplane/crossplane-tools/internal/comments"
 	xptypes "github.com/crossplane/crossplane-tools/internal/types"
+
+	"github.com/dave/jennifer/jen"
 )
 
 // NewResolveReferences returns a NewMethod that writes a SetProviderConfigReference
 // method for the supplied Object to the supplied file.
-func NewResolveReferences(comments comments.Comments, receiver, clientPath, referencePkgPath string) New {
+func NewResolveReferences(traverser *xptypes.Traverser, receiver, clientPath, referencePkgPath string) New {
 	return func(f *jen.File, o types.Object) {
 		n, ok := o.Type().(*types.Named)
 		if !ok {
 			return
 		}
-		defaultExtractor := jen.Qual(referencePkgPath, "ExternalName").Call()
-		refProcessor := NewReferenceProcessor(defaultExtractor)
-		if err := xptypes.NewTraverser(comments, xptypes.WithFieldProcessor(refProcessor)).Traverse(n); err != nil {
+		refProcessor := NewReferenceProcessor(WithDefaultExtractor(jen.Qual(referencePkgPath, "ExternalName").Call()))
+		if err := traverser.Traverse(n, xptypes.NewTraverseConfig(xptypes.WithFieldProcessor(refProcessor))); err != nil {
 			panic(fmt.Sprintf("cannot traverse the type tree of %s", n.Obj().Name()))
 		}
 		refs := refProcessor.GetReferences()
@@ -115,7 +113,7 @@ func encapsulate(index int, fields []string, contentFn resolutionCallFn) *jen.St
 	}
 }
 
-func singleResolutionCall(ref Reference, referencePkgPath string) resolutionCallFn {
+func singleResolutionCall(ref reference, referencePkgPath string) resolutionCallFn {
 	return func(fields []string) *jen.Statement {
 		prefixPath := jen.Id(fields[0])
 		for i := 1; i < len(fields)-1; i++ {
@@ -158,7 +156,7 @@ func singleResolutionCall(ref Reference, referencePkgPath string) resolutionCall
 	}
 }
 
-func multiResolutionCall(ref Reference, referencePkgPath string) resolutionCallFn {
+func multiResolutionCall(ref reference, referencePkgPath string) resolutionCallFn {
 	return func(fields []string) *jen.Statement {
 		prefixPath := jen.Id(fields[0])
 		for i := 1; i < len(fields)-1; i++ {

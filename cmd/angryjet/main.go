@@ -29,6 +29,7 @@ import (
 	"github.com/crossplane/crossplane-tools/internal/generate"
 	"github.com/crossplane/crossplane-tools/internal/match"
 	"github.com/crossplane/crossplane-tools/internal/method"
+	"github.com/crossplane/crossplane-tools/internal/types"
 )
 
 const (
@@ -225,11 +226,7 @@ func GenerateReferences(filename, header string, p *packages.Package) error {
 	comm := comments.In(p)
 
 	methods := method.Set{
-		"ResolveReferences": method.NewResolveReferences(
-			comm,
-			receiver,
-			ClientImport,
-			ReferenceImport),
+		"ResolveReferences": method.NewResolveReferences(types.NewTraverser(comm), receiver, ClientImport, ReferenceImport),
 	}
 
 	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
