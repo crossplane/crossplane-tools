@@ -20,8 +20,9 @@ import (
 	"go/types"
 	"strings"
 
-	"github.com/crossplane/crossplane-tools/internal/comments"
 	"github.com/dave/jennifer/jen"
+
+	"github.com/crossplane/crossplane-tools/internal/comments"
 )
 
 const (
@@ -36,9 +37,9 @@ type Reference struct {
 	Extractor  *jen.Statement
 
 	RemoteListType      *jen.Statement
-	GoValueFieldPath    string
-	GoRefFieldPath      string
-	GoSelectorFieldPath string
+	GoValueFieldPath    []string
+	GoRefFieldName      string
+	GoSelectorFieldName string
 	IsList              bool
 	IsPointer           bool
 }
@@ -79,19 +80,32 @@ func (rp *ReferenceProcessor) Process(_ *types.Named, f *types.Var, _ string, co
 		}
 	}
 
-	extractorValues := markers[ReferenceExtractorMarker]
 	extractorPath := rp.DefaultExtractor
-	if len(extractorValues) != 0 {
-		extractorPath = getTypeCodeFromPath(extractorValues[0])
+	if values, ok := markers[ReferenceExtractorMarker]; ok {
+		extractorPath = getFuncCodeFromPath(values[0])
 	}
-	fieldPath := strings.Join(append(formerFields, f.Name()), ".")
+
+	refFieldName := f.Name() + "Ref"
+	if isList {
+		refFieldName = f.Name() + "Refs"
+	}
+	if values, ok := markers[ReferenceReferenceFieldNameMarker]; ok {
+		refFieldName = values[0]
+	}
+
+	selectorFieldName := f.Name() + "Selector"
+	if values, ok := markers[ReferenceSelectorFieldNameMarker]; ok {
+		selectorFieldName = values[0]
+	}
+
+	fieldPath := append(formerFields, f.Name())
 	rp.refs = append(rp.refs, Reference{
 		RemoteType:          getTypeCodeFromPath(refType),
 		RemoteListType:      getTypeCodeFromPath(refType, "List"),
 		Extractor:           extractorPath,
 		GoValueFieldPath:    fieldPath,
-		GoRefFieldPath:      getRefFieldName(markers, fieldPath, isList),
-		GoSelectorFieldPath: getSelectorFieldName(markers, fieldPath),
+		GoRefFieldName:      refFieldName,
+		GoSelectorFieldName: selectorFieldName,
 		IsPointer:           isPointer,
 		IsList:              isList,
 	})
@@ -102,25 +116,6 @@ func (rp *ReferenceProcessor) GetReferences() []Reference {
 	return rp.refs
 }
 
-func getRefFieldName(markers comments.Markers, valueFieldPath string, isList bool) string {
-	if vals, ok := markers[ReferenceReferenceFieldNameMarker]; ok {
-		f := strings.Split(valueFieldPath, ".")
-		return strings.Join(f[:len(f)-1], ".") + "." + vals[0]
-	}
-	if isList {
-		return valueFieldPath + "Refs"
-	}
-	return valueFieldPath + "Ref"
-}
-
-func getSelectorFieldName(markers comments.Markers, valueFieldPath string) string {
-	if vals, ok := markers[ReferenceSelectorFieldNameMarker]; ok {
-		f := strings.Split(valueFieldPath, ".")
-		return strings.Join(f[:len(f)-1], ".") + "." + vals[0]
-	}
-	return valueFieldPath + "Selector"
-}
-
 func getTypeCodeFromPath(path string, nameSuffix ...string) *jen.Statement {
 	words := strings.Split(path, ".")
 	if len(words) == 1 {
@@ -129,4 +124,14 @@ func getTypeCodeFromPath(path string, nameSuffix ...string) *jen.Statement {
 	name := words[len(words)-1] + strings.Join(nameSuffix, "")
 	pkg := strings.TrimSuffix(path, "."+words[len(words)-1])
 	return jen.Op("&").Qual(pkg, name).Values()
+}
+
+func getFuncCodeFromPath(path string) *jen.Statement {
+	words := strings.Split(path, ".")
+	if len(words) == 1 {
+		return jen.Id(path)
+	}
+	name := words[len(words)-1]
+	pkg := strings.TrimSuffix(path, "."+words[len(words)-1])
+	return jen.Qual(pkg, name)
 }

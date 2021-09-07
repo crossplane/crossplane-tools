@@ -48,15 +48,13 @@ func NewResolveReferences(comments comments.Comments, receiver, clientPath, refe
 		hasSingleResolution := false
 		resolverCalls := make(jen.Statement, len(refs))
 		for i, ref := range refs {
-			ref.GoValueFieldPath = receiver + "." + ref.GoValueFieldPath
-			ref.GoRefFieldPath = receiver + "." + ref.GoRefFieldPath
-			ref.GoSelectorFieldPath = receiver + "." + ref.GoSelectorFieldPath
+			ref.GoValueFieldPath = append([]string{receiver}, ref.GoValueFieldPath...)
 			if ref.IsList {
 				hasMultiResolution = true
-				resolverCalls[i] = encapsulate(0, strings.Split(ref.GoValueFieldPath, "."), multiResolutionCall(ref, referencePkgPath)).Line()
+				resolverCalls[i] = encapsulate(0, ref.GoValueFieldPath, multiResolutionCall(ref, referencePkgPath)).Line()
 			} else {
 				hasSingleResolution = true
-				resolverCalls[i] = encapsulate(0, strings.Split(ref.GoValueFieldPath, "."), singleResolutionCall(ref, referencePkgPath)).Line()
+				resolverCalls[i] = encapsulate(0, ref.GoValueFieldPath, singleResolutionCall(ref, referencePkgPath)).Line()
 			}
 		}
 		var initStatements jen.Statement
@@ -64,7 +62,7 @@ func NewResolveReferences(comments comments.Comments, receiver, clientPath, refe
 			initStatements = append(initStatements, jen.Var().Id("rsp").Qual(referencePkgPath, "ResolutionResponse"))
 		}
 		if hasMultiResolution {
-			initStatements = append(initStatements, jen.Var().Id("mrsp").Qual(referencePkgPath, "MultiResolutionResponse"))
+			initStatements = append(initStatements, jen.Line().Var().Id("mrsp").Qual(referencePkgPath, "MultiResolutionResponse"))
 		}
 
 		f.Commentf("ResolveReferences of this %s.", o.Name())
@@ -123,14 +121,9 @@ func singleResolutionCall(ref Reference, referencePkgPath string) resolutionCall
 		for i := 1; i < len(fields)-1; i++ {
 			prefixPath = prefixPath.Dot(fields[i])
 		}
-		// We need to replace the last field with the information from ref because
-		// it might be overriden for selector and ref.
-		valFields := strings.Split(ref.GoValueFieldPath, ".")
-		currentValuePath := prefixPath.Clone().Dot(valFields[len(valFields)-1])
-		refFields := strings.Split(ref.GoRefFieldPath, ".")
-		referenceFieldPath := prefixPath.Clone().Dot(refFields[len(refFields)-1])
-		selectorFields := strings.Split(ref.GoSelectorFieldPath, ".")
-		selectorFieldPath := prefixPath.Clone().Dot(selectorFields[len(selectorFields)-1])
+		currentValuePath := prefixPath.Clone().Dot(fields[len(fields)-1])
+		referenceFieldPath := prefixPath.Clone().Dot(ref.GoRefFieldName)
+		selectorFieldPath := prefixPath.Clone().Dot(ref.GoSelectorFieldName)
 
 		setResolvedValue := currentValuePath.Clone().Op("=").Id("rsp").Dot("ResolvedValue")
 		if ref.IsPointer {
@@ -154,7 +147,7 @@ func singleResolutionCall(ref Reference, referencePkgPath string) resolutionCall
 			),
 			jen.Line(),
 			jen.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Qual("github.com/pkg/errors", "Wrapf").Call(jen.Err(), jen.Lit(ref.GoValueFieldPath))),
+				jen.Return(jen.Qual("github.com/pkg/errors", "Wrap").Call(jen.Err(), jen.Lit(strings.Join(ref.GoValueFieldPath, ".")))),
 			),
 			jen.Line(),
 			setResolvedValue,
@@ -171,12 +164,9 @@ func multiResolutionCall(ref Reference, referencePkgPath string) resolutionCallF
 		for i := 1; i < len(fields)-1; i++ {
 			prefixPath = prefixPath.Dot(fields[i])
 		}
-		valFields := strings.Split(ref.GoValueFieldPath, ".")
-		currentValuePath := prefixPath.Clone().Dot(valFields[len(valFields)-1])
-		refFields := strings.Split(ref.GoRefFieldPath, ".")
-		referenceFieldPath := prefixPath.Clone().Dot(refFields[len(refFields)-1])
-		selectorFields := strings.Split(ref.GoSelectorFieldPath, ".")
-		selectorFieldPath := prefixPath.Clone().Dot(selectorFields[len(selectorFields)-1])
+		currentValuePath := prefixPath.Clone().Dot(fields[len(fields)-1])
+		referenceFieldPath := prefixPath.Clone().Dot(ref.GoRefFieldName)
+		selectorFieldPath := prefixPath.Clone().Dot(ref.GoSelectorFieldName)
 
 		setResolvedValues := currentValuePath.Clone().Op("=").Id("mrsp").Dot("ResolvedValues")
 		if ref.IsPointer {
@@ -201,7 +191,7 @@ func multiResolutionCall(ref Reference, referencePkgPath string) resolutionCallF
 			),
 			jen.Line(),
 			jen.If(jen.Err().Op("!=").Nil()).Block(
-				jen.Return(jen.Qual("github.com/pkg/errors", "Wrapf").Call(jen.Err(), jen.Lit(ref.GoValueFieldPath))),
+				jen.Return(jen.Qual("github.com/pkg/errors", "Wrap").Call(jen.Err(), jen.Lit(strings.Join(ref.GoValueFieldPath, ".")))),
 			),
 			jen.Line(),
 			setResolvedValues,
