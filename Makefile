@@ -44,21 +44,12 @@ cobertura:
 		grep -v zz_generated.deepcopy | \
 		$(GOCOVER_COBERTURA) > $(GO_TEST_OUTPUT)/cobertura-coverage.xml
 
-# Ensure a PR is ready for review.
-reviewable: vendor lint test
-
 # Update the submodules, such as the common build scripts.
 submodules:
 	@git submodule sync
 	@git submodule update --init --recursive
 
-# Ensure branch is clean.
-check-diff: reviewable
-	@$(INFO) checking that branch is clean
-	@test -z "$$(git status --porcelain)" || $(FAIL)
-	@$(OK) branch is clea
-
-.PHONY: cobertura reviewable submodules fallthrough check-diff
+.PHONY: cobertura submodules fallthrough
 
 # Special Targets
 
