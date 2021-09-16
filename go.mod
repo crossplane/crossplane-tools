@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
-	github.com/alecthomas/units v0.0.0-20210208195552-ff826a37aa15 // indirect
+	github.com/alecthomas/units v0.0.0-20210912230133-d1bdfacee922 // indirect
 	github.com/dave/jennifer v1.4.1
 	github.com/google/go-cmp v0.5.6
 	github.com/pkg/errors v0.9.1

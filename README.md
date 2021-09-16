@@ -1,10 +1,10 @@
 # crossplane-tools [![Godoc](https://img.shields.io/badge/godoc-reference-blue.svg)](https://godoc.org/github.com/crossplane/crossplane-tools)
 
-Experimental code generators for [Crossplane] controllers.
+Code generators for [Crossplane] controllers.
 
 ## angryjet
 
-It will detect Go structs that appear to be capable of satisfying
+`angryjet` will detect Go structs that appear to be capable of satisfying
 crossplane-runtime's interfaces (such as [`resource.Managed`]) and automatically
 generate the method set required to satisfy that interface. A struct is
 considered capable of satisfying crossplane-runtime's interfaces based on the
@@ -29,7 +29,7 @@ the top level of your `api/` directory, for example:
 ### Reference Resolvers
 
 In addition to functions that satisfy `resource.Managed`, you can use `angryjet`
-to generate `ResolveReferences` method as well. In order to generate a resolution
+to generate a `ResolveReferences` method as well. In order to generate a resolution
 call for given field, you need to add the following comment marker:
 ```
 // +crossplane:generate:reference:type=<target type>
@@ -66,7 +66,7 @@ code to compile.
 
 ```console
 $ angryjet generate-methodsets --help
-usage: main generate-methodsets [<flags>] [<packages>]
+usage: angryjet generate-methodsets [<flags>] [<packages>]
 
 Generate a Crossplane method sets.
 

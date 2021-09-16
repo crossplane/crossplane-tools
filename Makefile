@@ -26,6 +26,15 @@ GO_SUBDIRS += cmd internal
 GO111MODULE = on
 -include build/makelib/golang.mk
 
+# We want submodules to be set up the first time `make` is run.
+# We manage the build/ folder and its Makefiles as a submodule.
+# The first time `make` is run, the includes of build/*.mk files will
+# all fail, and this target will be run. The next time, the default as defined
+# by the includes will be run instead.
+fallthrough: submodules
+	@echo Initial setup complete. Running make again . . .
+	@make
+
 go.test.unit: $(KUBEBUILDER)
 
 # Generate a coverage report for cobertura applying exclusions on
@@ -35,7 +44,12 @@ cobertura:
 		grep -v zz_generated.deepcopy | \
 		$(GOCOVER_COBERTURA) > $(GO_TEST_OUTPUT)/cobertura-coverage.xml
 
-.PHONY: cobertura reviewable submodules fallthrough check-diff
+# Update the submodules, such as the common build scripts.
+submodules:
+	@git submodule sync
+	@git submodule update --init --recursive
+
+.PHONY: cobertura submodules fallthrough
 
 # Special Targets
 

@@ -52,12 +52,12 @@ func NewResolveReferences(traverser *xptypes.Traverser, receiver, clientPath, re
 		hasSingleResolution := false
 		resolverCalls := make(jen.Statement, len(refs))
 		for i, ref := range refs {
-			if ref.IsList {
+			if ref.IsSlice {
 				hasMultiResolution = true
-				resolverCalls[i] = encapsulate(0, ref.GoValueFieldPath, multiResolutionCall(ref, referencePkgPath)).Line()
+				resolverCalls[i] = encapsulate(0, multiResolutionCall(ref, referencePkgPath), ref.GoValueFieldPath...).Line()
 			} else {
 				hasSingleResolution = true
-				resolverCalls[i] = encapsulate(0, ref.GoValueFieldPath, singleResolutionCall(ref, referencePkgPath)).Line()
+				resolverCalls[i] = encapsulate(0, singleResolutionCall(ref, referencePkgPath), ref.GoValueFieldPath...).Line()
 			}
 		}
 		var initStatements jen.Statement
@@ -69,11 +69,7 @@ func NewResolveReferences(traverser *xptypes.Traverser, receiver, clientPath, re
 		}
 
 		f.Commentf("ResolveReferences of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("ResolveReferences").
-			Params(
-				jen.Id("ctx").Qual("context", "Context"),
-				jen.Id("c").Qual(clientPath, "Reader"),
-			).Error().Block(
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("ResolveReferences").Params(jen.Id("ctx").Qual("context", "Context"), jen.Id("c").Qual(clientPath, "Reader")).Error().Block(
 			jen.Id("r").Op(":=").Qual(referencePkgPath, "NewAPIResolver").Call(jen.Id("c"), jen.Id(receiver)),
 			jen.Line(),
 			&initStatements,
@@ -91,13 +87,13 @@ var cleaner = strings.NewReplacer(
 	"*", "",
 )
 
-type resolutionCallFn func(formerFields []string) *jen.Statement
+type resolutionCallFn func(parentFields ...string) *jen.Statement
 
 // encapsulate goes through the fields and encapsulates the final call with nil
 // guard and/or for loops.
-func encapsulate(index int, fields []string, contentFn resolutionCallFn) *jen.Statement {
+func encapsulate(index int, callFn resolutionCallFn, fields ...string) *jen.Statement {
 	if len(fields) <= index {
-		return contentFn(fields)
+		return callFn(fields...)
 	}
 	field := fields[index]
 	fieldPath := jen.Id(cleaner.Replace(fields[0]))
@@ -107,21 +103,21 @@ func encapsulate(index int, fields []string, contentFn resolutionCallFn) *jen.St
 	switch {
 	case strings.HasPrefix(field, "*"):
 		fields[index] = cleaner.Replace(fields[index])
-		return jen.If(fieldPath.Op("!=").Nil()).Block(encapsulate(index+1, fields, contentFn))
+		return jen.If(fieldPath.Op("!=").Nil()).Block(encapsulate(index+1, callFn, fields...))
 	case strings.HasPrefix(field, "[]"):
 		fields[index] = cleaner.Replace(fields[index]) + fmt.Sprintf("[i%d]", index)
 		return jen.For(
 			jen.Id(fmt.Sprintf("i%d", index)).Op(":=").Lit(0),
 			jen.Id(fmt.Sprintf("i%d", index)).Op("<").Len(fieldPath),
 			jen.Id(fmt.Sprintf("i%d", index)).Op("++"),
-		).Block(encapsulate(index+1, fields, contentFn))
+		).Block(encapsulate(index+1, callFn, fields...))
 	default:
-		return encapsulate(index+1, fields, contentFn)
+		return encapsulate(index+1, callFn, fields...)
 	}
 }
 
 func singleResolutionCall(ref Reference, referencePkgPath string) resolutionCallFn {
-	return func(fields []string) *jen.Statement {
+	return func(fields ...string) *jen.Statement {
 		prefixPath := jen.Id(fields[0])
 		for i := 1; i < len(fields)-1; i++ {
 			prefixPath = prefixPath.Dot(fields[i])
@@ -164,7 +160,7 @@ func singleResolutionCall(ref Reference, referencePkgPath string) resolutionCall
 }
 
 func multiResolutionCall(ref Reference, referencePkgPath string) resolutionCallFn {
-	return func(fields []string) *jen.Statement {
+	return func(fields ...string) *jen.Statement {
 		prefixPath := jen.Id(fields[0])
 		for i := 1; i < len(fields)-1; i++ {
 			prefixPath = prefixPath.Dot(fields[i])

@@ -36,15 +36,33 @@ const (
 // Reference is the internal representation that has enough information to let
 // us generate the resolver.
 type Reference struct {
+	// RemoteType represents the type whose reference we're holding.
 	RemoteType *jen.Statement
-	Extractor  *jen.Statement
 
-	RemoteListType      *jen.Statement
-	GoValueFieldPath    []string
-	GoRefFieldName      string
+	// Extractor is the function call of the function that will take referenced
+	// instance and return a string or []string to be set as value.
+	Extractor *jen.Statement
+
+	// RemoteListType is the list type of the type whose reference we're holding.
+	RemoteListType *jen.Statement
+
+	// GoValueFieldPath is the list of fields that needs to be traveled to access
+	// the current value field. It may include prefixes like [] for array fields,
+	// * for pointer fields or []* for array of pointer fields.
+	GoValueFieldPath []string
+
+	// GoRefFieldName is the name of the field whose type is *xpv1.Reference or
+	// []xpv1.Reference.
+	GoRefFieldName string
+
+	// GoSelectorFieldName is the name of the field whose type is *xpv1.Selector
 	GoSelectorFieldName string
-	IsList              bool
-	IsPointer           bool
+
+	// IsSlice tells whether the current value type is a slice kind.
+	IsSlice bool
+
+	// IsPointer tells whether the current value type is a pointer kind.
+	IsPointer bool
 }
 
 // ReferenceProcessorOption is used to configure ReferenceProcessor.
@@ -82,7 +100,7 @@ type ReferenceProcessor struct {
 }
 
 // Process stores the reference information of the given field, if any.
-func (rp *ReferenceProcessor) Process(_ *types.Named, f *types.Var, _ string, comment string, formerFields []string) error {
+func (rp *ReferenceProcessor) Process(_ *types.Named, f *types.Var, _, comment string, parentFields ...string) error {
 	markers := comments.ParseMarkers(comment)
 	refTypeValues := markers[ReferenceTypeMarker]
 	if len(refTypeValues) == 0 {
@@ -122,7 +140,7 @@ func (rp *ReferenceProcessor) Process(_ *types.Named, f *types.Var, _ string, co
 	if values, ok := markers[ReferenceSelectorFieldNameMarker]; ok {
 		selectorFieldName = values[0]
 	}
-	path := append([]string{rp.Receiver}, formerFields...)
+	path := append([]string{rp.Receiver}, parentFields...)
 	rp.refs = append(rp.refs, Reference{
 		RemoteType:          getTypeCodeFromPath(refType),
 		RemoteListType:      getTypeCodeFromPath(refType, "List"),
@@ -131,7 +149,7 @@ func (rp *ReferenceProcessor) Process(_ *types.Named, f *types.Var, _ string, co
 		GoRefFieldName:      refFieldName,
 		GoSelectorFieldName: selectorFieldName,
 		IsPointer:           isPointer,
-		IsList:              isList,
+		IsSlice:             isList,
 	})
 	return nil
 }
