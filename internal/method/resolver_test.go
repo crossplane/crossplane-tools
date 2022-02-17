@@ -57,6 +57,10 @@ type ModelParameters struct {
 	// +crossplane:generate:reference:type=RouteTable
 	RouteTableIDs []*string
 
+	// +crossplane:generate:reference:type=golang.org/fake/v1alpha1.Configuration
+	// +crossplane:generate:reference:extractor=golang.org/fake/v1alpha1.Configurations()
+	Configurations *Configuration
+
 	UnrelatedField string
 }
 
@@ -69,6 +73,8 @@ type OtherSpec struct {
 	// +crossplane:generate:reference:type=Cluster
 	OtherID string
 }
+
+type Configuration struct {}
 
 type ModelSpec struct {
 	ForProvider       ModelParameters
@@ -220,6 +226,22 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	mg.Spec.ForProvider.RouteTableIDs = reference.ToPtrValues(mrsp.ResolvedValues)
 	mg.Spec.ForProvider.RouteTableIDsRefs = mrsp.ResolvedReferences
 
+	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Configurations),
+		Extract:      Configurations(),
+		Reference:    mg.Spec.ForProvider.ConfigurationsRef,
+		Selector:     mg.Spec.ForProvider.ConfigurationsSelector,
+		To: reference.To{
+			List:    &ConfigurationList{},
+			Managed: &Configuration{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.ForProvider.Configurations")
+	}
+	mg.Spec.ForProvider.Configurations = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.ForProvider.ConfigurationsRef = rsp.ResolvedReference
+
 	return nil
 }
 `
@@ -238,7 +260,7 @@ func TestNewResolveReferences(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	f := jen.NewFile("v1alpha1")
+	f := jen.NewFilePath("golang.org/fake/v1alpha1")
 	NewResolveReferences(xptypes.NewTraverser(comments.In(pkgs[0])), "mg", "example.org/client", "example.org/reference")(f, pkgs[0].Types.Scope().Lookup("Model"))
 	if diff := cmp.Diff(generated, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewResolveReferences(): -want, +got\n%s", diff)

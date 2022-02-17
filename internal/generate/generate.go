@@ -83,7 +83,7 @@ func WriteMethods(p *packages.Package, ms method.Set, file string, wo ...WriteOp
 		fn(opts)
 	}
 
-	f := jen.NewFile(p.Name)
+	f := jen.NewFilePath(p.PkgPath)
 	for path, alias := range opts.ImportAliases {
 		f.ImportAlias(path, alias)
 	}
