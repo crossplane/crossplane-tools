@@ -194,6 +194,23 @@ func (t *Type) SetWriteConnectionSecretToReference(r *runtime.SecretReference) {
 	}
 }
 
+func TestNewSetPublishConnectionDetailsTo(t *testing.T) {
+	want := `package pkg
+
+import runtime "example.org/runtime"
+
+// SetPublishConnectionDetailsTo of this Type.
+func (t *Type) SetPublishConnectionDetailsTo(r *runtime.PublishConnectionDetailsTo) {
+	t.Spec.PublishConnectionDetailsTo = r
+}
+`
+	f := jen.NewFile("pkg")
+	NewSetPublishConnectionDetailsTo("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewSetPublishConnectionDetailsTo(): -want, +got\n%s", diff)
+	}
+}
+
 func TestNewGetWriteConnectionSecretToReference(t *testing.T) {
 	want := `package pkg
 
@@ -208,6 +225,23 @@ func (t *Type) GetWriteConnectionSecretToReference() *runtime.SecretReference {
 	NewGetWriteConnectionSecretToReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewGetWriteConnectionSecretToLocalReference(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewGetPublishConnectionDetailsTo(t *testing.T) {
+	want := `package pkg
+
+import runtime "example.org/runtime"
+
+// GetPublishConnectionDetailsTo of this Type.
+func (t *Type) GetPublishConnectionDetailsTo() *runtime.PublishConnectionDetailsTo {
+	return t.Spec.PublishConnectionDetailsTo
+}
+`
+	f := jen.NewFile("pkg")
+	NewGetPublishConnectionDetailsTo("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewGetPublishConnectionDetailsTo(): -want, +got\n%s", diff)
 	}
 }
 

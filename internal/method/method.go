@@ -188,6 +188,30 @@ func NewGetWriteConnectionSecretToReference(receiver, runtime string) New {
 	}
 }
 
+// NewSetPublishConnectionDetailsTo returns a NewMethod that writes a
+// NewSetPublishConnectionDetailsTo method for the supplied Object to the
+// supplied file.
+func NewSetPublishConnectionDetailsTo(receiver, runtime string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("SetPublishConnectionDetailsTo of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetPublishConnectionDetailsTo").Params(jen.Id("r").Op("*").Qual(runtime, "PublishConnectionDetailsTo")).Block(
+			jen.Id(receiver).Dot(fields.NameSpec).Dot("PublishConnectionDetailsTo").Op("=").Id("r"),
+		)
+	}
+}
+
+// NewGetPublishConnectionDetailsTo returns a NewMethod that writes a
+// GetPublishConnectionDetailsTo method for the supplied Object to the
+// supplied file.
+func NewGetPublishConnectionDetailsTo(receiver, runtime string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("GetPublishConnectionDetailsTo of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetPublishConnectionDetailsTo").Params().Op("*").Qual(runtime, "PublishConnectionDetailsTo").Block(
+			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("PublishConnectionDetailsTo")),
+		)
+	}
+}
+
 // NewLocalSetWriteConnectionSecretToReference returns a NewMethod that writes a
 // SetWriteConnectionSecretToReference method for the supplied Object to the
 // supplied file.
