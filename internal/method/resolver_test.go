@@ -57,11 +57,11 @@ type ModelParameters struct {
 	// +crossplane:generate:reference:type=RouteTable
 	RouteTableIDs []*string
 
-	// +crossplane:generate:reference:type=golang.org/fake/v1alpha1.Configuration
-	// +crossplane:generate:reference:extractor=golang.org/fake/v1alpha1.Configurations()
-	Configurations *Configuration
-
 	UnrelatedField string
+
+	// +crossplane:generate:reference:type=golang.org/fake/v1alpha1.Configuration
+	// +crossplane:generate:reference:extractor=golang.org/fake/v1alpha1.Configuration()
+	CustomConfiguration *Configuration
 }
 
 type NetworkSpec struct {
@@ -73,8 +73,6 @@ type OtherSpec struct {
 	// +crossplane:generate:reference:type=Cluster
 	OtherID string
 }
-
-type Configuration struct {}
 
 type ModelSpec struct {
 	ForProvider       ModelParameters
@@ -227,20 +225,20 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	mg.Spec.ForProvider.RouteTableIDsRefs = mrsp.ResolvedReferences
 
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
-		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Configurations),
-		Extract:      Configurations(),
-		Reference:    mg.Spec.ForProvider.ConfigurationsRef,
-		Selector:     mg.Spec.ForProvider.ConfigurationsSelector,
+		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.CustomConfiguration),
+		Extract:      Configuration(),
+		Reference:    mg.Spec.ForProvider.CustomConfigurationRef,
+		Selector:     mg.Spec.ForProvider.CustomConfigurationSelector,
 		To: reference.To{
 			List:    &ConfigurationList{},
 			Managed: &Configuration{},
 		},
 	})
 	if err != nil {
-		return errors.Wrap(err, "mg.Spec.ForProvider.Configurations")
+		return errors.Wrap(err, "mg.Spec.ForProvider.CustomConfiguration")
 	}
-	mg.Spec.ForProvider.Configurations = reference.ToPtrValue(rsp.ResolvedValue)
-	mg.Spec.ForProvider.ConfigurationsRef = rsp.ResolvedReference
+	mg.Spec.ForProvider.CustomConfiguration = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.ForProvider.CustomConfigurationRef = rsp.ResolvedReference
 
 	return nil
 }

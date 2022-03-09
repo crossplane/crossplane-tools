@@ -45,7 +45,7 @@ func (t *Type) SetConditions(c ...runtime.Condition) {
 	t.Status.SetConditions(c...)
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewSetConditions("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewSetConditions(): -want, +got\n%s", diff)
@@ -62,7 +62,7 @@ func (t *Type) GetCondition(ct runtime.ConditionType) runtime.Condition {
 	return t.Status.GetCondition(ct)
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewGetCondition("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewGetCondition(): -want, +got\n%s", diff)
@@ -79,7 +79,7 @@ func (t *Type) SetResourceReference(r *core.ObjectReference) {
 	t.Spec.ResourceReference = r
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewSetResourceReference("t", "example.org/core")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewSetResourceReference(): -want, +got\n%s", diff)
@@ -96,7 +96,7 @@ func (t *Type) GetResourceReference() *core.ObjectReference {
 	return t.Spec.ResourceReference
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewGetResourceReference("t", "example.org/core")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewGetResourceReference(): -want, +got\n%s", diff)
@@ -113,7 +113,7 @@ func (t *Type) SetProviderConfigReference(r *runtime.Reference) {
 	t.Spec.ProviderConfigReference = r
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewSetProviderConfigReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewSetProviderConfigReference(): -want, +got\n%s", diff)
@@ -130,7 +130,7 @@ func (t *Type) GetProviderConfigReference() *runtime.Reference {
 	return t.Spec.ProviderConfigReference
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewGetProviderConfigReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewGetProviderConfigReference(): -want, +got\n%s", diff)
@@ -150,7 +150,7 @@ func (t *Type) SetProviderReference(r *runtime.Reference) {
 	t.Spec.ProviderReference = r
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewSetProviderReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewSetProviderReference(): -want, +got\n%s", diff)
@@ -170,7 +170,7 @@ func (t *Type) GetProviderReference() *runtime.Reference {
 	return t.Spec.ProviderReference
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewGetProviderReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewGetProviderReference(): -want, +got\n%s", diff)
@@ -187,7 +187,7 @@ func (t *Type) SetWriteConnectionSecretToReference(r *runtime.SecretReference) {
 	t.Spec.WriteConnectionSecretToReference = r
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewSetWriteConnectionSecretToReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewSetWriteConnectionSecretToReference(): -want, +got\n%s", diff)
@@ -204,7 +204,7 @@ func (t *Type) GetWriteConnectionSecretToReference() *runtime.SecretReference {
 	return t.Spec.WriteConnectionSecretToReference
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewGetWriteConnectionSecretToReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewGetWriteConnectionSecretToLocalReference(): -want, +got\n%s", diff)
@@ -221,7 +221,7 @@ func (t *Type) SetWriteConnectionSecretToReference(r *runtime.LocalSecretReferen
 	t.Spec.WriteConnectionSecretToReference = r
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewLocalSetWriteConnectionSecretToReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewSetWriteConnectionSecretToLocalReference(): -want, +got\n%s", diff)
@@ -238,7 +238,7 @@ func (t *Type) GetWriteConnectionSecretToReference() *runtime.LocalSecretReferen
 	return t.Spec.WriteConnectionSecretToReference
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewLocalGetWriteConnectionSecretToReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewGetWriteConnectionSecretToReference(): -want, +got\n%s", diff)
@@ -255,7 +255,7 @@ func (t *Type) SetDeletionPolicy(r runtime.DeletionPolicy) {
 	t.Spec.DeletionPolicy = r
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewSetDeletionPolicy("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewSetDeletionPolicy(): -want, +got\n%s", diff)
@@ -272,7 +272,7 @@ func (t *Type) GetDeletionPolicy() runtime.DeletionPolicy {
 	return t.Spec.DeletionPolicy
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewGetDeletionPolicy("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewGetDeletionPolicy(): -want, +got\n%s", diff)
@@ -287,7 +287,7 @@ func (t *Type) SetUsers(i int64) {
 	t.Status.Users = i
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewSetUsers("t")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewSetUsers(): -want, +got\n%s", diff)
@@ -302,7 +302,7 @@ func (t *Type) GetUsers() int64 {
 	return t.Status.Users
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewGetUsers("t")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewGetUsers(): -want, +got\n%s", diff)
@@ -323,7 +323,7 @@ func (t *Type) GetItems() []resource.Managed {
 	return items
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewManagedGetItems("t", "example.org/resource")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewManagedGetItems(): -want, +got\n%s", diff)
@@ -340,7 +340,7 @@ func (t *Type) SetProviderConfigReference(r runtime.Reference) {
 	t.ProviderConfigReference = r
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewSetRootProviderConfigReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewSetRootProviderConfigReference(): -want, +got\n%s", diff)
@@ -357,7 +357,7 @@ func (t *Type) GetProviderConfigReference() runtime.Reference {
 	return t.ProviderConfigReference
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewGetRootProviderConfigReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewGetRootProviderConfigReference(): -want, +got\n%s", diff)
@@ -374,7 +374,7 @@ func (t *Type) SetResourceReference(r runtime.TypedReference) {
 	t.ResourceReference = r
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewSetRootResourceReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewSetRootResourceReference(): -want, +got\n%s", diff)
@@ -391,7 +391,7 @@ func (t *Type) GetResourceReference() runtime.TypedReference {
 	return t.ResourceReference
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewGetRootResourceReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewGetRootResourceReference(): -want, +got\n%s", diff)
@@ -412,7 +412,7 @@ func (t *Type) GetItems() []resource.ProviderConfigUsage {
 	return items
 }
 `
-	f := jen.NewFile("pkg")
+	f := jen.NewFilePath("pkg")
 	NewProviderConfigUsageGetItems("t", "example.org/resource")(f, MockObject{Named: "Type"})
 	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewProviderConfigUsageGetItems(): -want, +got\n%s", diff)
