@@ -83,7 +83,14 @@ func WriteMethods(p *packages.Package, ms method.Set, file string, wo ...WriteOp
 		fn(opts)
 	}
 
-	f := jen.NewFile(p.Name)
+	// NewFilePath creates a new File object by taking the full package path such as:
+	// 'github.com/org/repo/apis/resource/v1alpha1'
+	// File object created using the function ('NewFile') that takes only the package
+	// name ('v1alpha1') is not sufficient in order to properly handle imports from
+	// the same package and to communicate with the Jennifer tool correctly.
+	// We need to create the File object by using NewFilePath (passing package path)
+	// so that we can communicate correctly with the library (jennifer).
+	f := jen.NewFilePath(p.PkgPath)
 	for path, alias := range opts.ImportAliases {
 		f.ImportAlias(path, alias)
 	}

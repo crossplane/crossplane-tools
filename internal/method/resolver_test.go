@@ -58,6 +58,10 @@ type ModelParameters struct {
 	RouteTableIDs []*string
 
 	UnrelatedField string
+
+	// +crossplane:generate:reference:type=golang.org/fake/v1alpha1.Configuration
+	// +crossplane:generate:reference:extractor=golang.org/fake/v1alpha1.Configuration()
+	CustomConfiguration *Configuration
 }
 
 type NetworkSpec struct {
@@ -220,6 +224,22 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	mg.Spec.ForProvider.RouteTableIDs = reference.ToPtrValues(mrsp.ResolvedValues)
 	mg.Spec.ForProvider.RouteTableIDsRefs = mrsp.ResolvedReferences
 
+	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.CustomConfiguration),
+		Extract:      Configuration(),
+		Reference:    mg.Spec.ForProvider.CustomConfigurationRef,
+		Selector:     mg.Spec.ForProvider.CustomConfigurationSelector,
+		To: reference.To{
+			List:    &ConfigurationList{},
+			Managed: &Configuration{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.ForProvider.CustomConfiguration")
+	}
+	mg.Spec.ForProvider.CustomConfiguration = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.ForProvider.CustomConfigurationRef = rsp.ResolvedReference
+
 	return nil
 }
 `
@@ -238,7 +258,7 @@ func TestNewResolveReferences(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	f := jen.NewFile("v1alpha1")
+	f := jen.NewFilePath("golang.org/fake/v1alpha1")
 	NewResolveReferences(xptypes.NewTraverser(comments.In(pkgs[0])), "mg", "example.org/client", "example.org/reference")(f, pkgs[0].Types.Scope().Lookup("Model"))
 	if diff := cmp.Diff(generated, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewResolveReferences(): -want, +got\n%s", diff)
