@@ -308,7 +308,7 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 func TestNewResolveReferences(t *testing.T) {
 	exported := packagestest.Export(t, packagestest.Modules, []packagestest.Module{{
 		Name: "golang.org/fake",
-		Files: map[string]interface{}{
+		Files: map[string]any{
 			"v1alpha1/model.go": source,
 		},
 	}})

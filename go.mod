@@ -1,6 +1,6 @@
 module github.com/crossplane/crossplane-tools
 
-go 1.17
+go 1.18
 
 require (
 	github.com/dave/jennifer v1.4.1
