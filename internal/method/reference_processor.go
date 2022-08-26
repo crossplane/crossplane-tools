@@ -181,6 +181,13 @@ func getTypeCodeFromPath(path string, nameSuffix ...string) *jen.Statement {
 
 func getFuncCodeFromPath(path string) (*jen.Statement, error) {
 	parts := regexFunctionCall.FindStringSubmatch(path)
+	// we have a total of four groups in the regular expression so if
+	// we do not have four parts, then we cannot handle the reference expression
+	// Examples paths are:
+	// github.com/upbound/upjet/pkg/resource.ExtractParamPath("a.b.c",true)
+	// ExtractParamPath("a.b.c",true)
+	// ExtractParamPath("a", false)
+	// ExtractParamPath()
 	if len(parts) != 4 {
 		return nil, errors.Errorf("path %q is not a valid function code", path)
 	}
