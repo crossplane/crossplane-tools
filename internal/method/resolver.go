@@ -21,6 +21,8 @@ import (
 	"go/types"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	xptypes "github.com/crossplane/crossplane-tools/internal/types"
 
 	"github.com/dave/jennifer/jen"
@@ -42,7 +44,7 @@ func NewResolveReferences(traverser *xptypes.Traverser, receiver, clientPath, re
 			Named: xptypes.NamedProcessorChain{},
 		}
 		if err := traverser.Traverse(n, cfg); err != nil {
-			panic(fmt.Sprintf("cannot traverse the type tree of %s", n.Obj().Name()))
+			panic(errors.Wrapf(err, "cannot traverse the type tree of %s", n.Obj().Name()))
 		}
 		refs := refProcessor.GetReferences()
 		if len(refs) == 0 {

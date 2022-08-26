@@ -18,9 +18,11 @@ package method
 
 import (
 	"go/types"
+	"regexp"
 	"strings"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/pkg/errors"
 
 	"github.com/crossplane/crossplane-tools/internal/comments"
 )
@@ -31,6 +33,10 @@ const (
 	ReferenceExtractorMarker          = "crossplane:generate:reference:extractor"
 	ReferenceReferenceFieldNameMarker = "crossplane:generate:reference:refFieldName"
 	ReferenceSelectorFieldNameMarker  = "crossplane:generate:reference:selectorFieldName"
+)
+
+var (
+	regexFunctionCall = regexp.MustCompile(`((.+)\.)?([^.]+\(.*\))`)
 )
 
 // Reference is the internal representation that has enough information to let
@@ -125,7 +131,11 @@ func (rp *ReferenceProcessor) Process(_ *types.Named, f *types.Var, _, comment s
 
 	extractorPath := rp.DefaultExtractor
 	if values, ok := markers[ReferenceExtractorMarker]; ok {
-		extractorPath = getFuncCodeFromPath(values[0])
+		var err error
+		extractorPath, err = getFuncCodeFromPath(values[0])
+		if err != nil {
+			return errors.Wrapf(err, "cannot get extractor function")
+		}
 	}
 
 	refFieldName := f.Name() + "Ref"
@@ -169,12 +179,20 @@ func getTypeCodeFromPath(path string, nameSuffix ...string) *jen.Statement {
 	return jen.Op("&").Qual(pkg, name).Values()
 }
 
-func getFuncCodeFromPath(path string) *jen.Statement {
-	words := strings.Split(path, ".")
-	if len(words) == 1 {
-		return jen.Id(path)
+func getFuncCodeFromPath(path string) (*jen.Statement, error) {
+	parts := regexFunctionCall.FindStringSubmatch(path)
+	// we have a total of four groups in the regular expression so if
+	// we do not have four parts, then we cannot handle the reference expression
+	// Examples paths are:
+	// github.com/upbound/upjet/pkg/resource.ExtractParamPath("a.b.c",true)
+	// ExtractParamPath("a.b.c",true)
+	// ExtractParamPath("a", false)
+	// ExtractParamPath()
+	if len(parts) != 4 {
+		return nil, errors.Errorf("path %q is not a valid function code", path)
 	}
-	name := words[len(words)-1]
-	pkg := strings.TrimSuffix(path, "."+words[len(words)-1])
-	return jen.Qual(pkg, name)
+	if len(parts[1]) == 0 {
+		return jen.Id(parts[3]), nil
+	}
+	return jen.Qual(parts[2], parts[3]), nil
 }

@@ -45,6 +45,18 @@ type ModelParameters struct {
 	// +crossplane:generate:reference:extractor=github.com/crossplane/provider-aws/apis/identity/v1beta1.IAMRoleARN()
 	IAMRoleARN *string
 
+	// +crossplane:generate:reference:type=github.com/crossplane/provider-aws/apis/identity/v1beta1.IAM
+	// +crossplane:generate:reference:extractor=github.com/crossplane/provider-aws/apis/identity/v1beta1.IAMRoleARN("a.b.c")
+	NestedTargetWithPath *string
+
+	// +crossplane:generate:reference:type=github.com/crossplane/provider-aws/apis/identity/v1beta1.IAM
+	// +crossplane:generate:reference:extractor=IAMRoleARN("a.b.c")
+	NestedTargetNoPath *string
+
+	// +crossplane:generate:reference:type=github.com/crossplane/provider-aws/apis/identity/v1beta1.IAM
+	// +crossplane:generate:reference:extractor=IAMRoleARN()
+	NoArgNoPath *string
+
 	Network *NetworkSpec
 
 	OtherSetting []OtherSpec
@@ -156,6 +168,54 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	mg.Spec.ForProvider.IAMRoleARN = reference.ToPtrValue(rsp.ResolvedValue)
 	mg.Spec.ForProvider.IAMRoleARNRef = rsp.ResolvedReference
 
+	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.NestedTargetWithPath),
+		Extract:      v1beta1.IAMRoleARN("a.b.c"),
+		Reference:    mg.Spec.ForProvider.NestedTargetWithPathRef,
+		Selector:     mg.Spec.ForProvider.NestedTargetWithPathSelector,
+		To: reference.To{
+			List:    &v1beta1.IAMList{},
+			Managed: &v1beta1.IAM{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.ForProvider.NestedTargetWithPath")
+	}
+	mg.Spec.ForProvider.NestedTargetWithPath = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.ForProvider.NestedTargetWithPathRef = rsp.ResolvedReference
+
+	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.NestedTargetNoPath),
+		Extract:      IAMRoleARN("a.b.c"),
+		Reference:    mg.Spec.ForProvider.NestedTargetNoPathRef,
+		Selector:     mg.Spec.ForProvider.NestedTargetNoPathSelector,
+		To: reference.To{
+			List:    &v1beta1.IAMList{},
+			Managed: &v1beta1.IAM{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.ForProvider.NestedTargetNoPath")
+	}
+	mg.Spec.ForProvider.NestedTargetNoPath = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.ForProvider.NestedTargetNoPathRef = rsp.ResolvedReference
+
+	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.NoArgNoPath),
+		Extract:      IAMRoleARN(),
+		Reference:    mg.Spec.ForProvider.NoArgNoPathRef,
+		Selector:     mg.Spec.ForProvider.NoArgNoPathSelector,
+		To: reference.To{
+			List:    &v1beta1.IAMList{},
+			Managed: &v1beta1.IAM{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.ForProvider.NoArgNoPath")
+	}
+	mg.Spec.ForProvider.NoArgNoPath = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.ForProvider.NoArgNoPathRef = rsp.ResolvedReference
+
 	if mg.Spec.ForProvider.Network != nil {
 		rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 			CurrentValue: mg.Spec.ForProvider.Network.VPCID,
@@ -248,7 +308,7 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 func TestNewResolveReferences(t *testing.T) {
 	exported := packagestest.Export(t, packagestest.Modules, []packagestest.Module{{
 		Name: "golang.org/fake",
-		Files: map[string]interface{}{
+		Files: map[string]any{
 			"v1alpha1/model.go": source,
 		},
 	}})
