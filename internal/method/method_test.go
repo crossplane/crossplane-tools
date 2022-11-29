@@ -279,6 +279,40 @@ func (t *Type) GetWriteConnectionSecretToReference() *runtime.LocalSecretReferen
 	}
 }
 
+func TestNewSetManagementPolicy(t *testing.T) {
+	want := `package pkg
+
+import runtime "example.org/runtime"
+
+// SetManagementPolicy of this Type.
+func (t *Type) SetManagementPolicy(r runtime.ManagementPolicy) {
+	t.Spec.ManagementPolicy = r
+}
+`
+	f := jen.NewFilePath("pkg")
+	NewSetManagementPolicy("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewSetManagementPolicy(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewGetManagementPolicy(t *testing.T) {
+	want := `package pkg
+
+import runtime "example.org/runtime"
+
+// GetManagementPolicy of this Type.
+func (t *Type) GetManagementPolicy() runtime.ManagementPolicy {
+	return t.Spec.ManagementPolicy
+}
+`
+	f := jen.NewFilePath("pkg")
+	NewGetManagementPolicy("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewGetManagementPolicy(): -want, +got\n%s", diff)
+	}
+}
+
 func TestNewSetDeletionPolicy(t *testing.T) {
 	want := `package pkg
 
