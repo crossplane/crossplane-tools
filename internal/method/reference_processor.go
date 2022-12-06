@@ -69,6 +69,9 @@ type Reference struct {
 
 	// IsPointer tells whether the current value type is a pointer kind.
 	IsPointer bool
+
+	// IsFloatPointer tells whether the current value pointer is of type float64
+	IsFloatPointer bool
 }
 
 // ReferenceProcessorOption is used to configure ReferenceProcessor.
@@ -115,18 +118,26 @@ func (rp *ReferenceProcessor) Process(_ *types.Named, f *types.Var, _, comment s
 	refType := refTypeValues[0]
 	isPointer := false
 	isList := false
+	isFloatPointer := false
+	refFieldName := f.Name() + "Ref"
+
 	// We don't support *[]string.
 	switch t := f.Type().(type) {
-	// *string
+	// *string|*float64
 	case *types.Pointer:
 		isPointer = true
-	// []string.
+	// []string|[]float64.
 	case *types.Slice:
 		isList = true
-		// []*string
+		refFieldName = f.Name() + "Refs"
+		// []*string|[]*float64
 		if _, ok := t.Elem().(*types.Pointer); ok {
 			isPointer = true
 		}
+	}
+
+	if strings.HasSuffix(f.Type().String(), "*float64") {
+		isFloatPointer = true
 	}
 
 	extractorPath := rp.DefaultExtractor
@@ -138,10 +149,6 @@ func (rp *ReferenceProcessor) Process(_ *types.Named, f *types.Var, _, comment s
 		}
 	}
 
-	refFieldName := f.Name() + "Ref"
-	if isList {
-		refFieldName = f.Name() + "Refs"
-	}
 	if values, ok := markers[ReferenceReferenceFieldNameMarker]; ok {
 		refFieldName = values[0]
 	}
@@ -160,6 +167,7 @@ func (rp *ReferenceProcessor) Process(_ *types.Named, f *types.Var, _, comment s
 		GoSelectorFieldName: selectorFieldName,
 		IsPointer:           isPointer,
 		IsSlice:             isList,
+		IsFloatPointer:      isFloatPointer,
 	})
 	return nil
 }
