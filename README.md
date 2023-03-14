@@ -8,7 +8,7 @@ Code generators for [Crossplane] controllers.
 crossplane-runtime's interfaces (such as [`resource.Managed`]) and automatically
 generate the method set required to satisfy that interface. A struct is
 considered capable of satisfying crossplane-runtime's interfaces based on the
-heuristics described in the [Crossplane Services Developer Guide], for example a
+heuristics described in the [Provider Development Guide], for example a
 managed resource must:
 
 * Embed a [`ResourceStatus`] struct in their `Status` struct.
@@ -94,4 +94,4 @@ Args:
 [`resource.Managed`]: https://godoc.org/github.com/crossplane/crossplane-runtime/pkg/resource#Managed
 [`ResourceSpec`]: https://godoc.org/github.com/crossplane/crossplane-runtime/apis/common/v1#ResourceSpec
 [`ResourceStatus`]: https://godoc.org/github.com/crossplane/crossplane-runtime/apis/common/v1#ResourceStatus
-[Crossplane Services Developer Guide]: https://crossplane.io/docs/v0.3/services-developer-guide.html#defining-resource-kinds
+[Provider Development Guide]: https://github.com/crossplane/crossplane/blob/master/contributing/guide-provider-development.md#defining-resource-kinds
