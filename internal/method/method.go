@@ -236,6 +236,28 @@ func NewLocalGetWriteConnectionSecretToReference(receiver, runtime string) New {
 	}
 }
 
+// NewSetManagementPolicy returns a NewMethod that writes a SetManagementPolicy
+// method for the supplied Object to the supplied file.
+func NewSetManagementPolicy(receiver, runtime string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("SetManagementPolicy of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetManagementPolicy").Params(jen.Id("r").Qual(runtime, "ManagementPolicy")).Block(
+			jen.Id(receiver).Dot(fields.NameSpec).Dot("ManagementPolicy").Op("=").Id("r"),
+		)
+	}
+}
+
+// NewGetManagementPolicy returns a NewMethod that writes a GetManagementPolicy
+// method for the supplied Object to the supplied file.
+func NewGetManagementPolicy(receiver, runtime string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("GetManagementPolicy of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetManagementPolicy").Params().Qual(runtime, "ManagementPolicy").Block(
+			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("ManagementPolicy")),
+		)
+	}
+}
+
 // NewSetDeletionPolicy returns a NewMethod that writes a SetDeletionPolicy
 // method for the supplied Object to the supplied file.
 func NewSetDeletionPolicy(receiver, runtime string) New {

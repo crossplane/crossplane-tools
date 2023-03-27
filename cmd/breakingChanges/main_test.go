@@ -55,7 +55,8 @@ func TestBreakingChanges(t *testing.T) {
 						},
 						"spec": {
 							Properties: map[string]v1.JSONSchemaProps{
-								"deletionPolicy": {},
+								"managementPolicy": {},
+								"deletionPolicy":   {},
 								"forProvider": {
 									Properties: map[string]v1.JSONSchemaProps{
 										"description":             {},
@@ -124,7 +125,8 @@ func TestBreakingChanges(t *testing.T) {
 						},
 						"spec": {
 							Properties: map[string]v1.JSONSchemaProps{
-								"deletionPolicy": {},
+								"managementPolicy": {},
+								"deletionPolicy":   {},
 								"forProvider": {
 									Properties: map[string]v1.JSONSchemaProps{
 										"description":             {},
@@ -184,7 +186,8 @@ func TestBreakingChanges(t *testing.T) {
 					Properties: map[string]v1.JSONSchemaProps{
 						"spec": {
 							Properties: map[string]v1.JSONSchemaProps{
-								"deletionPolicy": {},
+								"deletionPolicy":   {},
+								"managementPolicy": {},
 								"forProvider": {
 									Properties: map[string]v1.JSONSchemaProps{
 										"description":             {},
@@ -206,7 +209,8 @@ func TestBreakingChanges(t *testing.T) {
 					Properties: map[string]v1.JSONSchemaProps{
 						"spec": {
 							Properties: map[string]v1.JSONSchemaProps{
-								"deletionPolicy": {},
+								"deletionPolicy":   {},
+								"managementPolicy": {},
 								"forProvider": {
 									Properties: map[string]v1.JSONSchemaProps{
 										"enableInboundForwarding": {},
@@ -248,7 +252,8 @@ func TestBreakingChanges(t *testing.T) {
 						},
 						"spec": {
 							Properties: map[string]v1.JSONSchemaProps{
-								"deletionPolicy": {},
+								"managementPolicy": {},
+								"deletionPolicy":   {},
 							},
 						},
 					},
@@ -269,7 +274,8 @@ func TestBreakingChanges(t *testing.T) {
 						},
 						"spec": {
 							Properties: map[string]v1.JSONSchemaProps{
-								"deletionPolicy": {},
+								"managementPolicy": {},
+								"deletionPolicy":   {},
 							},
 						},
 					},
