@@ -129,9 +129,15 @@ func singleResolutionCall(ref Reference, referencePkgPath string) resolutionCall
 		selectorFieldPath := prefixPath.Clone().Dot(ref.GoSelectorFieldName)
 
 		setResolvedValue := currentValuePath.Clone().Op("=").Id("rsp").Dot("ResolvedValue")
+		toPointerFunction := "ToPtrValue"
+		fromPointerFunction := "FromPtrValue"
+		if ref.IsFloatPointer {
+			toPointerFunction = "ToFloatPtrValue"
+			fromPointerFunction = "FromFloatPtrValue"
+		}
 		if ref.IsPointer {
-			setResolvedValue = currentValuePath.Clone().Op("=").Qual(referencePkgPath, "ToPtrValue").Call(jen.Id("rsp").Dot("ResolvedValue"))
-			currentValuePath = jen.Qual(referencePkgPath, "FromPtrValue").Call(currentValuePath)
+			setResolvedValue = currentValuePath.Clone().Op("=").Qual(referencePkgPath, toPointerFunction).Call(jen.Id("rsp").Dot("ResolvedValue"))
+			currentValuePath = jen.Qual(referencePkgPath, fromPointerFunction).Call(currentValuePath)
 		}
 		return &jen.Statement{
 			jen.List(jen.Id("rsp"), jen.Err()).Op("=").Id("r").Dot("Resolve").Call(
@@ -172,9 +178,16 @@ func multiResolutionCall(ref Reference, referencePkgPath string) resolutionCallF
 		selectorFieldPath := prefixPath.Clone().Dot(ref.GoSelectorFieldName)
 
 		setResolvedValues := currentValuePath.Clone().Op("=").Id("mrsp").Dot("ResolvedValues")
+		toPointersFunction := "ToPtrValues"
+		fromPointersFunction := "FromPtrValues"
+		if ref.IsFloatPointer {
+			toPointersFunction = "ToFloatPtrValues"
+			fromPointersFunction = "FromFloatPtrValues"
+		}
+
 		if ref.IsPointer {
-			setResolvedValues = currentValuePath.Clone().Op("=").Qual(referencePkgPath, "ToPtrValues").Call(jen.Id("mrsp").Dot("ResolvedValues"))
-			currentValuePath = jen.Qual(referencePkgPath, "FromPtrValues").Call(currentValuePath)
+			setResolvedValues = currentValuePath.Clone().Op("=").Qual(referencePkgPath, toPointersFunction).Call(jen.Id("mrsp").Dot("ResolvedValues"))
+			currentValuePath = jen.Qual(referencePkgPath, fromPointersFunction).Call(currentValuePath)
 		}
 
 		return &jen.Statement{
