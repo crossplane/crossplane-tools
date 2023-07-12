@@ -236,24 +236,24 @@ func NewLocalGetWriteConnectionSecretToReference(receiver, runtime string) New {
 	}
 }
 
-// NewSetManagementPolicy returns a NewMethod that writes a SetManagementPolicy
+// NewSetManagementPolicies returns a NewMethod that writes a SetManagementPolicies
 // method for the supplied Object to the supplied file.
-func NewSetManagementPolicy(receiver, runtime string) New {
+func NewSetManagementPolicies(receiver, runtime string) New {
 	return func(f *jen.File, o types.Object) {
-		f.Commentf("SetManagementPolicy of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetManagementPolicy").Params(jen.Id("r").Qual(runtime, "ManagementPolicy")).Block(
-			jen.Id(receiver).Dot(fields.NameSpec).Dot("ManagementPolicy").Op("=").Id("r"),
+		f.Commentf("SetManagementPolicies of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetManagementPolicies").Params(jen.Id("r").Qual(runtime, "ManagementPolicies")).Block(
+			jen.Id(receiver).Dot(fields.NameSpec).Dot("ManagementPolicies").Op("=").Id("r"),
 		)
 	}
 }
 
-// NewGetManagementPolicy returns a NewMethod that writes a GetManagementPolicy
+// NewGetManagementPolicies returns a NewMethod that writes a GetManagementPolicies
 // method for the supplied Object to the supplied file.
-func NewGetManagementPolicy(receiver, runtime string) New {
+func NewGetManagementPolicies(receiver, runtime string) New {
 	return func(f *jen.File, o types.Object) {
-		f.Commentf("GetManagementPolicy of this %s.", o.Name())
-		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetManagementPolicy").Params().Qual(runtime, "ManagementPolicy").Block(
-			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("ManagementPolicy")),
+		f.Commentf("GetManagementPolicies of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetManagementPolicies").Params().Qual(runtime, "ManagementPolicies").Block(
+			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("ManagementPolicies")),
 		)
 	}
 }
