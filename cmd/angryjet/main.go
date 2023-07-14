@@ -114,8 +114,8 @@ func GenerateManaged(filename, header string, p *packages.Package) error {
 		"GetWriteConnectionSecretToReference": method.NewGetWriteConnectionSecretToReference(receiver, RuntimeImport),
 		"SetPublishConnectionDetailsTo":       method.NewSetPublishConnectionDetailsTo(receiver, RuntimeImport),
 		"GetPublishConnectionDetailsTo":       method.NewGetPublishConnectionDetailsTo(receiver, RuntimeImport),
-		"SetManagementPolicy":                 method.NewSetManagementPolicy(receiver, RuntimeImport),
-		"GetManagementPolicy":                 method.NewGetManagementPolicy(receiver, RuntimeImport),
+		"SetManagementPolicies":               method.NewSetManagementPolicies(receiver, RuntimeImport),
+		"GetManagementPolicies":               method.NewGetManagementPolicies(receiver, RuntimeImport),
 		"SetDeletionPolicy":                   method.NewSetDeletionPolicy(receiver, RuntimeImport),
 		"GetDeletionPolicy":                   method.NewGetDeletionPolicy(receiver, RuntimeImport),
 	}
