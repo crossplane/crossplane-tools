@@ -149,17 +149,6 @@ spec:
                 required:
                 - name
                 type: object
-              providerRef:
-                description: 'ProviderReference specifies the provider that will be
-                  used to create, observe, update, and delete this managed resource.
-                  Deprecated: Please use ProviderConfigReference, i.e. `providerConfigRef`'
-                properties:
-                  name:
-                    description: Name of the referenced object.
-                    type: string
-                required:
-                - name
-                type: object
               publishConnectionDetailsTo:
                 description: PublishConnectionDetailsTo specifies the connection secret
                   config which contains a name, metadata and a reference to secret
