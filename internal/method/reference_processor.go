@@ -72,6 +72,9 @@ type Reference struct {
 
 	// IsFloatPointer tells whether the current value pointer is of type float64
 	IsFloatPointer bool
+
+	// IsIntPointer tells whether the current value pointer is of type int
+	IsIntPointer bool
 }
 
 // ReferenceProcessorOption is used to configure ReferenceProcessor.
@@ -118,7 +121,6 @@ func (rp *ReferenceProcessor) Process(_ *types.Named, f *types.Var, _, comment s
 	refType := refTypeValues[0]
 	isPointer := false
 	isList := false
-	isFloatPointer := false
 	refFieldName := f.Name() + "Ref"
 
 	// We don't support *[]string.
@@ -136,9 +138,9 @@ func (rp *ReferenceProcessor) Process(_ *types.Named, f *types.Var, _, comment s
 		}
 	}
 
-	if strings.HasSuffix(f.Type().String(), "*float64") {
-		isFloatPointer = true
-	}
+	isFloatPointer := strings.HasSuffix(f.Type().String(), "*float64")
+
+	isIntPointer := strings.HasSuffix(f.Type().String(), "*int64")
 
 	extractorPath := rp.DefaultExtractor
 	if values, ok := markers[ReferenceExtractorMarker]; ok {
@@ -168,6 +170,7 @@ func (rp *ReferenceProcessor) Process(_ *types.Named, f *types.Var, _, comment s
 		IsPointer:           isPointer,
 		IsSlice:             isList,
 		IsFloatPointer:      isFloatPointer,
+		IsIntPointer:        isIntPointer,
 	})
 	return nil
 }
