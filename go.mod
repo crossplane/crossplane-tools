@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/dave/jennifer v1.4.1
-	github.com/google/go-cmp v0.5.6
+	github.com/google/go-cmp v0.6.0
 	github.com/pkg/errors v0.9.1
 	golang.org/x/tools v0.6.0
 	k8s.io/apiextensions-apiserver v0.25.0
