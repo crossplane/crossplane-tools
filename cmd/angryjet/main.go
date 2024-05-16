@@ -21,9 +21,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/alecthomas/kingpin/v2"
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
-	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/crossplane/crossplane-tools/internal/comments"
 	"github.com/crossplane/crossplane-tools/internal/generate"
