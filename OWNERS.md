@@ -11,6 +11,7 @@ guidelines and responsibilities for the steering committee and maintainers.
 ## Maintainers
 
 * Sergen Yalcin <sergen@upbound.io> ([sergenyalcin](https://github.com/sergenyalcin))
+* Alper Rifat Ulucinar <alper@upbound.io> ([ulucinar](https://github.com/ulucinar))
 * Nic Cope <negz@upbound.io> ([negz](https://github.com/negz))
 
 ## Emeritus Maintainers
