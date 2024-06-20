@@ -43,7 +43,7 @@ func NewResolveReferences(traverser *xptypes.Traverser, receiver, clientPath, re
 			Field: refProcessor,
 			Named: xptypes.NamedProcessorChain{},
 		}
-		if err := traverser.Traverse(n, cfg); err != nil {
+		if err := traverser.Traverse(n, cfg, []*types.Named{}); err != nil {
 			panic(errors.Wrapf(err, "cannot traverse the type tree of %s", n.Obj().Name()))
 		}
 		refs := refProcessor.GetReferences()

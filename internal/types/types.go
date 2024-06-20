@@ -86,8 +86,14 @@ type Traverser struct {
 // constructing an error. But we keep that for future type and field processors.
 
 // Traverse traverser given type recursively and runs given processors.
-func (t *Traverser) Traverse(n *types.Named, cfg *ProcessorConfig, parentFields ...string) error { // nolint:gocyclo
+func (t *Traverser) Traverse(n *types.Named, cfg *ProcessorConfig, visited []*types.Named, parentFields ...string) error { // nolint:gocyclo
 	// NOTE(muvaf): gocyclo is disabled due to repeated type checks.
+	for _, v := range visited {
+		if n == v {
+			return nil
+		}
+	}
+	visited = append(visited, n)
 	if err := cfg.Named.Process(n, t.comments.For(n.Obj())); err != nil {
 		return errors.Wrapf(err, "type processors failed to run for type %s", n.Obj().Name())
 	}
@@ -103,24 +109,24 @@ func (t *Traverser) Traverse(n *types.Named, cfg *ProcessorConfig, parentFields 
 		}
 		switch ft := field.Type().(type) {
 		case *types.Named:
-			if err := t.Traverse(ft, cfg, append(parentFields, field.Name())...); err != nil {
+			if err := t.Traverse(ft, cfg, visited, append(parentFields, field.Name())...); err != nil {
 				return errors.Wrapf(err, "failed to traverse type of field %s", field.Name())
 			}
 		case *types.Pointer:
 			if elemType, ok := ft.Elem().(*types.Named); ok {
-				if err := t.Traverse(elemType, cfg, append(parentFields, "*"+field.Name())...); err != nil {
+				if err := t.Traverse(elemType, cfg, visited, append(parentFields, "*"+field.Name())...); err != nil {
 					return errors.Wrapf(err, "failed to traverse type of field %s", field.Name())
 				}
 			}
 		case *types.Slice:
 			switch elemType := ft.Elem().(type) {
 			case *types.Named:
-				if err := t.Traverse(elemType, cfg, append(parentFields, "[]"+field.Name())...); err != nil {
+				if err := t.Traverse(elemType, cfg, visited, append(parentFields, "[]"+field.Name())...); err != nil {
 					return errors.Wrapf(err, "failed to traverse type of field %s", field.Name())
 				}
 			case *types.Pointer:
 				if elemElemType, ok := elemType.Elem().(*types.Named); ok {
-					if err := t.Traverse(elemElemType, cfg, append(parentFields, "[]"+"*"+field.Name())...); err != nil {
+					if err := t.Traverse(elemElemType, cfg, visited, append(parentFields, "[]"+"*"+field.Name())...); err != nil {
 						return errors.Wrapf(err, "failed to traverse type of field %s", field.Name())
 					}
 				}
