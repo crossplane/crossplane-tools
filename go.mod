@@ -1,13 +1,15 @@
 module github.com/crossplane/crossplane-tools
 
-go 1.18
+go 1.22.0
+
+toolchain go1.23.4
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/dave/jennifer v1.7.0
 	github.com/google/go-cmp v0.6.0
 	github.com/pkg/errors v0.9.1
-	golang.org/x/tools v0.6.0
+	golang.org/x/tools v0.29.0
 	k8s.io/apiextensions-apiserver v0.25.0
 	k8s.io/apimachinery v0.25.0
 )
@@ -21,10 +23,11 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
-	golang.org/x/mod v0.8.0 // indirect
-	golang.org/x/net v0.23.0 // indirect
-	golang.org/x/sys v0.18.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/mod v0.22.0 // indirect
+	golang.org/x/net v0.34.0 // indirect
+	golang.org/x/sync v0.10.0 // indirect
+	golang.org/x/sys v0.29.0 // indirect
+	golang.org/x/text v0.21.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	k8s.io/klog/v2 v2.70.1 // indirect
