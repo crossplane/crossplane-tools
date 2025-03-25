@@ -17,11 +17,10 @@ limitations under the License.
 package main
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
-	"github.com/alecthomas/kingpin/v2"
+	kingpin "github.com/alecthomas/kingpin/v2"
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
 
@@ -50,6 +49,9 @@ const (
 	ClientAlias  = "client"
 	ClientImport = "sigs.k8s.io/controller-runtime/pkg/client"
 
+	HelperAlias  = "helper"
+	HelperImport = "github.com/crossplane/crossplane-tools/pkg/helpers"
+
 	RuntimeAlias  = "xpv1"
 	RuntimeImport = "github.com/crossplane/crossplane-runtime/apis/common/v1"
 
@@ -58,6 +60,9 @@ const (
 
 	ReferenceAlias  = "reference"
 	ReferenceImport = "github.com/crossplane/crossplane-runtime/pkg/reference"
+
+	PtrAlias  = "ptr"
+	PtrImport = "k8s.io/utils/ptr"
 )
 
 func main() {
@@ -81,7 +86,7 @@ func main() {
 
 	header := ""
 	if *headerFile != "" {
-		h, err := ioutil.ReadFile(*headerFile)
+		h, err := os.ReadFile(*headerFile)
 		kingpin.FatalIfError(err, "cannot read header file %s", *headerFile)
 		header = string(h)
 	}
@@ -228,14 +233,16 @@ func GenerateReferences(filename, header string, p *packages.Package) error {
 	comm := comments.In(p)
 
 	methods := method.Set{
-		"ResolveReferences": method.NewResolveReferences(types.NewTraverser(comm), receiver, ClientImport, ReferenceImport),
+		"ResolveReferences": method.NewResolveReferences(types.NewTraverser(comm), receiver, ClientImport, ReferenceImport, HelperImport, PtrImport),
 	}
 
 	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
 		generate.WithHeaders(header),
 		generate.WithImportAliases(map[string]string{
 			ClientImport:    ClientAlias,
+			HelperImport:    HelperAlias,
 			ReferenceImport: ReferenceAlias,
+			PtrAlias:        PtrImport,
 		}),
 		generate.WithMatcher(match.AllOf(
 			match.Managed(),
