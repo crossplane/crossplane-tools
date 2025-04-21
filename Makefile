@@ -19,7 +19,6 @@ NPROCS ?= 1
 # parallel can lead to high CPU utilization. by default we reduce the parallelism
 # to half the number of CPU cores.
 GO_TEST_PARALLEL := $(shell echo $$(( $(NPROCS) / 2 )))
-
 GO_STATIC_PACKAGES = $(GO_PROJECT)/cmd/angryjet
 GO_LDFLAGS += -X $(GO_PROJECT)/pkg/version.Version=$(VERSION)
 GO_SUBDIRS += cmd internal
