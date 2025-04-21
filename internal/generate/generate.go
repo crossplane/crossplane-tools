@@ -78,7 +78,7 @@ func WithImportAliases(ia map[string]string) WriteOption {
 // same name is already defined for the object outside of the supplied filename.
 // Files will not be written if they would contain no methods.
 func WriteMethods(p *packages.Package, ms method.Set, file string, wo ...WriteOption) error {
-	opts := &options{Matches: func(o types.Object) bool { return true }}
+	opts := &options{Matches: func(_ types.Object) bool { return true }}
 	for _, fn := range wo {
 		fn(opts)
 	}
@@ -118,9 +118,7 @@ func WriteMethods(p *packages.Package, ms method.Set, file string, wo ...WriteOp
 		return nil
 	}
 
-	// gosec would prefer this to be written as 0600, but we're comfortable with
-	// it being world readable.
-	return errors.Wrap(os.WriteFile(file, b.Bytes(), 0o644), "cannot write Go file") // nolint:gosec
+	return errors.Wrap(os.WriteFile(file, b.Bytes(), 0o644), "cannot write Go file") //nolint:gosec // We're comfortable with this being world readable.
 }
 
 // ProducedNothing returns true if the supplied data is either not a valid Go

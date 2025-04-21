@@ -83,16 +83,12 @@ func NewResolveReferences(traverser *xptypes.Traverser, receiver, clientPath, re
 	}
 }
 
-var cleaner = strings.NewReplacer(
-	"[]", "",
-	"*", "",
-)
-
 type resolutionCallFn func(parentFields ...string) *jen.Statement
 
 // encapsulate goes through the fields and encapsulates the final call with nil
 // guard and/or for loops.
 func encapsulate(index int, callFn resolutionCallFn, fields ...string) *jen.Statement {
+	cleaner := strings.NewReplacer("[]", "", "*", "")
 	if len(fields) <= index {
 		return callFn(fields...)
 	}

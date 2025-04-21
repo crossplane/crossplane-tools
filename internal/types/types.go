@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package types contains utilities for manipulating structs.
 package types
 
 import (
@@ -85,9 +86,8 @@ type Traverser struct {
 // NOTE(muvaf): We return an error but currently there isn't really anything
 // constructing an error. But we keep that for future type and field processors.
 
-// Traverse traverser given type recursively and runs given processors.
-func (t *Traverser) Traverse(n *types.Named, cfg *ProcessorConfig, parentFields ...string) error { //nolint:gocyclo
-	// NOTE(muvaf): gocyclo is disabled due to repeated type checks.
+// Traverse given type recursively and run given processors.
+func (t *Traverser) Traverse(n *types.Named, cfg *ProcessorConfig, parentFields ...string) error { //nolint:gocognit // This is complex, but pretty easy to read.
 	if err := cfg.Named.Process(n, t.comments.For(n.Obj())); err != nil {
 		return errors.Wrapf(err, "type processors failed to run for type %s", n.Obj().Name())
 	}
@@ -95,7 +95,7 @@ func (t *Traverser) Traverse(n *types.Named, cfg *ProcessorConfig, parentFields 
 	if !ok {
 		return nil
 	}
-	for i := 0; i < st.NumFields(); i++ {
+	for i := range st.NumFields() {
 		field := st.Field(i)
 		tag := st.Tag(i)
 		if err := cfg.Field.Process(n, field, tag, t.comments.For(field), parentFields...); err != nil {

@@ -54,7 +54,7 @@ const (
 )
 
 func matches(s *types.Struct, m Matcher) bool {
-	for i := 0; i < s.NumFields(); i++ {
+	for i := range s.NumFields() {
 		if m(s.Field(i)) {
 			return true
 		}

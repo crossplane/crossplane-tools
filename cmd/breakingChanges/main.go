@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package main lints CRDs for breaking changes.
 package main
 
 import (
@@ -42,15 +43,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	new := &v1.CustomResourceDefinition{}
-	err = yaml.Unmarshal(newfile, new)
+	crd := &v1.CustomResourceDefinition{}
+	err = yaml.Unmarshal(newfile, crd)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	list := PrintFields(old.Spec.Versions[0].Schema.OpenAPIV3Schema, "", new.Spec.Versions[0].Schema.OpenAPIV3Schema)
-	for i := 0; i < len(list); i++ {
-		fmt.Println(list[i])
+	list := PrintFields(old.Spec.Versions[0].Schema.OpenAPIV3Schema, "", crd.Spec.Versions[0].Schema.OpenAPIV3Schema)
+	for i := range list {
+		fmt.Println(list[i]) //nolint:forbidigo // CLI tools are allowed to print their output.
 	}
 }
 
