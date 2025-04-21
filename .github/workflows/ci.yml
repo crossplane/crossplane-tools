@@ -72,10 +72,9 @@ jobs:
         run: make modules.download modules.check
 
       - name: Lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v6
         with:
           version: ${{ env.GOLANGCI_VERSION }}
-          skip-go-installation: true
 
   check-diff:
     runs-on: ubuntu-22.04
