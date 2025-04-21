@@ -63,7 +63,7 @@ type Filter func(o types.Object, methodName string) bool
 func DefinedOutside(fs *token.FileSet, filename string) Filter {
 	return func(o types.Object, name string) bool {
 		s := types.NewMethodSet(types.NewPointer(o.Type()))
-		for i := 0; i < s.Len(); i++ {
+		for i := range s.Len() {
 			mo := s.At(i).Obj()
 			if mo.Name() != name {
 				continue
@@ -311,7 +311,7 @@ func NewSetRootProviderConfigReference(receiver, runtime string) New {
 
 // NewGetRootProviderConfigReference returns a NewMethod that writes a
 // GetProviderConfigReference method for the supplied Object to the supplied
-// file. file. Note that unlike NewGetProviderConfigReference the generated
+// file. Note that unlike NewGetProviderConfigReference the generated
 // method expects the ProviderConfigReference to be at the root of the struct,
 // not under its Spec field.
 func NewGetRootProviderConfigReference(receiver, runtime string) New {

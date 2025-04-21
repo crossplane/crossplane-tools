@@ -96,7 +96,7 @@ func ParseMarkers(comment string) Markers {
 // +key:value1
 // +key:value2
 //
-// Would be parsed as Markers{"key": []string{"value1", "value2"}}
+// Would be parsed as Markers{"key": []string{"value1", "value2"}}.
 func ParseMarkersWithPrefix(prefix, comment string) Markers {
 	m := map[string][]string{}
 

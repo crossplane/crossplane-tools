@@ -27,7 +27,7 @@ import (
 	"github.com/crossplane/crossplane-tools/internal/comments"
 )
 
-// Comment markers used by ReferenceProcessor
+// Comment markers used by ReferenceProcessor.
 const (
 	ReferenceTypeMarker               = "crossplane:generate:reference:type"
 	ReferenceExtractorMarker          = "crossplane:generate:reference:extractor"
@@ -35,9 +35,7 @@ const (
 	ReferenceSelectorFieldNameMarker  = "crossplane:generate:reference:selectorFieldName"
 )
 
-var (
-	regexFunctionCall = regexp.MustCompile(`((.+)\.)?([^.]+\(.*\))`)
-)
+var regexFunctionCall = regexp.MustCompile(`((.+)\.)?([^.]+\(.*\))`)
 
 // Reference is the internal representation that has enough information to let
 // us generate the resolver.

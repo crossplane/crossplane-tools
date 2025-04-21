@@ -22,12 +22,11 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
+	"os"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
-
-	"os"
 
 	"github.com/crossplane/crossplane-tools/internal/match"
 	"github.com/crossplane/crossplane-tools/internal/method"
@@ -66,7 +65,7 @@ func WithMatcher(m match.Object) WriteOption {
 // WithImportAliases configures a map of import paths to aliases that will be
 // used when generating code. For example if a generated method requires
 // "example.org/foo/bar" it may refer to that package as "foobar" by supplying
-// map[string]string{"example.org/foo/bar": "foobar"}
+// map[string]string{"example.org/foo/bar": "foobar"}.
 func WithImportAliases(ia map[string]string) WriteOption {
 	return func(o *options) {
 		o.ImportAliases = ia
@@ -79,7 +78,7 @@ func WithImportAliases(ia map[string]string) WriteOption {
 // same name is already defined for the object outside of the supplied filename.
 // Files will not be written if they would contain no methods.
 func WriteMethods(p *packages.Package, ms method.Set, file string, wo ...WriteOption) error {
-	opts := &options{Matches: func(o types.Object) bool { return true }}
+	opts := &options{Matches: func(_ types.Object) bool { return true }}
 	for _, fn := range wo {
 		fn(opts)
 	}
@@ -119,10 +118,7 @@ func WriteMethods(p *packages.Package, ms method.Set, file string, wo ...WriteOp
 		return nil
 	}
 
-	// gosec would prefer this to be written as 0600, but we're comfortable with
-	// it being world readable.
-	return errors.Wrap(os.WriteFile(file, b.Bytes(), 0644), "cannot write Go file") // nolint:gosec
-
+	return errors.Wrap(os.WriteFile(file, b.Bytes(), 0o644), "cannot write Go file") //nolint:gosec // We're comfortable with this being world readable.
 }
 
 // ProducedNothing returns true if the supplied data is either not a valid Go

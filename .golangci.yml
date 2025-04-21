@@ -3,7 +3,104 @@ run:
 
 output:
   # colored-line-number|line-number|json|tab|checkstyle|code-climate, default is "colored-line-number"
-  formats: colored-line-number
+  formats:
+    - format: colored-line-number
+      path: stderr
+
+linters:
+  enable-all: true
+  fast: false
+  
+  disable:
+    # These linters are all deprecated. We disable them explicitly to avoid the
+    # linter logging deprecation warnings.
+    - execinquery
+
+    # These are linters we'd like to enable, but that will be labor intensive to
+    # make existing code compliant.
+    - wrapcheck
+    - varnamelen
+    - testpackage
+    - paralleltest
+    - nilnil
+    - gomnd
+
+    # Below are linters that lint for things we don't value. Each entry below
+    # this line must have a comment explaining the rationale.
+
+    # These linters add whitespace in an attempt to make code more readable.
+    # This isn't a widely accepted Go best practice, and would be laborious to
+    # apply to existing code.
+    - wsl 
+    - nlreturn
+
+    # Warns about uses of fmt.Sprintf that are less performant than alternatives
+    # such as string concatenation. We value readability more than performance
+    # unless performance is measured to be an issue.
+    - perfsprint
+
+    # This linter:
+    #
+    # 1. Requires errors.Is/errors.As to test equality.
+    # 2. Requires all errors be wrapped with fmt.Errorf specifically.
+    # 3. Disallows errors.New inline - requires package level errors.
+    #
+    # 1 is covered by other linters. 2 is covered by wrapcheck, which can also
+    # handle our use of crossplane-runtime's errors package. 3 is more strict
+    # than we need. Not every error needs to be tested for equality.
+    - err113
+
+    # These linters duplicate gocognit, but calculate complexity differently.
+    - gocyclo
+    - cyclop
+    - nestif
+    - funlen
+    - maintidx
+
+    # Enforces max line length. It's not idiomatic to enforce a strict limit on
+    # line length in Go. We'd prefer to lint for things that often cause long
+    # lines, like functions with too many parameters or long parameter names
+    # that duplicate their types.
+    - lll
+
+    # Warns about struct instantiations that don't specify every field. Could be
+    # useful in theory to catch fields that are accidentally omitted. Seems like
+    # it would have many more false positives than useful catches, though.
+    - exhaustruct
+
+    # Warns about TODO comments. The rationale being they should be issues
+    # instead. We're okay with using TODO to track minor cleanups for next time
+    # we touch a particular file.
+    - godox
+
+    # Warns about duplicated code blocks within the same file. Could be useful
+    # to prompt folks to think about whether code should be broken out into a
+    # function, but generally we're less worried about DRY and fine with a
+    # little copying. We don't want to give folks the impression that we require
+    # every duplicated code block to be factored out into a function.
+    - dupl
+
+    # Warns about returning interfaces rather than concrete types. We do think
+    # it's best to avoid returning interfaces where possible. However, at the
+    # time of writing enabling this linter would only catch the (many) cases
+    # where we must return an interface. 
+    - ireturn
+
+    # Warns about returning named variables. We do think it's best to avoid
+    # returning named variables where possible. However, at the time of writing
+    # enabling this linter would only catch the (many) cases where returning
+    # named variables is useful to document what the variables are. For example
+    # we believe it makes sense to return (ready bool) rather than just (bool)
+    # to communicate what the bool means.
+    - nonamedreturns
+
+    # Warns about taking the address of a range variable. This isn't an issue in
+    # Go v1.22 and above: https://tip.golang.org/doc/go1.22
+    - exportloopref
+
+    # Warns about using magic numbers. We do think it's best to avoid magic
+    # numbers, but we should not be strict about it.
+    - mnd
 
 linters-settings:
   errcheck:
@@ -15,35 +112,24 @@ linters-settings:
     # default is false: such cases aren't reported by default.
     check-blank: false
 
-    # [deprecated] comma-separated list of pairs of the form pkg:regex
-    # the regex is used to ignore names within pkg. (default "fmt:.*").
-    # see https://github.com/kisielk/errcheck#the-deprecated-method for details
-    exclude-functions: fmt:.*,io/ioutil:^Read.*
-
   govet:
     # report about shadowed variables
-    check-shadowing: false
-
-  revive:
-    # confidence for issues, default is 0.8
-    confidence: 0.8
+    disable:
+      - shadow
 
   gofmt:
     # simplify code: gofmt with `-s` option, true by default
     simplify: true
 
-  goimports:
-    # put imports beginning with prefix after 3rd-party packages;
-    # it's a comma-separated list of prefixes
-    local-prefixes: github.com/crossplane/crossplane
-
-  gocyclo:
-    # minimal code complexity to report, 30 by default (but we recommend 10-20)
-    min-complexity: 10
-
-  maligned:
-    # print struct with more effective memory layout or not, false by default
-    suggest-new: true
+  gci:
+    custom-order: true
+    sections:
+      - standard
+      - default
+      - prefix(github.com/crossplane/crossplane-runtime)
+      - prefix(github.com/crossplane/crossplane)
+      - blank
+      - dot
 
   dupl:
     # tokens count to trigger issue, 150 by default
@@ -60,11 +146,7 @@ linters-settings:
     tab-width: 1
 
   unused:
-    # treat code as a program (not a library) and report unused exported identifiers; default is false.
-    # XXX: if you enable this setting, unused will report a lot of false-positives in text editors:
-    # if it's called for subdir of a project it can't find funcs usages. All text editor integrations
-    # with golangci-lint call it on a directory with the changed file.
-    check-exported: false
+    exported-fields-are-used: true
 
   unparam:
     # Inspect exported functions, default is false. Set to true if no external program/library imports your code.
@@ -99,47 +181,64 @@ linters-settings:
       rangeValCopy:
         sizeThreshold: 32
 
-linters:
-  enable:
-    - gosimple
-    - staticcheck
-    - unused
-    - govet
-    - gocyclo
-    - gocritic
-    - goconst
-    - goimports
-    - gofmt  # We enable this as well as goimports for its simplify mode.
-    - prealloc
-    - revive
-    - unconvert
-    - misspell
-    - nakedret
+  nolintlint:
+    require-explanation: true
+    require-specific: true
+  
+  depguard:
+    rules:
+      no_third_party_test_libraries:
+        list-mode: lax
+        files:
+        - $test
+        deny:
+        - pkg: github.com/stretchr/testify
+          desc: "See https://go.dev/wiki/TestComments#assert-libraries"
+        - pkg: github.com/onsi/ginkgo
+          desc: "See https://go.dev/wiki/TestComments#assert-libraries"
+        - pkg: github.com/onsi/gomega
+          desc: "See https://go.dev/wiki/TestComments#assert-libraries"
 
-  presets:
-    - bugs
-    - unused
-  fast: false
-
+  interfacebloat:
+    max: 5
+  
+  tagliatelle:
+    case:
+      rules:
+        json: goCamel
 
 issues:
-  # Excluding configuration per-path and per-linter
+  # Excluding generated files.
+  exclude-files:
+  - "zz_generated\\..+\\.go$"
+  - ".+\\.pb.go$"
+  # Excluding configuration per-path and per-linter.
   exclude-rules:
     # Exclude some linters from running on tests files.
     - path: _test(ing)?\.go
       linters:
-        - gocyclo
+        - gocognit
         - errcheck
-        - dupl
         - gosec
         - scopelint
         - unparam
+        - gochecknoinits
+        - gochecknoglobals
+        - containedctx
+        - forcetypeassert
 
     # Ease some gocritic warnings on test files.
     - path: _test\.go
       text: "(unnamedResult|exitAfterDefer)"
       linters:
         - gocritic
+    
+    # It's idiomatic to register Kubernetes types with a package scoped
+    # SchemeBuilder using an init function.
+    - path: apis/
+      linters:
+      - gochecknoinits
+      - gochecknoglobals
 
     # These are performance optimisations rather than style issues per se.
     # They warn when function arguments or range values copy a lot of memory
@@ -172,6 +271,25 @@ issues:
       - gosec
       - gas
 
+    # This is about implicit memory aliasing in a range loop.
+    # This is a false positive with Go v1.22 and above.
+    - text: "G601:"
+      linters:
+      - gosec
+      - gas
+    
+    # Some k8s dependencies do not have JSON tags on all fields in structs.
+    - path: k8s.io/
+      linters:
+      - musttag
+
+    # Various fields related to native patch and transform Composition are
+    # deprecated, but we can't drop support from Crossplane 1.x. We ignore the
+    # warnings globally instead of suppressing them with comments everywhere.
+    - text: "SA1019: .+ is deprecated: Use Composition Functions instead."
+      linters:
+      - staticcheck
+
   # Independently from option `exclude` we use default exclude patterns,
   # it can be disabled by this option. To list all
   # excluded by default patterns execute `golangci-lint run --help`.
@@ -187,7 +305,7 @@ issues:
   new: false
 
   # Maximum issues count per one linter. Set to 0 to disable. Default is 50.
-  max-per-linter: 0
+  max-issues-per-linter: 0
 
   # Maximum count of issues with the same text. Set to 0 to disable. Default is 3.
   max-same-issues: 0

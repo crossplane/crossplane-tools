@@ -21,7 +21,7 @@ NPROCS ?= 1
 GO_TEST_PARALLEL := $(shell echo $$(( $(NPROCS) / 2 )))
 GO_STATIC_PACKAGES = $(GO_PROJECT)/cmd/angryjet
 GO_LDFLAGS += -X $(GO_PROJECT)/pkg/version.Version=$(VERSION)
-GO_SUBDIRS += cmd internal
+GO_SUBDIRS += cmd internal pkg
 GO111MODULE = on
 -include build/makelib/golang.mk
 

@@ -20,14 +20,13 @@ import (
 	"fmt"
 	"testing"
 
-	xptypes "github.com/crossplane/crossplane-tools/internal/types"
-
 	"github.com/dave/jennifer/jen"
 	"github.com/google/go-cmp/cmp"
 	"golang.org/x/tools/go/packages"
 	"golang.org/x/tools/go/packages/packagestest"
 
 	"github.com/crossplane/crossplane-tools/internal/comments"
+	xptypes "github.com/crossplane/crossplane-tools/internal/types"
 )
 
 const (
