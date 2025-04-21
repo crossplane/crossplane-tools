@@ -86,7 +86,7 @@ type Traverser struct {
 // constructing an error. But we keep that for future type and field processors.
 
 // Traverse traverser given type recursively and runs given processors.
-func (t *Traverser) Traverse(n *types.Named, cfg *ProcessorConfig, parentFields ...string) error { // nolint:gocyclo
+func (t *Traverser) Traverse(n *types.Named, cfg *ProcessorConfig, parentFields ...string) error { //nolint:gocyclo
 	// NOTE(muvaf): gocyclo is disabled due to repeated type checks.
 	if err := cfg.Named.Process(n, t.comments.For(n.Obj())); err != nil {
 		return errors.Wrapf(err, "type processors failed to run for type %s", n.Obj().Name())

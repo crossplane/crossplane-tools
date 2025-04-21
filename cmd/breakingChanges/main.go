@@ -56,7 +56,6 @@ func main() {
 
 // PrintFields function recursively traverses through the keys.
 func PrintFields(sch *v1.JSONSchemaProps, prefix string, newSchema *v1.JSONSchemaProps) []string {
-
 	var a []string
 
 	if len(sch.Properties) == 0 {

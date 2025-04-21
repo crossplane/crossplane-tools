@@ -21,11 +21,10 @@ import (
 	"go/types"
 	"strings"
 
+	"github.com/dave/jennifer/jen"
 	"github.com/pkg/errors"
 
 	xptypes "github.com/crossplane/crossplane-tools/internal/types"
-
-	"github.com/dave/jennifer/jen"
 )
 
 // NewResolveReferences returns a NewMethod that writes a ResolveReferences for

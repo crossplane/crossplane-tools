@@ -24,7 +24,6 @@ import (
 )
 
 func TestBreakingChanges(t *testing.T) {
-
 	type args struct {
 		oldyaml *v1.JSONSchemaProps
 		newyaml *v1.JSONSchemaProps
