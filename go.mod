@@ -1,6 +1,8 @@
 module github.com/crossplane/crossplane-tools
 
-go 1.23.6
+go 1.23.0
+
+toolchain go1.23.8
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
