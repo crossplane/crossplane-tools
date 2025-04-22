@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package helpers contains utilities for working with pointers.
-package helpers
+// Package convert contains utilities for converting to and from pointers.
+package convert
 
 import (
 	"strconv"
