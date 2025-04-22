@@ -72,7 +72,7 @@ jobs:
         run: make modules.download modules.check
 
       - name: Lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v7
         with:
           version: ${{ env.GOLANGCI_VERSION }}
 
