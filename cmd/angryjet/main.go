@@ -50,8 +50,8 @@ const (
 	ClientAlias  = "client"
 	ClientImport = "sigs.k8s.io/controller-runtime/pkg/client"
 
-	HelperAlias  = "helper"
-	HelperImport = "github.com/crossplane/crossplane-tools/pkg/helpers"
+	ConvertAlias  = "convert"
+	ConvertImport = "github.com/crossplane/crossplane-tools/pkg/convert"
 
 	RuntimeAlias  = "xpv1"
 	RuntimeImport = "github.com/crossplane/crossplane-runtime/apis/common/v1"
@@ -234,14 +234,14 @@ func GenerateReferences(filename, header string, p *packages.Package) error {
 	comm := comments.In(p)
 
 	methods := method.Set{
-		"ResolveReferences": method.NewResolveReferences(types.NewTraverser(comm), receiver, ClientImport, ReferenceImport, HelperImport, PtrImport),
+		"ResolveReferences": method.NewResolveReferences(types.NewTraverser(comm), receiver, ClientImport, ReferenceImport, ConvertImport, PtrImport),
 	}
 
 	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
 		generate.WithHeaders(header),
 		generate.WithImportAliases(map[string]string{
 			ClientImport:    ClientAlias,
-			HelperImport:    HelperAlias,
+			ConvertImport:   ConvertAlias,
 			ReferenceImport: ReferenceAlias,
 			PtrAlias:        PtrImport,
 		}),
