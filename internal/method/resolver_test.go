@@ -105,7 +105,7 @@ type Model struct {
 import (
 	"context"
 	client "example.org/client"
-	helpers "example.org/helpers"
+	convert "example.org/convert"
 	reference "example.org/reference"
 	v1beta11 "github.com/crossplane/provider-aws/apis/ec2/v1beta1"
 	v1beta1 "github.com/crossplane/provider-aws/apis/identity/v1beta1"
@@ -270,7 +270,7 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	mg.Spec.ForProvider.SubnetIDRefs = mrsp.ResolvedReferences
 
 	mrsp, err = r.ResolveMultiple(ctx, reference.MultiResolutionRequest{
-		CurrentValues: helpers.FromPtrValues(mg.Spec.ForProvider.RouteTableIDs),
+		CurrentValues: convert.FromPtrValues(mg.Spec.ForProvider.RouteTableIDs),
 		Extract:       reference.ExternalName(),
 		References:    mg.Spec.ForProvider.RouteTableIDsRefs,
 		Selector:      mg.Spec.ForProvider.RouteTableIDsSelector,
@@ -282,7 +282,7 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	if err != nil {
 		return errors.Wrap(err, "mg.Spec.ForProvider.RouteTableIDs")
 	}
-	mg.Spec.ForProvider.RouteTableIDs = helpers.ToPtrValues(mrsp.ResolvedValues)
+	mg.Spec.ForProvider.RouteTableIDs = convert.ToPtrValues(mrsp.ResolvedValues)
 	mg.Spec.ForProvider.RouteTableIDsRefs = mrsp.ResolvedReferences
 
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
@@ -320,7 +320,7 @@ func TestNewResolveReferences(t *testing.T) {
 		t.Error(err)
 	}
 	f := jen.NewFilePath("golang.org/fake/v1alpha1")
-	NewResolveReferences(xptypes.NewTraverser(comments.In(pkgs[0])), "mg", "example.org/client", "example.org/reference", "example.org/helpers", "k8s.io/utils/ptr")(f, pkgs[0].Types.Scope().Lookup("Model"))
+	NewResolveReferences(xptypes.NewTraverser(comments.In(pkgs[0])), "mg", "example.org/client", "example.org/reference", "example.org/convert", "k8s.io/utils/ptr")(f, pkgs[0].Types.Scope().Lookup("Model"))
 	if diff := cmp.Diff(generated, fmt.Sprintf("%#v", f)); diff != "" {
 		t.Errorf("NewResolveReferences(): -want, +got\n%s", diff)
 	}
