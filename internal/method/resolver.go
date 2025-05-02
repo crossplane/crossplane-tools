@@ -58,7 +58,7 @@ func NewResolveReferences(traverser *xptypes.Traverser, receiver, clientPath, re
 				resolverCalls[i] = encapsulate(0, multiResolutionCall(ref, referencePkgPath, convertPkgPath), ref.GoValueFieldPath...).Line()
 			} else {
 				hasSingleResolution = true
-				resolverCalls[i] = encapsulate(0, singleResolutionCall(ref, referencePkgPath, ptrPkgPath), ref.GoValueFieldPath...).Line()
+				resolverCalls[i] = encapsulate(0, singleResolutionCall(ref, referencePkgPath, ptrPkgPath, convertPkgPath), ref.GoValueFieldPath...).Line()
 			}
 		}
 		var initStatements jen.Statement
@@ -113,8 +113,9 @@ func encapsulate(index int, callFn resolutionCallFn, fields ...string) *jen.Stat
 	}
 }
 
-func singleResolutionCall(ref Reference, referencePkgPath string, ptrPkgPath string) resolutionCallFn {
+func singleResolutionCall(ref Reference, referencePkgPath string, ptrPkgPath string, convertPkgPath string) resolutionCallFn {
 	return func(fields ...string) *jen.Statement {
+		pkgPath := ptrPkgPath
 		prefixPath := jen.Id(fields[0])
 		for i := 1; i < len(fields)-1; i++ {
 			prefixPath = prefixPath.Dot(fields[i])
@@ -129,10 +130,13 @@ func singleResolutionCall(ref Reference, referencePkgPath string, ptrPkgPath str
 		if ref.IsFloatPointer {
 			toPointerFunction = "ToFloatPtrValue"
 			fromPointerFunction = "FromFloatPtrValue"
+			pkgPath = convertPkgPath
 		}
 		if ref.IsPointer {
-			setResolvedValue = currentValuePath.Clone().Op("=").Qual(ptrPkgPath, toPointerFunction).Call(jen.Id("rsp").Dot("ResolvedValue"))
-			currentValuePath = jen.Qual(ptrPkgPath, fromPointerFunction).Call(currentValuePath, jen.Op(`""`))
+			setResolvedValue = jen.If(jen.Id("v").Op(":=").Id("rsp").Dot("ResolvedValue")).Op(";").Id("v").Op("!=").Lit("").Block(
+				jen.Add(prefixPath.Clone().Dot(fields[len(fields)-1]).Clone().Op("=").Qual(pkgPath, toPointerFunction).Call(jen.Id("v")))).Else().Block(
+				jen.Add(prefixPath.Clone().Dot(fields[len(fields)-1]).Clone().Op("=").Nil()))
+			currentValuePath = jen.Qual(pkgPath, fromPointerFunction).Call(currentValuePath, jen.Op(`""`))
 		}
 		return &jen.Statement{
 			jen.List(jen.Id("rsp"), jen.Err()).Op("=").Id("r").Dot("Resolve").Call(
