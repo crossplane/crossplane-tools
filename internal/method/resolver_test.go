@@ -73,6 +73,10 @@ type ModelParameters struct {
 	// +crossplane:generate:reference:type=golang.org/fake/v1alpha1.Configuration
 	// +crossplane:generate:reference:extractor=golang.org/fake/v1alpha1.Configuration()
 	CustomConfiguration *Configuration
+
+	// +crossplane:generate:reference:type=github.com/crossplane/provider-aws/apis/identity/v1beta1.IAM
+	// +crossplane:generate:reference:extractor=Count()
+	Count *float64
 }
 
 type NetworkSpec struct {
@@ -150,7 +154,11 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	if err != nil {
 		return errors.Wrap(err, "mg.Spec.ForProvider.SecurityGroupID")
 	}
-	mg.Spec.ForProvider.SecurityGroupID = ptr.To(rsp.ResolvedValue)
+	if v := rsp.ResolvedValue; v != "" {
+		mg.Spec.ForProvider.SecurityGroupID = ptr.To(v)
+	} else {
+		mg.Spec.ForProvider.SecurityGroupID = nil
+	}
 	mg.Spec.ForProvider.SecurityGroupIDRef = rsp.ResolvedReference
 
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
@@ -166,7 +174,11 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	if err != nil {
 		return errors.Wrap(err, "mg.Spec.ForProvider.IAMRoleARN")
 	}
-	mg.Spec.ForProvider.IAMRoleARN = ptr.To(rsp.ResolvedValue)
+	if v := rsp.ResolvedValue; v != "" {
+		mg.Spec.ForProvider.IAMRoleARN = ptr.To(v)
+	} else {
+		mg.Spec.ForProvider.IAMRoleARN = nil
+	}
 	mg.Spec.ForProvider.IAMRoleARNRef = rsp.ResolvedReference
 
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
@@ -182,7 +194,11 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	if err != nil {
 		return errors.Wrap(err, "mg.Spec.ForProvider.NestedTargetWithPath")
 	}
-	mg.Spec.ForProvider.NestedTargetWithPath = ptr.To(rsp.ResolvedValue)
+	if v := rsp.ResolvedValue; v != "" {
+		mg.Spec.ForProvider.NestedTargetWithPath = ptr.To(v)
+	} else {
+		mg.Spec.ForProvider.NestedTargetWithPath = nil
+	}
 	mg.Spec.ForProvider.NestedTargetWithPathRef = rsp.ResolvedReference
 
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
@@ -198,7 +214,11 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	if err != nil {
 		return errors.Wrap(err, "mg.Spec.ForProvider.NestedTargetNoPath")
 	}
-	mg.Spec.ForProvider.NestedTargetNoPath = ptr.To(rsp.ResolvedValue)
+	if v := rsp.ResolvedValue; v != "" {
+		mg.Spec.ForProvider.NestedTargetNoPath = ptr.To(v)
+	} else {
+		mg.Spec.ForProvider.NestedTargetNoPath = nil
+	}
 	mg.Spec.ForProvider.NestedTargetNoPathRef = rsp.ResolvedReference
 
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
@@ -214,7 +234,11 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	if err != nil {
 		return errors.Wrap(err, "mg.Spec.ForProvider.NoArgNoPath")
 	}
-	mg.Spec.ForProvider.NoArgNoPath = ptr.To(rsp.ResolvedValue)
+	if v := rsp.ResolvedValue; v != "" {
+		mg.Spec.ForProvider.NoArgNoPath = ptr.To(v)
+	} else {
+		mg.Spec.ForProvider.NoArgNoPath = nil
+	}
 	mg.Spec.ForProvider.NoArgNoPathRef = rsp.ResolvedReference
 
 	if mg.Spec.ForProvider.Network != nil {
@@ -298,8 +322,32 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	if err != nil {
 		return errors.Wrap(err, "mg.Spec.ForProvider.CustomConfiguration")
 	}
-	mg.Spec.ForProvider.CustomConfiguration = ptr.To(rsp.ResolvedValue)
+	if v := rsp.ResolvedValue; v != "" {
+		mg.Spec.ForProvider.CustomConfiguration = ptr.To(v)
+	} else {
+		mg.Spec.ForProvider.CustomConfiguration = nil
+	}
 	mg.Spec.ForProvider.CustomConfigurationRef = rsp.ResolvedReference
+
+	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+		CurrentValue: convert.FromFloatPtrValue(mg.Spec.ForProvider.Count),
+		Extract:      Count(),
+		Reference:    mg.Spec.ForProvider.CountRef,
+		Selector:     mg.Spec.ForProvider.CountSelector,
+		To: reference.To{
+			List:    &v1beta1.IAMList{},
+			Managed: &v1beta1.IAM{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.ForProvider.Count")
+	}
+	if v := rsp.ResolvedValue; v != "" {
+		mg.Spec.ForProvider.Count = convert.ToFloatPtrValue(v)
+	} else {
+		mg.Spec.ForProvider.Count = nil
+	}
+	mg.Spec.ForProvider.CountRef = rsp.ResolvedReference
 
 	return nil
 }
