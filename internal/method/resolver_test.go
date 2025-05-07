@@ -286,7 +286,7 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	mg.Spec.ForProvider.RouteTableIDsRefs = mrsp.ResolvedReferences
 
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
-		CurrentValue: ptr.Deref(mg.Spec.ForProvider.CustomConfiguration, ""),
+		CurrentValue: mg.Spec.ForProvider.CustomConfiguration,
 		Extract:      Configuration(),
 		Reference:    mg.Spec.ForProvider.CustomConfigurationRef,
 		Selector:     mg.Spec.ForProvider.CustomConfigurationSelector,
@@ -298,7 +298,7 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	if err != nil {
 		return errors.Wrap(err, "mg.Spec.ForProvider.CustomConfiguration")
 	}
-	mg.Spec.ForProvider.CustomConfiguration = ptr.To(rsp.ResolvedValue)
+	mg.Spec.ForProvider.CustomConfiguration = rsp.ResolvedValue
 	mg.Spec.ForProvider.CustomConfigurationRef = rsp.ResolvedReference
 
 	return nil
