@@ -58,7 +58,7 @@ func NewResolveReferences(traverser *xptypes.Traverser, receiver, clientPath, re
 				resolverCalls[i] = encapsulate(0, multiResolutionCall(ref, referencePkgPath, convertPkgPath), ref.GoValueFieldPath...).Line()
 			} else {
 				hasSingleResolution = true
-				resolverCalls[i] = encapsulate(0, singleResolutionCall(ref, referencePkgPath, ptrPkgPath, convertPkgPath), ref.GoValueFieldPath...).Line()
+				resolverCalls[i] = encapsulate(0, singleResolutionCall(ref, referencePkgPath), ref.GoValueFieldPath...).Line()
 			}
 		}
 		var initStatements jen.Statement
@@ -113,7 +113,7 @@ func encapsulate(index int, callFn resolutionCallFn, fields ...string) *jen.Stat
 	}
 }
 
-func singleResolutionCall(ref Reference, referencePkgPath string, ptrPkgPath string, convertPkgPath string) resolutionCallFn {
+func singleResolutionCall(ref Reference, referencePkgPath string) resolutionCallFn {
 	return func(fields ...string) *jen.Statement {
 		prefixPath := jen.Id(fields[0])
 		for i := 1; i < len(fields)-1; i++ {
@@ -124,21 +124,15 @@ func singleResolutionCall(ref Reference, referencePkgPath string, ptrPkgPath str
 		selectorFieldPath := prefixPath.Clone().Dot(ref.GoSelectorFieldName)
 
 		setResolvedValue := currentValuePath.Clone().Op("=").Id("rsp").Dot("ResolvedValue")
-		pkgPath := ptrPkgPath
-		toPointerFunction := "To"
-		fromPointerFunction := "Deref"
+		toPointerFunction := "ToPtrValue"
+		fromPointerFunction := "FromPtrValue"
+		if ref.IsFloatPointer {
+			toPointerFunction = "ToFloatPtrValue"
+			fromPointerFunction = "FromFloatPtrValue"
+		}
 		if ref.IsPointer {
-			if ref.IsFloatPointer {
-				toPointerFunction = "ToFloatPtrValue"
-				fromPointerFunction = "FromFloatPtrValue"
-				pkgPath = convertPkgPath
-				currentValuePath = jen.Qual(pkgPath, fromPointerFunction).Call(currentValuePath)
-			} else {
-				currentValuePath = jen.Qual(pkgPath, fromPointerFunction).Call(currentValuePath, jen.Op(`""`))
-			}
-			setResolvedValue = jen.If(jen.Id("v").Op(":=").Id("rsp").Dot("ResolvedValue")).Op(";").Id("v").Op("!=").Lit("").Block(
-				jen.Add(prefixPath.Clone().Dot(fields[len(fields)-1]).Clone().Op("=").Qual(pkgPath, toPointerFunction).Call(jen.Id("v")))).Else().Block(
-				jen.Add(prefixPath.Clone().Dot(fields[len(fields)-1]).Clone().Op("=").Nil()))
+			setResolvedValue = currentValuePath.Clone().Op("=").Qual(referencePkgPath, toPointerFunction).Call(jen.Id("rsp").Dot("ResolvedValue"))
+			currentValuePath = jen.Qual(referencePkgPath, fromPointerFunction).Call(currentValuePath)
 		}
 		return &jen.Statement{
 			jen.List(jen.Id("rsp"), jen.Err()).Op("=").Id("r").Dot("Resolve").Call(
