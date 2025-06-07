@@ -126,6 +126,7 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 		CurrentValue: mg.Spec.ForProvider.APIID,
 		Extract:      reference.ExternalName(),
+		Namespace:    mg.GetNamespace(),
 		Reference:    mg.Spec.ForProvider.APIIDRef,
 		Selector:     mg.Spec.ForProvider.APIIDSelector,
 		To: reference.To{
@@ -142,6 +143,7 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.SecurityGroupID),
 		Extract:      reference.ExternalName(),
+		Namespace:    mg.GetNamespace(),
 		Reference:    mg.Spec.ForProvider.SecurityGroupIDRef,
 		Selector:     mg.Spec.ForProvider.SecurityGroupIDSelector,
 		To: reference.To{
@@ -158,6 +160,7 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.IAMRoleARN),
 		Extract:      v1beta1.IAMRoleARN(),
+		Namespace:    mg.GetNamespace(),
 		Reference:    mg.Spec.ForProvider.IAMRoleARNRef,
 		Selector:     mg.Spec.ForProvider.IAMRoleARNSelector,
 		To: reference.To{
@@ -174,6 +177,7 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.NestedTargetWithPath),
 		Extract:      v1beta1.IAMRoleARN("a.b.c"),
+		Namespace:    mg.GetNamespace(),
 		Reference:    mg.Spec.ForProvider.NestedTargetWithPathRef,
 		Selector:     mg.Spec.ForProvider.NestedTargetWithPathSelector,
 		To: reference.To{
@@ -190,6 +194,7 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.NestedTargetNoPath),
 		Extract:      IAMRoleARN("a.b.c"),
+		Namespace:    mg.GetNamespace(),
 		Reference:    mg.Spec.ForProvider.NestedTargetNoPathRef,
 		Selector:     mg.Spec.ForProvider.NestedTargetNoPathSelector,
 		To: reference.To{
@@ -206,6 +211,7 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.NoArgNoPath),
 		Extract:      IAMRoleARN(),
+		Namespace:    mg.GetNamespace(),
 		Reference:    mg.Spec.ForProvider.NoArgNoPathRef,
 		Selector:     mg.Spec.ForProvider.NoArgNoPathSelector,
 		To: reference.To{
@@ -223,6 +229,7 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 		rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 			CurrentValue: mg.Spec.ForProvider.Network.VPCID,
 			Extract:      reference.ExternalName(),
+			Namespace:    mg.GetNamespace(),
 			Reference:    mg.Spec.ForProvider.Network.VPCIDRef,
 			Selector:     mg.Spec.ForProvider.Network.VPCIDSelector,
 			To: reference.To{
@@ -241,6 +248,7 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 		rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 			CurrentValue: mg.Spec.ForProvider.OtherSetting[i3].OtherID,
 			Extract:      reference.ExternalName(),
+			Namespace:    mg.GetNamespace(),
 			Reference:    mg.Spec.ForProvider.OtherSetting[i3].OtherIDRef,
 			Selector:     mg.Spec.ForProvider.OtherSetting[i3].OtherIDSelector,
 			To: reference.To{
@@ -258,6 +266,7 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	mrsp, err = r.ResolveMultiple(ctx, reference.MultiResolutionRequest{
 		CurrentValues: mg.Spec.ForProvider.SubnetIDs,
 		Extract:       reference.ExternalName(),
+		Namespace:     mg.GetNamespace(),
 		References:    mg.Spec.ForProvider.SubnetIDRefs,
 		Selector:      mg.Spec.ForProvider.SubnetIDSelector,
 		To: reference.To{
@@ -274,6 +283,7 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	mrsp, err = r.ResolveMultiple(ctx, reference.MultiResolutionRequest{
 		CurrentValues: reference.FromPtrValues(mg.Spec.ForProvider.RouteTableIDs),
 		Extract:       reference.ExternalName(),
+		Namespace:     mg.GetNamespace(),
 		References:    mg.Spec.ForProvider.RouteTableIDsRefs,
 		Selector:      mg.Spec.ForProvider.RouteTableIDsSelector,
 		To: reference.To{
@@ -290,6 +300,7 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.CustomConfiguration),
 		Extract:      Configuration(),
+		Namespace:    mg.GetNamespace(),
 		Reference:    mg.Spec.ForProvider.CustomConfigurationRef,
 		Selector:     mg.Spec.ForProvider.CustomConfigurationSelector,
 		To: reference.To{
@@ -306,6 +317,7 @@ func (mg *Model) ResolveReferences(ctx context.Context, c client.Reader) error {
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 		CurrentValue: reference.FromFloatPtrValue(mg.Spec.ForProvider.Count),
 		Extract:      Count(),
+		Namespace:    mg.GetNamespace(),
 		Reference:    mg.Spec.ForProvider.CountRef,
 		Selector:     mg.Spec.ForProvider.CountSelector,
 		To: reference.To{
