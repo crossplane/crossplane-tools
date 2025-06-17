@@ -36,6 +36,9 @@ const (
 	NameProviderConfigStatus = "ProviderConfigStatus"
 	NameProviderConfigUsage  = "ProviderConfigUsage"
 	NameItems                = "Items"
+
+	NameTypedProviderConfigUsage = "TypedProviderConfigUsage"
+	NameResourceV2Spec           = "ManagedResourceSpec"
 )
 
 // Field type suffixes.
@@ -51,6 +54,9 @@ const (
 	TypeSuffixProviderConfigSpec   = "github.com/crossplane/crossplane-runtime/apis/common/v1.ProviderConfigSpec"
 	TypeSuffixProviderConfigStatus = "github.com/crossplane/crossplane-runtime/apis/common/v1.ProviderConfigStatus"
 	TypeSuffixProviderConfigUsage  = "github.com/crossplane/crossplane-runtime/apis/common/v1.ProviderConfigUsage"
+
+	TypeSuffixProviderConfigUsageV2 = "github.com/crossplane/crossplane-runtime/apis/common/v2.TypedProviderConfigUsage"
+	TypeSuffixResourceV2Spec        = "github.com/crossplane/crossplane-runtime/apis/common/v2.ManagedResourceSpec"
 )
 
 func matches(s *types.Struct, m Matcher) bool {
@@ -182,6 +188,10 @@ func IsStatus() Matcher { return IsTypeNamed(NameStatus, TypeSuffixStatus) }
 // appears to be a Crossplane managed resource spec.
 func IsResourceSpec() Matcher { return IsTypeNamed(TypeSuffixResourceSpec, NameResourceSpec) }
 
+// IsResourceV2Spec returns a Matcher that returns true if the supplied field
+// appears to be a Crossplane managed resource spec.
+func IsResourceV2Spec() Matcher { return IsTypeNamed(TypeSuffixResourceV2Spec, NameResourceV2Spec) }
+
 // IsResourceStatus returns a Matcher that returns true if the supplied field
 // appears to be a Crossplane managed resource status.
 func IsResourceStatus() Matcher { return IsTypeNamed(TypeSuffixResourceStatus, NameResourceStatus) }
@@ -202,6 +212,12 @@ func IsProviderConfigStatus() Matcher {
 // field appears to be a Crossplane provider config usage.
 func IsProviderConfigUsage() Matcher {
 	return IsTypeNamed(TypeSuffixProviderConfigUsage, NameProviderConfigUsage)
+}
+
+// IsTypedProviderConfigUsage returns a Matcher that returns true if the supplied
+// field appears to be a Crossplane provider config usage with typed ref.
+func IsTypedProviderConfigUsage() Matcher {
+	return IsTypeNamed(TypeSuffixProviderConfigUsageV2, NameTypedProviderConfigUsage)
 }
 
 // IsItems returns a Matcher that returns true if the supplied field appears to

@@ -27,9 +27,57 @@ import (
 	xptypes "github.com/crossplane/crossplane-tools/internal/types"
 )
 
+const (
+	funcnameNewAPINamespacedResolver          = "NewAPINamespacedResolver"
+	typenameNamespacedResolutionRequest       = "NamespacedResolutionRequest"
+	typenameNamespacedResolutionResponse      = "NamespacedResolutionResponse"
+	typenameMultiNamespacedResolutionRequest  = "MultiNamespacedResolutionRequest"
+	typenameMultiNamespacedResolutionResponse = "MultiNamespacedResolutionResponse"
+)
+
+const (
+	funcnameNewAPIResolver          = "NewAPIResolver"
+	typenameResolutionRequest       = "ResolutionRequest"
+	typenameResolutionResponse      = "ResolutionResponse"
+	typenameMultiResolutionRequest  = "MultiResolutionRequest"
+	typenameMultiResolutionResponse = "MultiResolutionResponse"
+)
+
+type names struct {
+	APIResolverFunctionName         string
+	ResolutionRequestTypeName       string
+	ResolutionResponseTypeName      string
+	MultiResolutionRequestTypeName  string
+	MultiResolutionResponseTypeName string
+}
+
 // NewResolveReferences returns a NewMethod that writes a ResolveReferences for
 // given managed resource, if needed.
 func NewResolveReferences(traverser *xptypes.Traverser, receiver, clientPath, referencePkgPath string) New {
+	return NewResolveReferencesCommon(traverser, receiver, clientPath, referencePkgPath, names{
+		APIResolverFunctionName:         funcnameNewAPIResolver,
+		ResolutionRequestTypeName:       typenameResolutionRequest,
+		ResolutionResponseTypeName:      typenameResolutionResponse,
+		MultiResolutionRequestTypeName:  typenameMultiResolutionRequest,
+		MultiResolutionResponseTypeName: typenameMultiResolutionResponse,
+	})
+}
+
+// NewResolveReferencesV2 returns a NewMethod that writes a ResolveReferences for
+// given managed resource, if needed.
+func NewResolveReferencesV2(traverser *xptypes.Traverser, receiver, clientPath, referencePkgPath string) New {
+	return NewResolveReferencesCommon(traverser, receiver, clientPath, referencePkgPath, names{
+		APIResolverFunctionName:         funcnameNewAPINamespacedResolver,
+		ResolutionRequestTypeName:       typenameNamespacedResolutionRequest,
+		ResolutionResponseTypeName:      typenameNamespacedResolutionResponse,
+		MultiResolutionRequestTypeName:  typenameMultiNamespacedResolutionRequest,
+		MultiResolutionResponseTypeName: typenameMultiNamespacedResolutionResponse,
+	})
+}
+
+// NewResolveReferencesCommon returns a NewMethod that writes a ResolveReferences for
+// given managed resource, if needed.
+func NewResolveReferencesCommon(traverser *xptypes.Traverser, receiver, clientPath, referencePkgPath string, names names) New {
 	return func(f *jen.File, o types.Object) {
 		n, ok := o.Type().(*types.Named)
 		if !ok {
@@ -55,23 +103,23 @@ func NewResolveReferences(traverser *xptypes.Traverser, receiver, clientPath, re
 		for i, ref := range refs {
 			if ref.IsSlice {
 				hasMultiResolution = true
-				resolverCalls[i] = encapsulate(0, multiResolutionCall(ref, referencePkgPath), ref.GoValueFieldPath...).Line()
+				resolverCalls[i] = encapsulate(0, multiResolutionCall(ref, referencePkgPath, names.MultiResolutionRequestTypeName), ref.GoValueFieldPath...).Line()
 			} else {
 				hasSingleResolution = true
-				resolverCalls[i] = encapsulate(0, singleResolutionCall(ref, referencePkgPath), ref.GoValueFieldPath...).Line()
+				resolverCalls[i] = encapsulate(0, singleResolutionCall(ref, referencePkgPath, names.ResolutionRequestTypeName), ref.GoValueFieldPath...).Line()
 			}
 		}
 		var initStatements jen.Statement
 		if hasSingleResolution {
-			initStatements = append(initStatements, jen.Var().Id("rsp").Qual(referencePkgPath, "ResolutionResponse"))
+			initStatements = append(initStatements, jen.Var().Id("rsp").Qual(referencePkgPath, names.ResolutionResponseTypeName))
 		}
 		if hasMultiResolution {
-			initStatements = append(initStatements, jen.Line().Var().Id("mrsp").Qual(referencePkgPath, "MultiResolutionResponse"))
+			initStatements = append(initStatements, jen.Line().Var().Id("mrsp").Qual(referencePkgPath, names.MultiResolutionResponseTypeName))
 		}
 
 		f.Commentf("ResolveReferences of this %s.", o.Name())
 		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("ResolveReferences").Params(jen.Id("ctx").Qual("context", "Context"), jen.Id("c").Qual(clientPath, "Reader")).Error().Block(
-			jen.Id("r").Op(":=").Qual(referencePkgPath, "NewAPIResolver").Call(jen.Id("c"), jen.Id(receiver)),
+			jen.Id("r").Op(":=").Qual(referencePkgPath, names.APIResolverFunctionName).Call(jen.Id("c"), jen.Id(receiver)),
 			jen.Line(),
 			&initStatements,
 			jen.Var().Err().Error(),
@@ -113,7 +161,7 @@ func encapsulate(index int, callFn resolutionCallFn, fields ...string) *jen.Stat
 	}
 }
 
-func singleResolutionCall(ref Reference, referencePkgPath string) resolutionCallFn {
+func singleResolutionCall(ref Reference, referencePkgPath, resolutionRequestTypeName string) resolutionCallFn {
 	return func(fields ...string) *jen.Statement {
 		prefixPath := jen.Id(fields[0])
 		for i := 1; i < len(fields)-1; i++ {
@@ -137,7 +185,7 @@ func singleResolutionCall(ref Reference, referencePkgPath string) resolutionCall
 		return &jen.Statement{
 			jen.List(jen.Id("rsp"), jen.Err()).Op("=").Id("r").Dot("Resolve").Call(
 				jen.Id("ctx"),
-				jen.Qual(referencePkgPath, "ResolutionRequest").Values(jen.Dict{
+				jen.Qual(referencePkgPath, resolutionRequestTypeName).Values(jen.Dict{
 					jen.Id("CurrentValue"): currentValuePath,
 					jen.Id("Reference"):    referenceFieldPath,
 					jen.Id("Selector"):     selectorFieldPath,
@@ -163,7 +211,7 @@ func singleResolutionCall(ref Reference, referencePkgPath string) resolutionCall
 	}
 }
 
-func multiResolutionCall(ref Reference, referencePkgPath string) resolutionCallFn {
+func multiResolutionCall(ref Reference, referencePkgPath, multiResolutionRequestTypeName string) resolutionCallFn {
 	return func(fields ...string) *jen.Statement {
 		prefixPath := jen.Id(fields[0])
 		for i := 1; i < len(fields)-1; i++ {
@@ -189,7 +237,7 @@ func multiResolutionCall(ref Reference, referencePkgPath string) resolutionCallF
 		return &jen.Statement{
 			jen.List(jen.Id("mrsp"), jen.Err()).Op("=").Id("r").Dot("ResolveMultiple").Call(
 				jen.Id("ctx"),
-				jen.Qual(referencePkgPath, "MultiResolutionRequest").Values(jen.Dict{
+				jen.Qual(referencePkgPath, multiResolutionRequestTypeName).Values(jen.Dict{
 					jen.Id("CurrentValues"): currentValuePath,
 					jen.Id("References"):    referenceFieldPath,
 					jen.Id("Selector"):      selectorFieldPath,
