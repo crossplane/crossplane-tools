@@ -104,6 +104,12 @@ func findStruct(o types.Object) *types.Struct {
 			return nil
 		}
 		return s
+	case *types.Pointer:
+		s, ok := t.Elem().Underlying().(*types.Struct)
+		if !ok {
+			return nil
+		}
+		return s
 	}
 	return nil
 }
