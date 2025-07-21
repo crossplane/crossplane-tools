@@ -129,9 +129,9 @@ func ProviderConfigUsage() Object {
 	}
 }
 
-// TypedProviderConfigUsage returns an Object matcher that returns true if the supplied
+// ProviderConfigUsageV2 returns an Object matcher that returns true if the supplied
 // Object is a Crossplane v2 style ProviderConfigUsage.
-func TypedProviderConfigUsage() Object {
+func ProviderConfigUsageV2() Object {
 	return func(o types.Object) bool {
 		return fields.Has(o,
 			fields.IsTypeMeta().And(fields.IsEmbedded()),
@@ -156,9 +156,9 @@ func ProviderConfigUsageList() Object {
 	}
 }
 
-// TypedProviderConfigUsageList returns an Object matcher that returns true if the
-// supplied Object is a list of Crossplane provider config usages.
-func TypedProviderConfigUsageList() Object {
+// ProviderConfigUsageListV2 returns an Object matcher that returns true if the
+// supplied Object is a list of Crossplane v2 style provider config usages.
+func ProviderConfigUsageListV2() Object {
 	return func(o types.Object) bool {
 		return fields.Has(o,
 			fields.IsTypeMeta().And(fields.IsEmbedded()),
