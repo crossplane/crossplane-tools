@@ -90,17 +90,22 @@ func main() {
 		for _, err := range p.Errors {
 			kingpin.FatalIfError(err, "error loading packages using pattern %s", *pattern)
 		}
-		kingpin.FatalIfError(GenerateManaged(*filenameManaged, header, p), "cannot write managed resource method set for package %s", p.PkgPath)
-		kingpin.FatalIfError(GenerateManagedList(*filenameManagedList, header, p), "cannot write managed resource list method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateManagedLegacy(*filenameManaged, header, p), "cannot write managed resource method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateManagedModern(*filenameManaged, header, p), "cannot write managed resource method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateManagedListLegacy(*filenameManagedList, header, p), "cannot write managed resource list method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateManagedListModern(*filenameManagedList, header, p), "cannot write managed resource list method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateProviderConfig(*filenamePC, header, p), "cannot write provider config method set for package %s", p.PkgPath)
-		kingpin.FatalIfError(GenerateProviderConfigUsage(*filenamePCU, header, p), "cannot write provider config usage method set for package %s", p.PkgPath)
-		kingpin.FatalIfError(GenerateProviderConfigUsageList(*filenamePCUList, header, p), "cannot write provider config usage list method set for package %s", p.PkgPath)
-		kingpin.FatalIfError(GenerateReferences(*filenameResolvers, header, p), "cannot write reference resolvers for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateProviderConfigUsageLegacy(*filenamePCU, header, p), "cannot write provider config usage method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateProviderConfigUsageModern(*filenamePCU, header, p), "cannot write provider config usage method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateProviderConfigUsageListLegacy(*filenamePCUList, header, p), "cannot write provider config usage list method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateProviderConfigUsageListModern(*filenamePCUList, header, p), "cannot write provider config usage list method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateReferencesLegacy(*filenameResolvers, header, p), "cannot write reference resolvers for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateReferencesModern(*filenameResolvers, header, p), "cannot write reference resolvers for package %s", p.PkgPath)
 	}
 }
 
-// GenerateManaged generates the resource.Managed method set.
-func GenerateManaged(filename, header string, p *packages.Package) error {
+// GenerateManagedLegacy generates the resource.Managed method set.
+func GenerateManagedLegacy(filename, header string, p *packages.Package) error {
 	receiver := "mg"
 
 	methods := method.Set{
@@ -110,8 +115,6 @@ func GenerateManaged(filename, header string, p *packages.Package) error {
 		"SetProviderConfigReference":          method.NewSetProviderConfigReference(receiver, RuntimeImport),
 		"SetWriteConnectionSecretToReference": method.NewSetWriteConnectionSecretToReference(receiver, RuntimeImport),
 		"GetWriteConnectionSecretToReference": method.NewGetWriteConnectionSecretToReference(receiver, RuntimeImport),
-		"SetPublishConnectionDetailsTo":       method.NewSetPublishConnectionDetailsTo(receiver, RuntimeImport),
-		"GetPublishConnectionDetailsTo":       method.NewGetPublishConnectionDetailsTo(receiver, RuntimeImport),
 		"SetManagementPolicies":               method.NewSetManagementPolicies(receiver, RuntimeImport),
 		"GetManagementPolicies":               method.NewGetManagementPolicies(receiver, RuntimeImport),
 		"SetDeletionPolicy":                   method.NewSetDeletionPolicy(receiver, RuntimeImport),
@@ -133,8 +136,38 @@ func GenerateManaged(filename, header string, p *packages.Package) error {
 	return errors.Wrap(err, "cannot write managed resource methods")
 }
 
-// GenerateManagedList generates the resource.ManagedList method set.
-func GenerateManagedList(filename, header string, p *packages.Package) error {
+// GenerateManagedModern generates the resource.Managed method set for v2-style namespaced MRs.
+func GenerateManagedModern(filename, header string, p *packages.Package) error {
+	receiver := "mg"
+
+	methods := method.Set{
+		"SetConditions":                       method.NewSetConditions(receiver, RuntimeImport),
+		"GetCondition":                        method.NewGetCondition(receiver, RuntimeImport),
+		"GetProviderConfigReference":          method.NewGetTypedProviderConfigReference(receiver, RuntimeImport),
+		"SetProviderConfigReference":          method.NewSetTypedProviderConfigReference(receiver, RuntimeImport),
+		"SetWriteConnectionSecretToReference": method.NewLocalSetWriteConnectionSecretToReference(receiver, RuntimeImport),
+		"GetWriteConnectionSecretToReference": method.NewLocalGetWriteConnectionSecretToReference(receiver, RuntimeImport),
+		"SetManagementPolicies":               method.NewSetManagementPolicies(receiver, RuntimeImport),
+		"GetManagementPolicies":               method.NewGetManagementPolicies(receiver, RuntimeImport),
+	}
+
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
+		generate.WithHeaders(header),
+		generate.WithImportAliases(map[string]string{
+			CoreImport:    CoreAlias,
+			RuntimeImport: RuntimeAlias,
+		}),
+		generate.WithMatcher(match.AllOf(
+			match.ManagedV2(),
+			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
+		),
+	)
+
+	return errors.Wrap(err, "cannot write V2 managed resource methods")
+}
+
+// GenerateManagedListLegacy generates the resource.ManagedList method set.
+func GenerateManagedListLegacy(filename, header string, p *packages.Package) error {
 	receiver := "l"
 
 	methods := method.Set{
@@ -153,6 +186,28 @@ func GenerateManagedList(filename, header string, p *packages.Package) error {
 	)
 
 	return errors.Wrap(err, "cannot write managed resource list methods")
+}
+
+// GenerateManagedListModern generates the resource.ManagedList method set for v2-style namespaced MRs.
+func GenerateManagedListModern(filename, header string, p *packages.Package) error {
+	receiver := "l"
+
+	methods := method.Set{
+		"GetItems": method.NewManagedGetItems(receiver, ResourceImport),
+	}
+
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
+		generate.WithHeaders(header),
+		generate.WithImportAliases(map[string]string{
+			ResourceImport: ResourceAlias,
+		}),
+		generate.WithMatcher(match.AllOf(
+			match.ManagedListV2(),
+			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
+		),
+	)
+
+	return errors.Wrap(err, "cannot write V2 managed resource list methods")
 }
 
 // GenerateProviderConfig generates the resource.ProviderConfig method set.
@@ -178,8 +233,8 @@ func GenerateProviderConfig(filename, header string, p *packages.Package) error 
 	return errors.Wrap(err, "cannot write provider config methods")
 }
 
-// GenerateProviderConfigUsage generates the resource.ProviderConfigUsage method set.
-func GenerateProviderConfigUsage(filename, header string, p *packages.Package) error {
+// GenerateProviderConfigUsageLegacy generates the resource.ProviderConfigUsage method set.
+func GenerateProviderConfigUsageLegacy(filename, header string, p *packages.Package) error {
 	receiver := "p"
 
 	methods := method.Set{
@@ -201,9 +256,32 @@ func GenerateProviderConfigUsage(filename, header string, p *packages.Package) e
 	return errors.Wrap(err, "cannot write provider config usage methods")
 }
 
-// GenerateProviderConfigUsageList generates the
+// GenerateProviderConfigUsageModern generates the v2.ProviderConfigUsage method set.
+func GenerateProviderConfigUsageModern(filename, header string, p *packages.Package) error {
+	receiver := "p"
+
+	methods := method.Set{
+		"SetProviderConfigReference": method.NewSetRootProviderConfigTypedReference(receiver, RuntimeImport),
+		"GetProviderConfigReference": method.NewGetRootProviderConfigTypedReference(receiver, RuntimeImport),
+		"SetResourceReference":       method.NewSetRootResourceReference(receiver, RuntimeImport),
+		"GetResourceReference":       method.NewGetRootResourceReference(receiver, RuntimeImport),
+	}
+
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
+		generate.WithHeaders(header),
+		generate.WithImportAliases(map[string]string{RuntimeImport: RuntimeAlias}),
+		generate.WithMatcher(match.AllOf(
+			match.ProviderConfigUsageV2(),
+			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
+		),
+	)
+
+	return errors.Wrap(err, "cannot write provider config usage methods")
+}
+
+// GenerateProviderConfigUsageListLegacy generates the
 // resource.ProviderConfigUsageList method set.
-func GenerateProviderConfigUsageList(filename, header string, p *packages.Package) error {
+func GenerateProviderConfigUsageListLegacy(filename, header string, p *packages.Package) error {
 	receiver := "p"
 
 	methods := method.Set{
@@ -222,8 +300,30 @@ func GenerateProviderConfigUsageList(filename, header string, p *packages.Packag
 	return errors.Wrap(err, "cannot write provider config usage list methods")
 }
 
-// GenerateReferences generates reference resolver calls.
-func GenerateReferences(filename, header string, p *packages.Package) error {
+// GenerateProviderConfigUsageListModern generates the
+// resource.ProviderConfigUsageList method set
+// for XPv2 namespaced MRs.
+func GenerateProviderConfigUsageListModern(filename, header string, p *packages.Package) error {
+	receiver := "p"
+
+	methods := method.Set{
+		"GetItems": method.NewProviderConfigUsageGetItems(receiver, ResourceImport),
+	}
+
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
+		generate.WithHeaders(header),
+		generate.WithImportAliases(map[string]string{RuntimeImport: RuntimeAlias, ResourceImport: ResourceAlias}),
+		generate.WithMatcher(match.AllOf(
+			match.ProviderConfigUsageListV2(),
+			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
+		),
+	)
+
+	return errors.Wrap(err, "cannot write V2 provider config usage list methods")
+}
+
+// GenerateReferencesLegacy generates reference resolver calls.
+func GenerateReferencesLegacy(filename, header string, p *packages.Package) error {
 	receiver := "mg"
 	comm := comments.In(p)
 
@@ -244,4 +344,28 @@ func GenerateReferences(filename, header string, p *packages.Package) error {
 	)
 
 	return errors.Wrap(err, "cannot write reference resolver methods")
+}
+
+// GenerateReferencesModern generates reference resolver calls for XPv2 namespaced MRs.
+func GenerateReferencesModern(filename, header string, p *packages.Package) error {
+	receiver := "mg"
+	comm := comments.In(p)
+
+	methods := method.Set{
+		"ResolveReferences": method.NewResolveReferencesV2(types.NewTraverser(comm), receiver, ClientImport, ReferenceImport),
+	}
+
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
+		generate.WithHeaders(header),
+		generate.WithImportAliases(map[string]string{
+			ClientImport:    ClientAlias,
+			ReferenceImport: ReferenceAlias,
+		}),
+		generate.WithMatcher(match.AllOf(
+			match.ManagedV2(),
+			match.DoesNotHaveMarker(comm, DisableMarker, "false")),
+		),
+	)
+
+	return errors.Wrap(err, "cannot write V2 reference resolver methods")
 }
