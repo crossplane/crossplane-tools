@@ -142,6 +142,28 @@ func NewGetProviderConfigReference(receiver, runtime string) New {
 	}
 }
 
+// NewSetTypedProviderConfigReference returns a NewMethod that writes a SetProviderConfigReference
+// method for the supplied Object to the supplied file.
+func NewSetTypedProviderConfigReference(receiver, runtime string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("SetProviderConfigReference of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetProviderConfigReference").Params(jen.Id("r").Op("*").Qual(runtime, "ProviderConfigReference")).Block(
+			jen.Id(receiver).Dot(fields.NameSpec).Dot("ProviderConfigReference").Op("=").Id("r"),
+		)
+	}
+}
+
+// NewGetTypedProviderConfigReference returns a NewMethod that writes a GetProviderConfigReference
+// method for the supplied Object to the supplied file.
+func NewGetTypedProviderConfigReference(receiver, runtime string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("GetProviderConfigReference of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetProviderConfigReference").Params().Op("*").Qual(runtime, "ProviderConfigReference").Block(
+			jen.Return(jen.Id(receiver).Dot(fields.NameSpec).Dot("ProviderConfigReference")),
+		)
+	}
+}
+
 // NewSetWriteConnectionSecretToReference returns a NewMethod that writes a
 // SetWriteConnectionSecretToReference method for the supplied Object to the
 // supplied file.
@@ -356,6 +378,34 @@ func NewProviderConfigUsageGetItems(receiver, resource string) New {
 				jen.Id("items").Index(jen.Id("i")).Op("=").Op("&").Id(receiver).Dot("Items").Index(jen.Id("i")),
 			),
 			jen.Return(jen.Id("items")),
+		)
+	}
+}
+
+// NewSetRootProviderConfigTypedReference returns a NewMethod that writes a
+// SetProviderConfigTypedReference method for the supplied Object to the supplied
+// file. Note that unlike NewSetProviderConfigTypedReference the generated method
+// expects the ProviderConfigReference to be at the root of the struct, not
+// under its Spec field.
+func NewSetRootProviderConfigTypedReference(receiver, runtime string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("SetProviderConfigReference of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("SetProviderConfigReference").Params(jen.Id("r").Qual(runtime, "ProviderConfigReference")).Block(
+			jen.Id(receiver).Dot("ProviderConfigReference").Op("=").Id("r"),
+		)
+	}
+}
+
+// NewGetRootProviderConfigTypedReference returns a NewMethod that writes a
+// GetProviderConfigTypedReference method for the supplied Object to the supplied
+// file. Note that unlike NewGetProviderConfigTypedReference the generated
+// method expects the ProviderConfigReference to be at the root of the struct,
+// not under its Spec field.
+func NewGetRootProviderConfigTypedReference(receiver, runtime string) New {
+	return func(f *jen.File, o types.Object) {
+		f.Commentf("GetProviderConfigReference of this %s.", o.Name())
+		f.Func().Params(jen.Id(receiver).Op("*").Id(o.Name())).Id("GetProviderConfigReference").Params().Qual(runtime, "ProviderConfigReference").Block(
+			jen.Return(jen.Id(receiver).Dot("ProviderConfigReference")),
 		)
 	}
 }

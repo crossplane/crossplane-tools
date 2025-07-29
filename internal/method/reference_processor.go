@@ -50,6 +50,9 @@ type Reference struct {
 	// RemoteListType is the list type of the type whose reference we're holding.
 	RemoteListType *jen.Statement
 
+	// GetNamespace is the function call for getting the namespace of instance.
+	GetNamespace *jen.Statement
+
 	// GoValueFieldPath is the list of fields that needs to be traveled to access
 	// the current value field. It may include prefixes like [] for array fields,
 	// * for pointer fields or []* for array of pointer fields.
@@ -163,6 +166,7 @@ func (rp *ReferenceProcessor) Process(_ *types.Named, f *types.Var, _, comment s
 		GoValueFieldPath:    append(path, f.Name()),
 		GoRefFieldName:      refFieldName,
 		GoSelectorFieldName: selectorFieldName,
+		GetNamespace:        jen.Id(rp.Receiver).Dot("GetNamespace").Call(),
 		IsPointer:           isPointer,
 		IsSlice:             isList,
 		IsFloatPointer:      isFloatPointer,

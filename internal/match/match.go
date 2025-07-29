@@ -45,6 +45,23 @@ func Managed() Object {
 	}
 }
 
+// ManagedV2 returns an Object matcher that returns true if the supplied Object is
+// a v2-style Crossplane managed resource.
+func ManagedV2() Object {
+	return func(o types.Object) bool {
+		return fields.Has(o,
+			fields.IsTypeMeta().And(fields.IsEmbedded()),
+			fields.IsObjectMeta().And(fields.IsEmbedded()),
+			fields.IsSpec().And(fields.HasFieldThat(
+				fields.IsResourceV2Spec().And(fields.IsEmbedded()),
+			)),
+			fields.IsStatus().And(fields.HasFieldThat(
+				fields.IsResourceStatus().And(fields.IsEmbedded()),
+			)),
+		)
+	}
+}
+
 // ManagedList returns an Object matcher that returns true if the supplied
 // Object is a list of Crossplane managed resource.
 func ManagedList() Object {
@@ -56,6 +73,26 @@ func ManagedList() Object {
 				fields.IsObjectMeta().And(fields.IsEmbedded()),
 				fields.IsSpec().And(fields.HasFieldThat(
 					fields.IsResourceSpec().And(fields.IsEmbedded()),
+				)),
+				fields.IsStatus().And(fields.HasFieldThat(
+					fields.IsResourceStatus().And(fields.IsEmbedded()),
+				)),
+			)),
+		)
+	}
+}
+
+// ManagedListV2 returns an Object matcher that returns true if the supplied
+// Object is a list of Crossplane managed resource.
+func ManagedListV2() Object {
+	return func(o types.Object) bool {
+		return fields.Has(o,
+			fields.IsTypeMeta().And(fields.IsEmbedded()),
+			fields.IsItems().And(fields.IsSlice()).And(fields.HasFieldThat(
+				fields.IsTypeMeta().And(fields.IsEmbedded()),
+				fields.IsObjectMeta().And(fields.IsEmbedded()),
+				fields.IsSpec().And(fields.HasFieldThat(
+					fields.IsResourceV2Spec().And(fields.IsEmbedded()),
 				)),
 				fields.IsStatus().And(fields.HasFieldThat(
 					fields.IsResourceStatus().And(fields.IsEmbedded()),
@@ -92,6 +129,18 @@ func ProviderConfigUsage() Object {
 	}
 }
 
+// ProviderConfigUsageV2 returns an Object matcher that returns true if the supplied
+// Object is a Crossplane v2 style ProviderConfigUsage.
+func ProviderConfigUsageV2() Object {
+	return func(o types.Object) bool {
+		return fields.Has(o,
+			fields.IsTypeMeta().And(fields.IsEmbedded()),
+			fields.IsObjectMeta().And(fields.IsEmbedded()),
+			fields.IsTypedProviderConfigUsage().And(fields.IsEmbedded()),
+		)
+	}
+}
+
 // ProviderConfigUsageList returns an Object matcher that returns true if the
 // supplied Object is a list of Crossplane provider config usages.
 func ProviderConfigUsageList() Object {
@@ -102,6 +151,21 @@ func ProviderConfigUsageList() Object {
 				fields.IsTypeMeta().And(fields.IsEmbedded()),
 				fields.IsObjectMeta().And(fields.IsEmbedded()),
 				fields.IsProviderConfigUsage().And(fields.IsEmbedded()),
+			)),
+		)
+	}
+}
+
+// ProviderConfigUsageListV2 returns an Object matcher that returns true if the
+// supplied Object is a list of Crossplane v2 style provider config usages.
+func ProviderConfigUsageListV2() Object {
+	return func(o types.Object) bool {
+		return fields.Has(o,
+			fields.IsTypeMeta().And(fields.IsEmbedded()),
+			fields.IsItems().And(fields.IsSlice()).And(fields.HasFieldThat(
+				fields.IsTypeMeta().And(fields.IsEmbedded()),
+				fields.IsObjectMeta().And(fields.IsEmbedded()),
+				fields.IsTypedProviderConfigUsage().And(fields.IsEmbedded()),
 			)),
 		)
 	}

@@ -446,3 +446,71 @@ func (t *Type) GetItems() []resource.ProviderConfigUsage {
 		t.Errorf("NewProviderConfigUsageGetItems(): -want, +got\n%s", diff)
 	}
 }
+
+func TestNewSetTypedProviderConfigReference(t *testing.T) {
+	want := `package pkg
+
+import runtime "example.org/runtime"
+
+// SetProviderConfigReference of this Type.
+func (t *Type) SetProviderConfigReference(r *runtime.ProviderConfigReference) {
+	t.Spec.ProviderConfigReference = r
+}
+`
+	f := jen.NewFilePath("pkg")
+	NewSetTypedProviderConfigReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewSetProviderConfigReference(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewGetTypedProviderConfigReference(t *testing.T) {
+	want := `package pkg
+
+import runtime "example.org/runtime"
+
+// GetProviderConfigReference of this Type.
+func (t *Type) GetProviderConfigReference() *runtime.ProviderConfigReference {
+	return t.Spec.ProviderConfigReference
+}
+`
+	f := jen.NewFilePath("pkg")
+	NewGetTypedProviderConfigReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewGetProviderConfigReference(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewSetRootProviderConfigTypedReference(t *testing.T) {
+	want := `package pkg
+
+import runtime "example.org/runtime"
+
+// SetProviderConfigReference of this Type.
+func (t *Type) SetProviderConfigReference(r runtime.ProviderConfigReference) {
+	t.ProviderConfigReference = r
+}
+`
+	f := jen.NewFilePath("pkg")
+	NewSetRootProviderConfigTypedReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewSetRootProviderConfigReference(): -want, +got\n%s", diff)
+	}
+}
+
+func TestNewGetRootProviderConfigTypedReference(t *testing.T) {
+	want := `package pkg
+
+import runtime "example.org/runtime"
+
+// GetProviderConfigReference of this Type.
+func (t *Type) GetProviderConfigReference() runtime.ProviderConfigReference {
+	return t.ProviderConfigReference
+}
+`
+	f := jen.NewFilePath("pkg")
+	NewGetRootProviderConfigTypedReference("t", "example.org/runtime")(f, MockObject{Named: "Type"})
+	if diff := cmp.Diff(want, fmt.Sprintf("%#v", f)); diff != "" {
+		t.Errorf("NewGetRootProviderConfigReference(): -want, +got\n%s", diff)
+	}
+}
