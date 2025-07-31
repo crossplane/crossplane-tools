@@ -49,14 +49,14 @@ const (
 	TypeSuffixSpec                 = NameSpec
 	TypeSuffixSpecTemplate         = NameSpecTemplate
 	TypeSuffixStatus               = NameStatus
-	TypeSuffixResourceSpec         = "github.com/crossplane/crossplane-runtime/apis/common/v1.ResourceSpec"
-	TypeSuffixResourceStatus       = "github.com/crossplane/crossplane-runtime/apis/common/v1.ResourceStatus"
-	TypeSuffixProviderConfigSpec   = "github.com/crossplane/crossplane-runtime/apis/common/v1.ProviderConfigSpec"
-	TypeSuffixProviderConfigStatus = "github.com/crossplane/crossplane-runtime/apis/common/v1.ProviderConfigStatus"
-	TypeSuffixProviderConfigUsage  = "github.com/crossplane/crossplane-runtime/apis/common/v1.ProviderConfigUsage"
+	TypeSuffixResourceSpec         = "github.com/crossplane/crossplane-runtime/v2/apis/common/v1.ResourceSpec"
+	TypeSuffixResourceStatus       = "github.com/crossplane/crossplane-runtime/v2/apis/common/v1.ResourceStatus"
+	TypeSuffixProviderConfigSpec   = "github.com/crossplane/crossplane-runtime/v2/apis/common/v1.ProviderConfigSpec"
+	TypeSuffixProviderConfigStatus = "github.com/crossplane/crossplane-runtime/v2/apis/common/v1.ProviderConfigStatus"
+	TypeSuffixProviderConfigUsage  = "github.com/crossplane/crossplane-runtime/v2/apis/common/v1.ProviderConfigUsage"
 
-	TypeSuffixProviderConfigUsageV2 = "github.com/crossplane/crossplane-runtime/apis/common/v2.TypedProviderConfigUsage"
-	TypeSuffixResourceV2Spec        = "github.com/crossplane/crossplane-runtime/apis/common/v2.ManagedResourceSpec"
+	TypeSuffixProviderConfigUsageV2 = "github.com/crossplane/crossplane-runtime/v2/apis/common/v2.TypedProviderConfigUsage"
+	TypeSuffixResourceV2Spec        = "github.com/crossplane/crossplane-runtime/v2/apis/common/v2.ManagedResourceSpec"
 )
 
 func matches(s *types.Struct, m Matcher) bool {

@@ -91,7 +91,7 @@ Args:
 ```
 
 [Crossplane]: https://crossplane.io
-[`resource.Managed`]: https://godoc.org/github.com/crossplane/crossplane-runtime/pkg/resource#Managed
-[`ResourceSpec`]: https://godoc.org/github.com/crossplane/crossplane-runtime/apis/common/v1#ResourceSpec
-[`ResourceStatus`]: https://godoc.org/github.com/crossplane/crossplane-runtime/apis/common/v1#ResourceStatus
+[`resource.Managed`]: https://godoc.org/github.com/crossplane/crossplane-runtime/v2/pkg/resource#Managed
+[`ResourceSpec`]: https://godoc.org/github.com/crossplane/crossplane-runtime/v2/apis/common/v1#ResourceSpec
+[`ResourceStatus`]: https://godoc.org/github.com/crossplane/crossplane-runtime/v2/apis/common/v1#ResourceStatus
 [Provider Development Guide]: https://github.com/crossplane/crossplane/blob/master/contributing/guide-provider-development.md#defining-resource-kinds

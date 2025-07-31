@@ -51,13 +51,13 @@ const (
 	ClientImport = "sigs.k8s.io/controller-runtime/pkg/client"
 
 	RuntimeAlias  = "xpv1"
-	RuntimeImport = "github.com/crossplane/crossplane-runtime/apis/common/v1"
+	RuntimeImport = "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
 
 	ResourceAlias  = "resource"
-	ResourceImport = "github.com/crossplane/crossplane-runtime/pkg/resource"
+	ResourceImport = "github.com/crossplane/crossplane-runtime/v2/pkg/resource"
 
 	ReferenceAlias  = "reference"
-	ReferenceImport = "github.com/crossplane/crossplane-runtime/pkg/reference"
+	ReferenceImport = "github.com/crossplane/crossplane-runtime/v2/pkg/reference"
 )
 
 func main() {
