@@ -178,6 +178,10 @@ func singleResolutionCall(ref Reference, referencePkgPath, resolutionRequestType
 			toPointerFunction = "ToFloatPtrValue"
 			fromPointerFunction = "FromFloatPtrValue"
 		}
+		if ref.IsIntPointer {
+			toPointerFunction = "ToIntPtrValue"
+			fromPointerFunction = "FromIntPtrValue"
+		}
 		if ref.IsPointer {
 			setResolvedValue = currentValuePath.Clone().Op("=").Qual(referencePkgPath, toPointerFunction).Call(jen.Id("rsp").Dot("ResolvedValue"))
 			currentValuePath = jen.Qual(referencePkgPath, fromPointerFunction).Call(currentValuePath)
@@ -227,6 +231,10 @@ func multiResolutionCall(ref Reference, referencePkgPath, multiResolutionRequest
 		if ref.IsFloatPointer {
 			toPointersFunction = "ToFloatPtrValues"
 			fromPointersFunction = "FromFloatPtrValues"
+		}
+		if ref.IsIntPointer {
+			toPointersFunction = "ToIntPtrValues"
+			fromPointersFunction = "FromIntPtrValues"
 		}
 
 		if ref.IsPointer {
