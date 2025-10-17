@@ -8,7 +8,7 @@ PLATFORMS ?= linux_amd64 darwin_amd64
 # to run a target until the include commands succeeded.
 -include build/makelib/common.mk
 
-S3_BUCKET ?= crossplane.releases/$(PROJECT_NAME)
+S3_BUCKET ?= crossplane-releases/$(PROJECT_NAME)
 -include build/makelib/output.mk
 
 # Set a sane default so that the nprocs calculation below is less noisy on the initial
