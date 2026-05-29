@@ -56,7 +56,7 @@ func ManagedV2() Object {
 				fields.IsResourceV2Spec().And(fields.IsEmbedded()),
 			)),
 			fields.IsStatus().And(fields.HasFieldThat(
-				fields.IsResourceStatus().And(fields.IsEmbedded()),
+				fields.IsResourceStatus().Or(fields.IsManagedResourceStatus()).And(fields.IsEmbedded()),
 			)),
 		)
 	}
@@ -95,7 +95,7 @@ func ManagedListV2() Object {
 					fields.IsResourceV2Spec().And(fields.IsEmbedded()),
 				)),
 				fields.IsStatus().And(fields.HasFieldThat(
-					fields.IsResourceStatus().And(fields.IsEmbedded()),
+					fields.IsResourceStatus().Or(fields.IsManagedResourceStatus()).And(fields.IsEmbedded()),
 				)),
 			)),
 		)
@@ -113,7 +113,7 @@ func ManagedCluster() Object {
 				fields.IsClusterManagedResourceSpec().And(fields.IsEmbedded()),
 			)),
 			fields.IsStatus().And(fields.HasFieldThat(
-				fields.IsResourceStatus().And(fields.IsEmbedded()),
+				fields.IsResourceStatus().Or(fields.IsManagedResourceStatus()).And(fields.IsEmbedded()),
 			)),
 		)
 	}
@@ -132,7 +132,7 @@ func ManagedClusterList() Object {
 					fields.IsClusterManagedResourceSpec().And(fields.IsEmbedded()),
 				)),
 				fields.IsStatus().And(fields.HasFieldThat(
-					fields.IsResourceStatus().And(fields.IsEmbedded()),
+					fields.IsResourceStatus().Or(fields.IsManagedResourceStatus()).And(fields.IsEmbedded()),
 				)),
 			)),
 		)

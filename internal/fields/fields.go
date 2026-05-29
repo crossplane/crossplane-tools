@@ -40,6 +40,7 @@ const (
 	NameTypedProviderConfigUsage   = "TypedProviderConfigUsage"
 	NameResourceV2Spec             = "ManagedResourceSpec"
 	NameClusterManagedResourceSpec = "ClusterManagedResourceSpec"
+	NameManagedResourceStatus      = "ManagedResourceStatus"
 )
 
 // Field type suffixes.
@@ -60,6 +61,7 @@ const (
 	TypeSuffixResourceV2Spec                = "github.com/crossplane/crossplane-runtime/v2/apis/common/v2.ManagedResourceSpec"
 	TypeSuffixNamespacedManagedResourceSpec = "github.com/crossplane/crossplane/apis/v2/core/v2.ManagedResourceSpec"
 	TypeSuffixClusterManagedResourceSpec    = "github.com/crossplane/crossplane/apis/v2/core/v2.ClusterManagedResourceSpec"
+	TypeSuffixManagedResourceStatus         = "github.com/crossplane/crossplane/apis/v2/core/v2.ManagedResourceStatus"
 )
 
 func matches(s *types.Struct, m Matcher) bool {
@@ -79,6 +81,14 @@ type Matcher func(f *types.Var) bool
 func (o Matcher) And(m Matcher) Matcher {
 	return func(f *types.Var) bool {
 		return o(f) && m(f)
+	}
+}
+
+// Or returns a Matcher that returns true if either the original Matcher o or
+// the new Matcher m matches.
+func (o Matcher) Or(m Matcher) Matcher {
+	return func(f *types.Var) bool {
+		return o(f) || m(f)
 	}
 }
 
@@ -216,6 +226,12 @@ func IsClusterManagedResourceSpec() Matcher {
 // IsResourceStatus returns a Matcher that returns true if the supplied field
 // appears to be a Crossplane managed resource status.
 func IsResourceStatus() Matcher { return IsTypeNamed(TypeSuffixResourceStatus, NameResourceStatus) }
+
+// IsManagedResourceStatus returns a Matcher that returns true if the supplied
+// field appears to be a Crossplane managed resource status from the core API.
+func IsManagedResourceStatus() Matcher {
+	return IsTypeNamed(TypeSuffixManagedResourceStatus, NameManagedResourceStatus)
+}
 
 // IsProviderConfigSpec returns a Matcher that returns true if the supplied
 // field appears to be a Crossplane provider config spec.
