@@ -89,6 +89,8 @@ type OtherSpec struct {
 	OtherID string
 }
 
+type Configuration struct {}
+
 type ModelSpec struct {
 	ForProvider       ModelParameters
 }

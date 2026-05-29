@@ -102,6 +102,43 @@ func ManagedListV2() Object {
 	}
 }
 
+// ManagedCluster returns an Object matcher that returns true if the supplied Object is
+// a cluster-scoped Crossplane managed resource using ClusterManagedResourceSpec.
+func ManagedCluster() Object {
+	return func(o types.Object) bool {
+		return fields.Has(o,
+			fields.IsTypeMeta().And(fields.IsEmbedded()),
+			fields.IsObjectMeta().And(fields.IsEmbedded()),
+			fields.IsSpec().And(fields.HasFieldThat(
+				fields.IsClusterManagedResourceSpec().And(fields.IsEmbedded()),
+			)),
+			fields.IsStatus().And(fields.HasFieldThat(
+				fields.IsResourceStatus().And(fields.IsEmbedded()),
+			)),
+		)
+	}
+}
+
+// ManagedClusterList returns an Object matcher that returns true if the supplied
+// Object is a list of cluster-scoped Crossplane managed resources.
+func ManagedClusterList() Object {
+	return func(o types.Object) bool {
+		return fields.Has(o,
+			fields.IsTypeMeta().And(fields.IsEmbedded()),
+			fields.IsItems().And(fields.IsSlice()).And(fields.HasFieldThat(
+				fields.IsTypeMeta().And(fields.IsEmbedded()),
+				fields.IsObjectMeta().And(fields.IsEmbedded()),
+				fields.IsSpec().And(fields.HasFieldThat(
+					fields.IsClusterManagedResourceSpec().And(fields.IsEmbedded()),
+				)),
+				fields.IsStatus().And(fields.HasFieldThat(
+					fields.IsResourceStatus().And(fields.IsEmbedded()),
+				)),
+			)),
+		)
+	}
+}
+
 // ProviderConfig returns an Object matcher that returns true if the supplied
 // Object is a Crossplane ProviderConfig.
 func ProviderConfig() Object {

@@ -37,8 +37,9 @@ const (
 	NameProviderConfigUsage  = "ProviderConfigUsage"
 	NameItems                = "Items"
 
-	NameTypedProviderConfigUsage = "TypedProviderConfigUsage"
-	NameResourceV2Spec           = "ManagedResourceSpec"
+	NameTypedProviderConfigUsage   = "TypedProviderConfigUsage"
+	NameResourceV2Spec             = "ManagedResourceSpec"
+	NameClusterManagedResourceSpec = "ClusterManagedResourceSpec"
 )
 
 // Field type suffixes.
@@ -55,8 +56,9 @@ const (
 	TypeSuffixProviderConfigStatus = "github.com/crossplane/crossplane-runtime/v2/apis/common/v1.ProviderConfigStatus"
 	TypeSuffixProviderConfigUsage  = "github.com/crossplane/crossplane-runtime/v2/apis/common/v1.ProviderConfigUsage"
 
-	TypeSuffixProviderConfigUsageV2 = "github.com/crossplane/crossplane-runtime/v2/apis/common/v2.TypedProviderConfigUsage"
-	TypeSuffixResourceV2Spec        = "github.com/crossplane/crossplane-runtime/v2/apis/common/v2.ManagedResourceSpec"
+	TypeSuffixProviderConfigUsageV2      = "github.com/crossplane/crossplane-runtime/v2/apis/common/v2.TypedProviderConfigUsage"
+	TypeSuffixResourceV2Spec             = "github.com/crossplane/crossplane-runtime/v2/apis/common/v2.ManagedResourceSpec"
+	TypeSuffixClusterManagedResourceSpec = "github.com/crossplane/crossplane/apis/v2/core/v2.ClusterManagedResourceSpec"
 )
 
 func matches(s *types.Struct, m Matcher) bool {
@@ -197,6 +199,12 @@ func IsResourceSpec() Matcher { return IsTypeNamed(TypeSuffixResourceSpec, NameR
 // IsResourceV2Spec returns a Matcher that returns true if the supplied field
 // appears to be a Crossplane managed resource spec.
 func IsResourceV2Spec() Matcher { return IsTypeNamed(TypeSuffixResourceV2Spec, NameResourceV2Spec) }
+
+// IsClusterManagedResourceSpec returns a Matcher that returns true if the supplied field
+// appears to be a Crossplane cluster-scoped managed resource spec.
+func IsClusterManagedResourceSpec() Matcher {
+	return IsTypeNamed(TypeSuffixClusterManagedResourceSpec, NameClusterManagedResourceSpec)
+}
 
 // IsResourceStatus returns a Matcher that returns true if the supplied field
 // appears to be a Crossplane managed resource status.

@@ -53,6 +53,9 @@ const (
 	RuntimeAlias  = "xpv1"
 	RuntimeImport = "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
 
+	RuntimeV2Alias  = "v2"
+	RuntimeV2Import = "github.com/crossplane/crossplane/apis/v2/core/v2"
+
 	ResourceAlias  = "resource"
 	ResourceImport = "github.com/crossplane/crossplane-runtime/v2/pkg/resource"
 
@@ -92,8 +95,10 @@ func main() {
 		}
 		kingpin.FatalIfError(GenerateManagedLegacy(*filenameManaged, header, p), "cannot write managed resource method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateManagedModern(*filenameManaged, header, p), "cannot write managed resource method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateManagedCluster(*filenameManaged, header, p), "cannot write cluster managed resource method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateManagedListLegacy(*filenameManagedList, header, p), "cannot write managed resource list method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateManagedListModern(*filenameManagedList, header, p), "cannot write managed resource list method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateManagedClusterList(*filenameManagedList, header, p), "cannot write cluster managed resource list method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateProviderConfig(*filenamePC, header, p), "cannot write provider config method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateProviderConfigUsageLegacy(*filenamePCU, header, p), "cannot write provider config usage method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateProviderConfigUsageModern(*filenamePCU, header, p), "cannot write provider config usage method set for package %s", p.PkgPath)
@@ -101,6 +106,7 @@ func main() {
 		kingpin.FatalIfError(GenerateProviderConfigUsageListModern(*filenamePCUList, header, p), "cannot write provider config usage list method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateReferencesLegacy(*filenameResolvers, header, p), "cannot write reference resolvers for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateReferencesModern(*filenameResolvers, header, p), "cannot write reference resolvers for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateReferencesCluster(*filenameResolvers, header, p), "cannot write cluster reference resolvers for package %s", p.PkgPath)
 	}
 }
 
@@ -166,6 +172,38 @@ func GenerateManagedModern(filename, header string, p *packages.Package) error {
 	return errors.Wrap(err, "cannot write V2 managed resource methods")
 }
 
+// GenerateManagedCluster generates the resource.Managed method set for cluster-scoped MRs.
+func GenerateManagedCluster(filename, header string, p *packages.Package) error {
+	receiver := "mg"
+
+	methods := method.Set{
+		"SetConditions":                       method.NewSetConditions(receiver, RuntimeV2Import),
+		"GetCondition":                        method.NewGetCondition(receiver, RuntimeV2Import),
+		"GetProviderConfigReference":          method.NewGetProviderConfigReference(receiver, RuntimeV2Import),
+		"SetProviderConfigReference":          method.NewSetProviderConfigReference(receiver, RuntimeV2Import),
+		"SetWriteConnectionSecretToReference": method.NewSetWriteConnectionSecretToReference(receiver, RuntimeV2Import),
+		"GetWriteConnectionSecretToReference": method.NewGetWriteConnectionSecretToReference(receiver, RuntimeV2Import),
+		"SetManagementPolicies":               method.NewSetManagementPolicies(receiver, RuntimeV2Import),
+		"GetManagementPolicies":               method.NewGetManagementPolicies(receiver, RuntimeV2Import),
+		"SetDeletionPolicy":                   method.NewSetDeletionPolicy(receiver, RuntimeV2Import),
+		"GetDeletionPolicy":                   method.NewGetDeletionPolicy(receiver, RuntimeV2Import),
+	}
+
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
+		generate.WithHeaders(header),
+		generate.WithImportAliases(map[string]string{
+			CoreImport:      CoreAlias,
+			RuntimeV2Import: RuntimeV2Alias,
+		}),
+		generate.WithMatcher(match.AllOf(
+			match.ManagedCluster(),
+			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
+		),
+	)
+
+	return errors.Wrap(err, "cannot write cluster managed resource methods")
+}
+
 // GenerateManagedListLegacy generates the resource.ManagedList method set.
 func GenerateManagedListLegacy(filename, header string, p *packages.Package) error {
 	receiver := "l"
@@ -208,6 +246,28 @@ func GenerateManagedListModern(filename, header string, p *packages.Package) err
 	)
 
 	return errors.Wrap(err, "cannot write V2 managed resource list methods")
+}
+
+// GenerateManagedClusterList generates the resource.ManagedList method set for cluster-scoped MRs.
+func GenerateManagedClusterList(filename, header string, p *packages.Package) error {
+	receiver := "l"
+
+	methods := method.Set{
+		"GetItems": method.NewManagedGetItems(receiver, ResourceImport),
+	}
+
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
+		generate.WithHeaders(header),
+		generate.WithImportAliases(map[string]string{
+			ResourceImport: ResourceAlias,
+		}),
+		generate.WithMatcher(match.AllOf(
+			match.ManagedClusterList(),
+			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
+		),
+	)
+
+	return errors.Wrap(err, "cannot write cluster managed resource list methods")
 }
 
 // GenerateProviderConfig generates the resource.ProviderConfig method set.
@@ -368,4 +428,28 @@ func GenerateReferencesModern(filename, header string, p *packages.Package) erro
 	)
 
 	return errors.Wrap(err, "cannot write V2 reference resolver methods")
+}
+
+// GenerateReferencesCluster generates reference resolver calls for cluster-scoped MRs.
+func GenerateReferencesCluster(filename, header string, p *packages.Package) error {
+	receiver := "mg"
+	comm := comments.In(p)
+
+	methods := method.Set{
+		"ResolveReferences": method.NewResolveReferences(types.NewTraverser(comm), receiver, ClientImport, ReferenceImport),
+	}
+
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
+		generate.WithHeaders(header),
+		generate.WithImportAliases(map[string]string{
+			ClientImport:    ClientAlias,
+			ReferenceImport: ReferenceAlias,
+		}),
+		generate.WithMatcher(match.AllOf(
+			match.ManagedCluster(),
+			match.DoesNotHaveMarker(comm, DisableMarker, "false")),
+		),
+	)
+
+	return errors.Wrap(err, "cannot write cluster reference resolver methods")
 }
