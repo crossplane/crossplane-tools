@@ -11,9 +11,13 @@ considered capable of satisfying crossplane-runtime's interfaces based on the
 heuristics described in the [Provider Development Guide], for example a
 managed resource must:
 
-* Embed a [`ResourceStatus`] struct in their `Status` struct.
-* Embed a [`ResourceSpec`] struct in their `Spec` struct.
+* Embed a [`ResourceStatus`] or [`ManagedResourceStatus`] struct in their `Status` struct.
+* Embed a [`ResourceSpec`], [`ManagedResourceSpec`], or [`ClusterManagedResourceSpec`] struct in their `Spec` struct.
 * Embed a `Parameters` struct in their `Spec` struct.
+
+The newer [`ManagedResourceSpec`], [`ClusterManagedResourceSpec`], and
+[`ManagedResourceStatus`] types from `github.com/crossplane/crossplane/apis/v2/core/v2`
+are supported for namespaced and cluster-scoped managed resources respectively.
 
 Methods are not written if they are already defined outside of the file that
 would be generated. Use the `//+crossplane:generate:methods=false` comment
@@ -94,4 +98,7 @@ Args:
 [`resource.Managed`]: https://godoc.org/github.com/crossplane/crossplane-runtime/v2/pkg/resource#Managed
 [`ResourceSpec`]: https://godoc.org/github.com/crossplane/crossplane-runtime/v2/apis/common/v1#ResourceSpec
 [`ResourceStatus`]: https://godoc.org/github.com/crossplane/crossplane-runtime/v2/apis/common/v1#ResourceStatus
+[`ManagedResourceSpec`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#ManagedResourceSpec
+[`ClusterManagedResourceSpec`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#ClusterManagedResourceSpec
+[`ManagedResourceStatus`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#ManagedResourceStatus
 [Provider Development Guide]: https://github.com/crossplane/crossplane/blob/master/contributing/guide-provider-development.md#defining-resource-kinds
