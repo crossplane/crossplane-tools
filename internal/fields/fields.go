@@ -208,13 +208,13 @@ func IsStatus() Matcher { return IsTypeNamed(NameStatus, TypeSuffixStatus) }
 func IsResourceSpec() Matcher { return IsTypeNamed(TypeSuffixResourceSpec, NameResourceSpec) }
 
 // IsResourceV2Spec returns a Matcher that returns true if the supplied field
-// appears to be a Crossplane managed resource spec. It matches both the
-// crossplane-runtime and crossplane core ManagedResourceSpec types.
-func IsResourceV2Spec() Matcher {
-	return func(f *types.Var) bool {
-		return IsTypeNamed(TypeSuffixResourceV2Spec, NameResourceV2Spec)(f) ||
-			IsTypeNamed(TypeSuffixNamespacedManagedResourceSpec, NameResourceV2Spec)(f)
-	}
+// appears to be a Crossplane managed resource spec from crossplane-runtime.
+func IsResourceV2Spec() Matcher { return IsTypeNamed(TypeSuffixResourceV2Spec, NameResourceV2Spec) }
+
+// IsNamespacedManagedResourceSpec returns a Matcher that returns true if the supplied field
+// appears to be a Crossplane namespaced managed resource spec from the core API.
+func IsNamespacedManagedResourceSpec() Matcher {
+	return IsTypeNamed(TypeSuffixNamespacedManagedResourceSpec, NameResourceV2Spec)
 }
 
 // IsClusterManagedResourceSpec returns a Matcher that returns true if the supplied field

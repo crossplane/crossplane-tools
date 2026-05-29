@@ -46,7 +46,7 @@ func Managed() Object {
 }
 
 // ManagedV2 returns an Object matcher that returns true if the supplied Object is
-// a v2-style Crossplane managed resource.
+// a v2-style Crossplane managed resource using crossplane-runtime types.
 func ManagedV2() Object {
 	return func(o types.Object) bool {
 		return fields.Has(o,
@@ -56,7 +56,24 @@ func ManagedV2() Object {
 				fields.IsResourceV2Spec().And(fields.IsEmbedded()),
 			)),
 			fields.IsStatus().And(fields.HasFieldThat(
-				fields.IsResourceStatus().Or(fields.IsManagedResourceStatus()).And(fields.IsEmbedded()),
+				fields.IsResourceStatus().And(fields.IsEmbedded()),
+			)),
+		)
+	}
+}
+
+// ManagedNamespaced returns an Object matcher that returns true if the supplied Object is
+// a namespaced Crossplane managed resource using the core API types.
+func ManagedNamespaced() Object {
+	return func(o types.Object) bool {
+		return fields.Has(o,
+			fields.IsTypeMeta().And(fields.IsEmbedded()),
+			fields.IsObjectMeta().And(fields.IsEmbedded()),
+			fields.IsSpec().And(fields.HasFieldThat(
+				fields.IsNamespacedManagedResourceSpec().And(fields.IsEmbedded()),
+			)),
+			fields.IsStatus().And(fields.HasFieldThat(
+				fields.IsManagedResourceStatus().And(fields.IsEmbedded()),
 			)),
 		)
 	}
@@ -83,7 +100,7 @@ func ManagedList() Object {
 }
 
 // ManagedListV2 returns an Object matcher that returns true if the supplied
-// Object is a list of Crossplane managed resource.
+// Object is a list of Crossplane managed resource using crossplane-runtime types.
 func ManagedListV2() Object {
 	return func(o types.Object) bool {
 		return fields.Has(o,
@@ -95,7 +112,27 @@ func ManagedListV2() Object {
 					fields.IsResourceV2Spec().And(fields.IsEmbedded()),
 				)),
 				fields.IsStatus().And(fields.HasFieldThat(
-					fields.IsResourceStatus().Or(fields.IsManagedResourceStatus()).And(fields.IsEmbedded()),
+					fields.IsResourceStatus().And(fields.IsEmbedded()),
+				)),
+			)),
+		)
+	}
+}
+
+// ManagedNamespacedList returns an Object matcher that returns true if the supplied
+// Object is a list of namespaced Crossplane managed resources using the core API types.
+func ManagedNamespacedList() Object {
+	return func(o types.Object) bool {
+		return fields.Has(o,
+			fields.IsTypeMeta().And(fields.IsEmbedded()),
+			fields.IsItems().And(fields.IsSlice()).And(fields.HasFieldThat(
+				fields.IsTypeMeta().And(fields.IsEmbedded()),
+				fields.IsObjectMeta().And(fields.IsEmbedded()),
+				fields.IsSpec().And(fields.HasFieldThat(
+					fields.IsNamespacedManagedResourceSpec().And(fields.IsEmbedded()),
+				)),
+				fields.IsStatus().And(fields.HasFieldThat(
+					fields.IsManagedResourceStatus().And(fields.IsEmbedded()),
 				)),
 			)),
 		)
