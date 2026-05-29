@@ -56,9 +56,10 @@ const (
 	TypeSuffixProviderConfigStatus = "github.com/crossplane/crossplane-runtime/v2/apis/common/v1.ProviderConfigStatus"
 	TypeSuffixProviderConfigUsage  = "github.com/crossplane/crossplane-runtime/v2/apis/common/v1.ProviderConfigUsage"
 
-	TypeSuffixProviderConfigUsageV2      = "github.com/crossplane/crossplane-runtime/v2/apis/common/v2.TypedProviderConfigUsage"
-	TypeSuffixResourceV2Spec             = "github.com/crossplane/crossplane-runtime/v2/apis/common/v2.ManagedResourceSpec"
-	TypeSuffixClusterManagedResourceSpec = "github.com/crossplane/crossplane/apis/v2/core/v2.ClusterManagedResourceSpec"
+	TypeSuffixProviderConfigUsageV2         = "github.com/crossplane/crossplane-runtime/v2/apis/common/v2.TypedProviderConfigUsage"
+	TypeSuffixResourceV2Spec                = "github.com/crossplane/crossplane-runtime/v2/apis/common/v2.ManagedResourceSpec"
+	TypeSuffixNamespacedManagedResourceSpec = "github.com/crossplane/crossplane/apis/v2/core/v2.ManagedResourceSpec"
+	TypeSuffixClusterManagedResourceSpec    = "github.com/crossplane/crossplane/apis/v2/core/v2.ClusterManagedResourceSpec"
 )
 
 func matches(s *types.Struct, m Matcher) bool {
@@ -197,8 +198,14 @@ func IsStatus() Matcher { return IsTypeNamed(NameStatus, TypeSuffixStatus) }
 func IsResourceSpec() Matcher { return IsTypeNamed(TypeSuffixResourceSpec, NameResourceSpec) }
 
 // IsResourceV2Spec returns a Matcher that returns true if the supplied field
-// appears to be a Crossplane managed resource spec.
-func IsResourceV2Spec() Matcher { return IsTypeNamed(TypeSuffixResourceV2Spec, NameResourceV2Spec) }
+// appears to be a Crossplane managed resource spec. It matches both the
+// crossplane-runtime and crossplane core ManagedResourceSpec types.
+func IsResourceV2Spec() Matcher {
+	return func(f *types.Var) bool {
+		return IsTypeNamed(TypeSuffixResourceV2Spec, NameResourceV2Spec)(f) ||
+			IsTypeNamed(TypeSuffixNamespacedManagedResourceSpec, NameResourceV2Spec)(f)
+	}
+}
 
 // IsClusterManagedResourceSpec returns a Matcher that returns true if the supplied field
 // appears to be a Crossplane cluster-scoped managed resource spec.
