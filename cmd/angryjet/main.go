@@ -53,7 +53,7 @@ const (
 	RuntimeAlias  = "xpv1"
 	RuntimeImport = "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
 
-	RuntimeV2Alias  = "v2"
+	RuntimeV2Alias  = "xpv2"
 	RuntimeV2Import = "github.com/crossplane/crossplane/apis/v2/core/v2"
 
 	ResourceAlias  = "resource"
