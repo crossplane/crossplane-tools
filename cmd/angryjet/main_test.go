@@ -138,12 +138,49 @@ type ModernResourceList struct {
 type ModernProviderConfigUsage struct {
 	metav1.TypeMeta
 	metav1.ObjectMeta
-	xprv2.TypedProviderConfigUsage
+	xpv2.TypedProviderConfigUsage
 }
 
 type ModernProviderConfigUsageList struct {
 	metav1.TypeMeta
 	Items []ModernProviderConfigUsage
+}
+
+type ModernProviderCredentials struct {
+	Source xpv2.CredentialsSource
+	xpv2.CommonCredentialSelectors
+}
+
+type ModernProviderConfigSpec struct {
+	xprv1.ProviderConfigSpec
+	Credentials ModernProviderCredentials
+}
+
+// A ModernProviderConfigStatus reflects the observed state of a ProviderConfig.
+type ModernProviderConfigStatus struct {
+	xpv2.ProviderConfigStatus
+}
+
+type ModernProviderConfig struct {
+	metav1.TypeMeta
+	metav1.ObjectMeta
+	Spec   ModernProviderConfigSpec
+	Status ModernProviderConfigStatus
+}
+
+type LegacyProviderConfigSpec struct {
+	xprv1.ProviderConfigSpec
+}
+
+type LegacyProviderConfigStatus struct {
+	xprv1.ProviderConfigStatus
+}
+
+type LegacyProviderConfig struct {
+	metav1.TypeMeta
+	metav1.ObjectMeta
+	Spec   LegacyProviderConfigSpec
+	Status LegacyProviderConfigStatus
 }
 `
 
@@ -168,13 +205,44 @@ type ManagedResourceStatus struct{}
 	runtimeV1FixtureSource = `package v1
 
 type ResourceStatus struct{}
+
+type Condition struct{}
+
+type ConditionType string
+
+type User struct{}
+
+type ProviderConfigSpec struct{}
+
+type ProviderConfigStatus struct{}
+
+func (p *ProviderConfigStatus) SetConditions(c ...Condition) {}
+
+func (p *ProviderConfigStatus) GetCondition(ct ConditionType) Condition { return Condition{} }
+
+func (p *ProviderConfigStatus) SetUsers(u ...User) {}
+
+func (p *ProviderConfigStatus) GetUsers() []User { return nil }
 `
 
 	runtimeV2FixtureSource = `package v2
 
 type ManagedResourceSpec struct{}
+`
+
+	coreV2ProviderConfigFixtureSource = `package v2
+
+type ProviderConfigStatus struct{}
+
+type ProviderConfigReference struct{}
+
+type TypedReference struct{}
 
 type TypedProviderConfigUsage struct{}
+
+type CredentialsSource string
+
+type CommonCredentialSelectors struct{}
 `
 )
 
@@ -328,6 +396,12 @@ func TestGenerateMethods(t *testing.T) {
 			},
 			want: want{
 				contains: []string{
+					`func (p *ModernProviderConfigUsage) SetProviderConfigReference(r xpv2.ProviderConfigReference) {`,
+					`func (p *ModernProviderConfigUsage) GetProviderConfigReference() xpv2.ProviderConfigReference {`,
+					`func (p *ModernProviderConfigUsage) SetResourceReference(r xpv2.TypedReference) {`,
+					`func (p *ModernProviderConfigUsage) GetResourceReference() xpv2.TypedReference {`,
+				},
+				notContains: []string{
 					`func (p *ModernProviderConfigUsage) SetProviderConfigReference(r xpv1.ProviderConfigReference) {`,
 					`func (p *ModernProviderConfigUsage) GetResourceReference() xpv1.TypedReference {`,
 				},
@@ -341,6 +415,35 @@ func TestGenerateMethods(t *testing.T) {
 			want: want{
 				contains: []string{
 					`func (p *ModernProviderConfigUsageList) GetItems() []resource.ProviderConfigUsage {`,
+				},
+			},
+		},
+		"Provider config legacy": {
+			args: args{
+				generate: GenerateProviderConfigLegacy,
+				filename: "zz_generated.legacy_pc.go",
+			},
+			want: want{
+				contains: []string{
+					`func (p *LegacyProviderConfig) SetConditions(c ...xpv1.Condition) {`,
+					`func (p *LegacyProviderConfig) GetCondition(ct xpv1.ConditionType) xpv1.Condition {`,
+				},
+			},
+		},
+		"Provider config modern status and credential migration": {
+			args: args{
+				generate: GenerateProviderConfigModern,
+				filename: "zz_generated.modern_pc.go",
+			},
+			want: want{
+				contains: []string{
+					`func (p *ModernProviderConfig) SetUsers(i int64) {`,
+					`func (p *ModernProviderConfig) GetUsers() int64 {`,
+					`func (p *ModernProviderConfig) SetConditions(c ...xpv2.Condition) {`,
+					`func (p *ModernProviderConfig) GetCondition(ct xpv2.ConditionType) xpv2.Condition {`,
+				},
+				notContains: []string{
+					`func (p *ModernProviderConfig) GetCondition(ct xpv1.ConditionType) xpv1.Condition {`,
 				},
 			},
 		},
@@ -398,7 +501,8 @@ func loadFixturePackage(t *testing.T) *packages.Package {
 		{
 			Name: "github.com/crossplane/crossplane",
 			Files: map[string]any{
-				"apis/v2/core/v2/types.go": coreV2FixtureSource,
+				"apis/v2/core/v2/types.go":          coreV2FixtureSource,
+				"apis/v2/core/v2/providerconfig.go": coreV2ProviderConfigFixtureSource,
 			},
 		},
 		{

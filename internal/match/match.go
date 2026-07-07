@@ -176,9 +176,9 @@ func ManagedClusterList() Object {
 	}
 }
 
-// ProviderConfig returns an Object matcher that returns true if the supplied
-// Object is a Crossplane ProviderConfig.
-func ProviderConfig() Object {
+// ProviderConfigLegacy returns an Object matcher that returns true if the supplied
+// Object is a legacy Crossplane ProviderConfig.
+func ProviderConfigLegacy() Object {
 	return func(o types.Object) bool {
 		return fields.Has(o,
 			fields.IsTypeMeta().And(fields.IsEmbedded()),
@@ -186,6 +186,21 @@ func ProviderConfig() Object {
 			fields.IsSpec(),
 			fields.IsStatus().And(fields.HasFieldThat(
 				fields.IsProviderConfigStatus().And(fields.IsEmbedded()),
+			)),
+		)
+	}
+}
+
+// ProviderConfigV2 returns an Object matcher that returns true if the supplied
+// Object is a Crossplane core API v2 ProviderConfig.
+func ProviderConfigV2() Object {
+	return func(o types.Object) bool {
+		return fields.Has(o,
+			fields.IsTypeMeta().And(fields.IsEmbedded()),
+			fields.IsObjectMeta().And(fields.IsEmbedded()),
+			fields.IsSpec(),
+			fields.IsStatus().And(fields.HasFieldThat(
+				fields.IsProviderConfigStatusV2().And(fields.IsEmbedded()),
 			)),
 		)
 	}

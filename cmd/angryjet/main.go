@@ -101,7 +101,8 @@ func main() {
 		kingpin.FatalIfError(GenerateManagedListModern(*filenameManagedList, header, p), "cannot write managed resource list method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateManagedNamespacedList(*filenameManagedList, header, p), "cannot write namespaced managed resource list method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateManagedClusterList(*filenameManagedList, header, p), "cannot write cluster managed resource list method set for package %s", p.PkgPath)
-		kingpin.FatalIfError(GenerateProviderConfig(*filenamePC, header, p), "cannot write provider config method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateProviderConfigLegacy(*filenamePC, header, p), "cannot write provider config method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateProviderConfigModern(*filenamePC, header, p), "cannot write provider config method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateProviderConfigUsageLegacy(*filenamePCU, header, p), "cannot write provider config usage method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateProviderConfigUsageModern(*filenamePCU, header, p), "cannot write provider config usage method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateProviderConfigUsageListLegacy(*filenamePCUList, header, p), "cannot write provider config usage list method set for package %s", p.PkgPath)
@@ -327,8 +328,8 @@ func GenerateManagedClusterList(filename, header string, p *packages.Package) er
 	return errors.Wrap(err, "cannot write cluster managed resource list methods")
 }
 
-// GenerateProviderConfig generates the resource.ProviderConfig method set.
-func GenerateProviderConfig(filename, header string, p *packages.Package) error {
+// GenerateProviderConfigLegacy generates the legacy resource.ProviderConfig method set.
+func GenerateProviderConfigLegacy(filename, header string, p *packages.Package) error {
 	receiver := "p"
 
 	methods := method.Set{
@@ -342,12 +343,35 @@ func GenerateProviderConfig(filename, header string, p *packages.Package) error 
 		generate.WithHeaders(header),
 		generate.WithImportAliases(map[string]string{RuntimeImport: RuntimeAlias}),
 		generate.WithMatcher(match.AllOf(
-			match.ProviderConfig(),
+			match.ProviderConfigLegacy(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
 		),
 	)
 
-	return errors.Wrap(err, "cannot write provider config methods")
+	return errors.Wrap(err, "cannot write legacy provider config methods")
+}
+
+// GenerateProviderConfigModern generates the core API v2 resource.ProviderConfig method set.
+func GenerateProviderConfigModern(filename, header string, p *packages.Package) error {
+	receiver := "p"
+
+	methods := method.Set{
+		"SetUsers":      method.NewSetUsers(receiver),
+		"GetUsers":      method.NewGetUsers(receiver),
+		"SetConditions": method.NewSetConditions(receiver, RuntimeV2Import),
+		"GetCondition":  method.NewGetCondition(receiver, RuntimeV2Import),
+	}
+
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
+		generate.WithHeaders(header),
+		generate.WithImportAliases(map[string]string{RuntimeV2Import: RuntimeV2Alias}),
+		generate.WithMatcher(match.AllOf(
+			match.ProviderConfigV2(),
+			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
+		),
+	)
+
+	return errors.Wrap(err, "cannot write v2 provider config methods")
 }
 
 // GenerateProviderConfigUsageLegacy generates the resource.ProviderConfigUsage method set.
@@ -378,15 +402,15 @@ func GenerateProviderConfigUsageModern(filename, header string, p *packages.Pack
 	receiver := "p"
 
 	methods := method.Set{
-		"SetProviderConfigReference": method.NewSetRootProviderConfigTypedReference(receiver, RuntimeImport),
-		"GetProviderConfigReference": method.NewGetRootProviderConfigTypedReference(receiver, RuntimeImport),
-		"SetResourceReference":       method.NewSetRootResourceReference(receiver, RuntimeImport),
-		"GetResourceReference":       method.NewGetRootResourceReference(receiver, RuntimeImport),
+		"SetProviderConfigReference": method.NewSetRootProviderConfigTypedReference(receiver, RuntimeV2Import),
+		"GetProviderConfigReference": method.NewGetRootProviderConfigTypedReference(receiver, RuntimeV2Import),
+		"SetResourceReference":       method.NewSetRootResourceReference(receiver, RuntimeV2Import),
+		"GetResourceReference":       method.NewGetRootResourceReference(receiver, RuntimeV2Import),
 	}
 
 	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
 		generate.WithHeaders(header),
-		generate.WithImportAliases(map[string]string{RuntimeImport: RuntimeAlias}),
+		generate.WithImportAliases(map[string]string{RuntimeV2Import: RuntimeV2Alias}),
 		generate.WithMatcher(match.AllOf(
 			match.ProviderConfigUsageV2(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),

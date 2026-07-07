@@ -57,7 +57,8 @@ const (
 	TypeSuffixProviderConfigStatus = "github.com/crossplane/crossplane-runtime/v2/apis/common/v1.ProviderConfigStatus"
 	TypeSuffixProviderConfigUsage  = "github.com/crossplane/crossplane-runtime/v2/apis/common/v1.ProviderConfigUsage"
 
-	TypeSuffixProviderConfigUsageV2         = "github.com/crossplane/crossplane-runtime/v2/apis/common/v2.TypedProviderConfigUsage"
+	TypeSuffixProviderConfigStatusV2        = "github.com/crossplane/crossplane/apis/v2/core/v2.ProviderConfigStatus"
+	TypeSuffixProviderConfigUsageV2         = "github.com/crossplane/crossplane/apis/v2/core/v2.TypedProviderConfigUsage"
 	TypeSuffixResourceV2Spec                = "github.com/crossplane/crossplane-runtime/v2/apis/common/v2.ManagedResourceSpec"
 	TypeSuffixNamespacedManagedResourceSpec = "github.com/crossplane/crossplane/apis/v2/core/v2.ManagedResourceSpec"
 	TypeSuffixClusterManagedResourceSpec    = "github.com/crossplane/crossplane/apis/v2/core/v2.ClusterManagedResourceSpec"
@@ -243,6 +244,12 @@ func IsProviderConfigSpec() Matcher {
 // field appears to be a Crossplane provider config status.
 func IsProviderConfigStatus() Matcher {
 	return IsTypeNamed(TypeSuffixProviderConfigStatus, NameProviderConfigStatus)
+}
+
+// IsProviderConfigStatusV2 returns a Matcher that returns true if the supplied
+// field appears to be a Crossplane core API provider config status.
+func IsProviderConfigStatusV2() Matcher {
+	return IsTypeNamed(TypeSuffixProviderConfigStatusV2, NameProviderConfigStatus)
 }
 
 // IsProviderConfigUsage returns a Matcher that returns true if the supplied

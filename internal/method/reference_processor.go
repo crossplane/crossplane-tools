@@ -58,11 +58,13 @@ type Reference struct {
 	// * for pointer fields or []* for array of pointer fields.
 	GoValueFieldPath []string
 
-	// GoRefFieldName is the name of the field whose type is *xpv1.Reference or
-	// []xpv1.Reference.
+	// GoRefFieldName is the name of the field whose type is either
+	// *xpv2.Reference / []xpv2.Reference or
+	// *xpv2.NamespacedReference / []xpv2.NamespacedReference.
 	GoRefFieldName string
 
-	// GoSelectorFieldName is the name of the field whose type is *xpv1.Selector
+	// GoSelectorFieldName is the name of the field whose type is either
+	// *xpv2.Selector or *xpv2.NamespacedSelector.
 	GoSelectorFieldName string
 
 	// IsSlice tells whether the current value type is a slice kind.
