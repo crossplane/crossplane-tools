@@ -95,22 +95,26 @@ func main() {
 		}
 		kingpin.FatalIfError(GenerateManagedLegacy(*filenameManaged, header, p), "cannot write managed resource method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateManagedModern(*filenameManaged, header, p), "cannot write managed resource method set for package %s", p.PkgPath)
-		kingpin.FatalIfError(GenerateManagedNamespaced(*filenameManaged, header, p), "cannot write namespaced managed resource method set for package %s", p.PkgPath)
-		kingpin.FatalIfError(GenerateManagedCluster(*filenameManaged, header, p), "cannot write cluster managed resource method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateManagedLegacyCore(*filenameManaged, header, p), "cannot write core API managed resource method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateManagedModernCore(*filenameManaged, header, p), "cannot write core API managed resource method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateManagedListLegacy(*filenameManagedList, header, p), "cannot write managed resource list method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateManagedListModern(*filenameManagedList, header, p), "cannot write managed resource list method set for package %s", p.PkgPath)
-		kingpin.FatalIfError(GenerateManagedNamespacedList(*filenameManagedList, header, p), "cannot write namespaced managed resource list method set for package %s", p.PkgPath)
-		kingpin.FatalIfError(GenerateManagedClusterList(*filenameManagedList, header, p), "cannot write cluster managed resource list method set for package %s", p.PkgPath)
-		kingpin.FatalIfError(GenerateProviderConfigLegacy(*filenamePC, header, p), "cannot write provider config method set for package %s", p.PkgPath)
-		kingpin.FatalIfError(GenerateProviderConfigModern(*filenamePC, header, p), "cannot write provider config method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateManagedListLegacyCore(*filenameManagedList, header, p), "cannot write core API managed resource list method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateManagedListModernCore(*filenameManagedList, header, p), "cannot write core API managed resource list method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateProviderConfig(*filenamePC, header, p), "cannot write provider config method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateProviderConfigCore(*filenamePC, header, p), "cannot write core API provider config method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateProviderConfigUsageLegacy(*filenamePCU, header, p), "cannot write provider config usage method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateProviderConfigUsageModern(*filenamePCU, header, p), "cannot write provider config usage method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateProviderConfigUsageLegacyCore(*filenamePCU, header, p), "cannot write core API provider config usage method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateProviderConfigUsageModernCore(*filenamePCU, header, p), "cannot write core API provider config usage method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateProviderConfigUsageListLegacy(*filenamePCUList, header, p), "cannot write provider config usage list method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateProviderConfigUsageListModern(*filenamePCUList, header, p), "cannot write provider config usage list method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateProviderConfigUsageListLegacyCore(*filenamePCUList, header, p), "cannot write core API provider config usage list method set for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateProviderConfigUsageListModernCore(*filenamePCUList, header, p), "cannot write core API provider config usage list method set for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateReferencesLegacy(*filenameResolvers, header, p), "cannot write reference resolvers for package %s", p.PkgPath)
 		kingpin.FatalIfError(GenerateReferencesModern(*filenameResolvers, header, p), "cannot write reference resolvers for package %s", p.PkgPath)
-		kingpin.FatalIfError(GenerateReferencesNamespaced(*filenameResolvers, header, p), "cannot write namespaced reference resolvers for package %s", p.PkgPath)
-		kingpin.FatalIfError(GenerateReferencesCluster(*filenameResolvers, header, p), "cannot write cluster reference resolvers for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateReferencesLegacyCore(*filenameResolvers, header, p), "cannot write core API reference resolvers for package %s", p.PkgPath)
+		kingpin.FatalIfError(GenerateReferencesModernCore(*filenameResolvers, header, p), "cannot write core API reference resolvers for package %s", p.PkgPath)
 	}
 }
 
@@ -138,7 +142,7 @@ func GenerateManagedLegacy(filename, header string, p *packages.Package) error {
 			RuntimeImport: RuntimeAlias,
 		}),
 		generate.WithMatcher(match.AllOf(
-			match.Managed(),
+			match.ManagedLegacy(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
 		),
 	)
@@ -168,7 +172,7 @@ func GenerateManagedModern(filename, header string, p *packages.Package) error {
 			RuntimeImport: RuntimeAlias,
 		}),
 		generate.WithMatcher(match.AllOf(
-			match.ManagedV2(),
+			match.ManagedModern(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
 		),
 	)
@@ -176,9 +180,9 @@ func GenerateManagedModern(filename, header string, p *packages.Package) error {
 	return errors.Wrap(err, "cannot write V2 managed resource methods")
 }
 
-// GenerateManagedNamespaced generates the resource.Managed method set for namespaced MRs
-// using the crossplane core API types.
-func GenerateManagedNamespaced(filename, header string, p *packages.Package) error {
+// GenerateManagedModernCore generates the resource.Managed method set for
+// namespaced (modern) MRs using the crossplane core API v2 types.
+func GenerateManagedModernCore(filename, header string, p *packages.Package) error {
 	receiver := "mg"
 
 	methods := method.Set{
@@ -199,16 +203,17 @@ func GenerateManagedNamespaced(filename, header string, p *packages.Package) err
 			RuntimeV2Import: RuntimeV2Alias,
 		}),
 		generate.WithMatcher(match.AllOf(
-			match.ManagedNamespaced(),
+			match.ManagedModernCore(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
 		),
 	)
 
-	return errors.Wrap(err, "cannot write namespaced managed resource methods")
+	return errors.Wrap(err, "cannot write core API managed resource methods")
 }
 
-// GenerateManagedCluster generates the resource.Managed method set for cluster-scoped MRs.
-func GenerateManagedCluster(filename, header string, p *packages.Package) error {
+// GenerateManagedLegacyCore generates the resource.Managed method set for
+// cluster-scoped (legacy) MRs using the crossplane core API v2 types.
+func GenerateManagedLegacyCore(filename, header string, p *packages.Package) error {
 	receiver := "mg"
 
 	methods := method.Set{
@@ -231,12 +236,12 @@ func GenerateManagedCluster(filename, header string, p *packages.Package) error 
 			RuntimeV2Import: RuntimeV2Alias,
 		}),
 		generate.WithMatcher(match.AllOf(
-			match.ManagedCluster(),
+			match.ManagedLegacyCore(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
 		),
 	)
 
-	return errors.Wrap(err, "cannot write cluster managed resource methods")
+	return errors.Wrap(err, "cannot write core API cluster managed resource methods")
 }
 
 // GenerateManagedListLegacy generates the resource.ManagedList method set.
@@ -253,7 +258,7 @@ func GenerateManagedListLegacy(filename, header string, p *packages.Package) err
 			ResourceImport: ResourceAlias,
 		}),
 		generate.WithMatcher(match.AllOf(
-			match.ManagedList(),
+			match.ManagedListLegacy(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
 		),
 	)
@@ -275,7 +280,7 @@ func GenerateManagedListModern(filename, header string, p *packages.Package) err
 			ResourceImport: ResourceAlias,
 		}),
 		generate.WithMatcher(match.AllOf(
-			match.ManagedListV2(),
+			match.ManagedListModern(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
 		),
 	)
@@ -283,9 +288,9 @@ func GenerateManagedListModern(filename, header string, p *packages.Package) err
 	return errors.Wrap(err, "cannot write V2 managed resource list methods")
 }
 
-// GenerateManagedNamespacedList generates the resource.ManagedList method set for namespaced MRs
-// using the crossplane core API types.
-func GenerateManagedNamespacedList(filename, header string, p *packages.Package) error {
+// GenerateManagedListModernCore generates the resource.ManagedList method set
+// for namespaced (modern) MRs using the crossplane core API v2 types.
+func GenerateManagedListModernCore(filename, header string, p *packages.Package) error {
 	receiver := "l"
 
 	methods := method.Set{
@@ -298,16 +303,17 @@ func GenerateManagedNamespacedList(filename, header string, p *packages.Package)
 			ResourceImport: ResourceAlias,
 		}),
 		generate.WithMatcher(match.AllOf(
-			match.ManagedNamespacedList(),
+			match.ManagedListModernCore(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
 		),
 	)
 
-	return errors.Wrap(err, "cannot write namespaced managed resource list methods")
+	return errors.Wrap(err, "cannot write core API managed resource list methods")
 }
 
-// GenerateManagedClusterList generates the resource.ManagedList method set for cluster-scoped MRs.
-func GenerateManagedClusterList(filename, header string, p *packages.Package) error {
+// GenerateManagedListLegacyCore generates the resource.ManagedList method set
+// for cluster-scoped (legacy) MRs using the crossplane core API v2 types.
+func GenerateManagedListLegacyCore(filename, header string, p *packages.Package) error {
 	receiver := "l"
 
 	methods := method.Set{
@@ -320,16 +326,16 @@ func GenerateManagedClusterList(filename, header string, p *packages.Package) er
 			ResourceImport: ResourceAlias,
 		}),
 		generate.WithMatcher(match.AllOf(
-			match.ManagedClusterList(),
+			match.ManagedListLegacyCore(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
 		),
 	)
 
-	return errors.Wrap(err, "cannot write cluster managed resource list methods")
+	return errors.Wrap(err, "cannot write core API cluster managed resource list methods")
 }
 
-// GenerateProviderConfigLegacy generates the legacy resource.ProviderConfig method set.
-func GenerateProviderConfigLegacy(filename, header string, p *packages.Package) error {
+// GenerateProviderConfig generates the resource.ProviderConfig method set.
+func GenerateProviderConfig(filename, header string, p *packages.Package) error {
 	receiver := "p"
 
 	methods := method.Set{
@@ -343,16 +349,19 @@ func GenerateProviderConfigLegacy(filename, header string, p *packages.Package) 
 		generate.WithHeaders(header),
 		generate.WithImportAliases(map[string]string{RuntimeImport: RuntimeAlias}),
 		generate.WithMatcher(match.AllOf(
-			match.ProviderConfigLegacy(),
+			match.ProviderConfig(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
 		),
 	)
 
-	return errors.Wrap(err, "cannot write legacy provider config methods")
+	return errors.Wrap(err, "cannot write provider config methods")
 }
 
-// GenerateProviderConfigModern generates the core API v2 resource.ProviderConfig method set.
-func GenerateProviderConfigModern(filename, header string, p *packages.Package) error {
+// GenerateProviderConfigCore generates the resource.ProviderConfig method set
+// using the crossplane core API v2 types. A ProviderConfig's method set does not
+// vary by scope, so it needs no separate cluster-scoped and namespaced variants
+// like managed resources and provider config usages do.
+func GenerateProviderConfigCore(filename, header string, p *packages.Package) error {
 	receiver := "p"
 
 	methods := method.Set{
@@ -366,12 +375,12 @@ func GenerateProviderConfigModern(filename, header string, p *packages.Package) 
 		generate.WithHeaders(header),
 		generate.WithImportAliases(map[string]string{RuntimeV2Import: RuntimeV2Alias}),
 		generate.WithMatcher(match.AllOf(
-			match.ProviderConfigV2(),
+			match.ProviderConfigCore(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
 		),
 	)
 
-	return errors.Wrap(err, "cannot write v2 provider config methods")
+	return errors.Wrap(err, "cannot write core API provider config methods")
 }
 
 // GenerateProviderConfigUsageLegacy generates the resource.ProviderConfigUsage method set.
@@ -389,7 +398,7 @@ func GenerateProviderConfigUsageLegacy(filename, header string, p *packages.Pack
 		generate.WithHeaders(header),
 		generate.WithImportAliases(map[string]string{RuntimeImport: RuntimeAlias}),
 		generate.WithMatcher(match.AllOf(
-			match.ProviderConfigUsage(),
+			match.ProviderConfigUsageLegacy(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
 		),
 	)
@@ -399,6 +408,56 @@ func GenerateProviderConfigUsageLegacy(filename, header string, p *packages.Pack
 
 // GenerateProviderConfigUsageModern generates the v2.ProviderConfigUsage method set.
 func GenerateProviderConfigUsageModern(filename, header string, p *packages.Package) error {
+	receiver := "p"
+
+	methods := method.Set{
+		"SetProviderConfigReference": method.NewSetRootProviderConfigTypedReference(receiver, RuntimeImport),
+		"GetProviderConfigReference": method.NewGetRootProviderConfigTypedReference(receiver, RuntimeImport),
+		"SetResourceReference":       method.NewSetRootResourceReference(receiver, RuntimeImport),
+		"GetResourceReference":       method.NewGetRootResourceReference(receiver, RuntimeImport),
+	}
+
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
+		generate.WithHeaders(header),
+		generate.WithImportAliases(map[string]string{RuntimeImport: RuntimeAlias}),
+		generate.WithMatcher(match.AllOf(
+			match.ProviderConfigUsageModern(),
+			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
+		),
+	)
+
+	return errors.Wrap(err, "cannot write provider config usage methods")
+}
+
+// GenerateProviderConfigUsageLegacyCore generates the resource.ProviderConfigUsage
+// method set for provider config usages that embed the core API v2 non-typed
+// ProviderConfigUsage.
+func GenerateProviderConfigUsageLegacyCore(filename, header string, p *packages.Package) error {
+	receiver := "p"
+
+	methods := method.Set{
+		"SetProviderConfigReference": method.NewSetRootProviderConfigReference(receiver, RuntimeV2Import),
+		"GetProviderConfigReference": method.NewGetRootProviderConfigReference(receiver, RuntimeV2Import),
+		"SetResourceReference":       method.NewSetRootResourceReference(receiver, RuntimeV2Import),
+		"GetResourceReference":       method.NewGetRootResourceReference(receiver, RuntimeV2Import),
+	}
+
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
+		generate.WithHeaders(header),
+		generate.WithImportAliases(map[string]string{RuntimeV2Import: RuntimeV2Alias}),
+		generate.WithMatcher(match.AllOf(
+			match.ProviderConfigUsageLegacyCore(),
+			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
+		),
+	)
+
+	return errors.Wrap(err, "cannot write core API provider config usage methods")
+}
+
+// GenerateProviderConfigUsageModernCore generates the resource.ProviderConfigUsage
+// method set for provider config usages that embed the core API v2
+// TypedProviderConfigUsage.
+func GenerateProviderConfigUsageModernCore(filename, header string, p *packages.Package) error {
 	receiver := "p"
 
 	methods := method.Set{
@@ -412,12 +471,12 @@ func GenerateProviderConfigUsageModern(filename, header string, p *packages.Pack
 		generate.WithHeaders(header),
 		generate.WithImportAliases(map[string]string{RuntimeV2Import: RuntimeV2Alias}),
 		generate.WithMatcher(match.AllOf(
-			match.ProviderConfigUsageV2(),
+			match.ProviderConfigUsageModernCore(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
 		),
 	)
 
-	return errors.Wrap(err, "cannot write provider config usage methods")
+	return errors.Wrap(err, "cannot write core API typed provider config usage methods")
 }
 
 // GenerateProviderConfigUsageListLegacy generates the
@@ -433,7 +492,7 @@ func GenerateProviderConfigUsageListLegacy(filename, header string, p *packages.
 		generate.WithHeaders(header),
 		generate.WithImportAliases(map[string]string{RuntimeImport: RuntimeAlias}),
 		generate.WithMatcher(match.AllOf(
-			match.ProviderConfigUsageList(),
+			match.ProviderConfigUsageListLegacy(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
 		),
 	)
@@ -455,12 +514,56 @@ func GenerateProviderConfigUsageListModern(filename, header string, p *packages.
 		generate.WithHeaders(header),
 		generate.WithImportAliases(map[string]string{RuntimeImport: RuntimeAlias, ResourceImport: ResourceAlias}),
 		generate.WithMatcher(match.AllOf(
-			match.ProviderConfigUsageListV2(),
+			match.ProviderConfigUsageListModern(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
 		),
 	)
 
 	return errors.Wrap(err, "cannot write V2 provider config usage list methods")
+}
+
+// GenerateProviderConfigUsageListLegacyCore generates the
+// resource.ProviderConfigUsageList method set for provider config usages that
+// embed the core API v2 non-typed ProviderConfigUsage.
+func GenerateProviderConfigUsageListLegacyCore(filename, header string, p *packages.Package) error {
+	receiver := "p"
+
+	methods := method.Set{
+		"GetItems": method.NewProviderConfigUsageGetItems(receiver, ResourceImport),
+	}
+
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
+		generate.WithHeaders(header),
+		generate.WithImportAliases(map[string]string{RuntimeV2Import: RuntimeV2Alias, ResourceImport: ResourceAlias}),
+		generate.WithMatcher(match.AllOf(
+			match.ProviderConfigUsageListLegacyCore(),
+			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
+		),
+	)
+
+	return errors.Wrap(err, "cannot write core API provider config usage list methods")
+}
+
+// GenerateProviderConfigUsageListModernCore generates the
+// resource.ProviderConfigUsageList method set for provider config usages that
+// embed the core API v2 TypedProviderConfigUsage.
+func GenerateProviderConfigUsageListModernCore(filename, header string, p *packages.Package) error {
+	receiver := "p"
+
+	methods := method.Set{
+		"GetItems": method.NewProviderConfigUsageGetItems(receiver, ResourceImport),
+	}
+
+	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
+		generate.WithHeaders(header),
+		generate.WithImportAliases(map[string]string{RuntimeV2Import: RuntimeV2Alias, ResourceImport: ResourceAlias}),
+		generate.WithMatcher(match.AllOf(
+			match.ProviderConfigUsageListModernCore(),
+			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
+		),
+	)
+
+	return errors.Wrap(err, "cannot write core API typed provider config usage list methods")
 }
 
 // GenerateReferencesLegacy generates reference resolver calls.
@@ -479,7 +582,7 @@ func GenerateReferencesLegacy(filename, header string, p *packages.Package) erro
 			ReferenceImport: ReferenceAlias,
 		}),
 		generate.WithMatcher(match.AllOf(
-			match.Managed(),
+			match.ManagedLegacy(),
 			match.DoesNotHaveMarker(comm, DisableMarker, "false")),
 		),
 	)
@@ -503,7 +606,7 @@ func GenerateReferencesModern(filename, header string, p *packages.Package) erro
 			ReferenceImport: ReferenceAlias,
 		}),
 		generate.WithMatcher(match.AllOf(
-			match.ManagedV2(),
+			match.ManagedModern(),
 			match.DoesNotHaveMarker(comm, DisableMarker, "false")),
 		),
 	)
@@ -511,9 +614,9 @@ func GenerateReferencesModern(filename, header string, p *packages.Package) erro
 	return errors.Wrap(err, "cannot write V2 reference resolver methods")
 }
 
-// GenerateReferencesNamespaced generates reference resolver calls for namespaced MRs
-// using the crossplane core API types.
-func GenerateReferencesNamespaced(filename, header string, p *packages.Package) error {
+// GenerateReferencesModernCore generates reference resolver calls for namespaced
+// (modern) MRs using the crossplane core API v2 types.
+func GenerateReferencesModernCore(filename, header string, p *packages.Package) error {
 	receiver := "mg"
 	comm := comments.In(p)
 
@@ -528,16 +631,17 @@ func GenerateReferencesNamespaced(filename, header string, p *packages.Package) 
 			ReferenceImport: ReferenceAlias,
 		}),
 		generate.WithMatcher(match.AllOf(
-			match.ManagedNamespaced(),
+			match.ManagedModernCore(),
 			match.DoesNotHaveMarker(comm, DisableMarker, "false")),
 		),
 	)
 
-	return errors.Wrap(err, "cannot write namespaced reference resolver methods")
+	return errors.Wrap(err, "cannot write core API reference resolver methods")
 }
 
-// GenerateReferencesCluster generates reference resolver calls for cluster-scoped MRs.
-func GenerateReferencesCluster(filename, header string, p *packages.Package) error {
+// GenerateReferencesLegacyCore generates reference resolver calls for
+// cluster-scoped (legacy) MRs using the crossplane core API v2 types.
+func GenerateReferencesLegacyCore(filename, header string, p *packages.Package) error {
 	receiver := "mg"
 	comm := comments.In(p)
 
@@ -552,10 +656,10 @@ func GenerateReferencesCluster(filename, header string, p *packages.Package) err
 			ReferenceImport: ReferenceAlias,
 		}),
 		generate.WithMatcher(match.AllOf(
-			match.ManagedCluster(),
+			match.ManagedLegacyCore(),
 			match.DoesNotHaveMarker(comm, DisableMarker, "false")),
 		),
 	)
 
-	return errors.Wrap(err, "cannot write cluster reference resolver methods")
+	return errors.Wrap(err, "cannot write core API cluster reference resolver methods")
 }

@@ -22,19 +22,21 @@ are supported for namespaced and cluster-scoped managed resources respectively.
 `angryjet` also supports provider config and provider config usage migrations
 across the legacy crossplane-runtime types and the newer core API v2 types:
 
-- Provider configs are detected when their `Status` embeds either the legacy
-  [`ProviderConfigStatus`] or the core API v2 [`ProviderConfigStatusV2`] type.
+- Provider configs are detected when their `Status` embeds either the
+  crossplane-runtime [`ProviderConfigStatus`] or the core API v2
+  [`ProviderConfigStatus`][provider-config-status-core] type.
 - For provider configs that embed the core API v2 status type, generated
-  condition methods use the core API v2 [`ConditionV2`] and
-  [`ConditionTypeV2`] types.
-- Provider config usages are detected when they embed either the legacy
-  [`ProviderConfigUsage`] or the newer [`TypedProviderConfigUsage`] type.
-- For provider config usages that embed [`TypedProviderConfigUsage`], generated
-  provider config reference methods use the core API v2
-  [`ProviderConfigReferenceV2`] type and resource reference methods use the
-  core API v2 [`TypedReferenceV2`] type.
+  condition methods use the core API v2 [`Condition`] and
+  [`ConditionType`] types.
+- Provider config usages are detected when they embed a non-typed
+  [`ProviderConfigUsage`] or a typed [`TypedProviderConfigUsage`], from either
+  crossplane-runtime or the core API v2 module.
+- For provider config usages that embed a typed usage from the core API v2
+  module, generated provider config reference methods use the core API v2
+  [`ProviderConfigReference`] type and resource reference methods use the
+  core API v2 [`TypedReference`] type.
 - Provider config specs that migrate nested credential helper fields such as
-  [`CredentialsSourceV2`] and [`CommonCredentialSelectorsV2`] continue to be
+  [`CredentialsSource`] and [`CommonCredentialSelectors`] continue to be
   supported.
 
 Methods are not written if they are already defined outside of the file that
@@ -67,11 +69,11 @@ to fetch the value and it assumes that reference field is named as
 `FieldNameRef`/`FieldNameRefs if array` and selector field is named as
 `FieldNameSelector`.
 
-For cluster-scoped resolvers these fields should use the core API v2
-[`ReferenceV2`] and [`SelectorV2`] types. For namespaced resolvers they should
-use [`NamespacedReferenceV2`] and [`NamespacedSelectorV2`]. You can override
-the default field names by adding the optional comment markers, see the
-following example:
+For cluster-scoped resolvers built against the core API v2 module these fields
+should use the [`Reference`] and [`Selector`] types. For namespaced
+resolvers they should use [`NamespacedReference`] and
+[`NamespacedSelector`]. You can override the default field names by adding
+the optional comment markers, see the following example:
 
 ```go
 type SomeParameters struct {
@@ -127,17 +129,17 @@ Args:
 [`ClusterManagedResourceSpec`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#ClusterManagedResourceSpec
 [`ManagedResourceStatus`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#ManagedResourceStatus
 [`ProviderConfigStatus`]: https://pkg.go.dev/github.com/crossplane/crossplane-runtime/v2/apis/common/v1#ProviderConfigStatus
-[`ProviderConfigStatusV2`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#ProviderConfigStatus
-[`ConditionV2`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#Condition
-[`ConditionTypeV2`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#ConditionType
-[`ProviderConfigUsage`]: https://pkg.go.dev/github.com/crossplane/crossplane-runtime/v2/apis/common/v1#ProviderConfigUsage
+[provider-config-status-core]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#ProviderConfigStatus
+[`Condition`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#Condition
+[`ConditionType`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#ConditionType
+[`ProviderConfigUsage`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#ProviderConfigUsage
 [`TypedProviderConfigUsage`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#TypedProviderConfigUsage
-[`ProviderConfigReferenceV2`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#ProviderConfigReference
-[`ReferenceV2`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#Reference
-[`SelectorV2`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#Selector
-[`NamespacedReferenceV2`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#NamespacedReference
-[`NamespacedSelectorV2`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#NamespacedSelector
-[`TypedReferenceV2`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#TypedReference
-[`CredentialsSourceV2`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#CredentialsSource
-[`CommonCredentialSelectorsV2`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#CommonCredentialSelectors
+[`ProviderConfigReference`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#ProviderConfigReference
+[`Reference`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#Reference
+[`Selector`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#Selector
+[`NamespacedReference`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#NamespacedReference
+[`NamespacedSelector`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#NamespacedSelector
+[`TypedReference`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#TypedReference
+[`CredentialsSource`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#CredentialsSource
+[`CommonCredentialSelectors`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#CommonCredentialSelectors
 [Provider Development Guide]: https://github.com/crossplane/crossplane/blob/master/contributing/guide-provider-development.md#defining-resource-kinds

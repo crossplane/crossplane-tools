@@ -27,6 +27,13 @@ import (
 	"golang.org/x/tools/go/packages/packagestest"
 )
 
+// The fixture below models one kind for each shape angryjet generates for:
+//
+//   - Legacy/Modern: the crossplane-runtime common/v1 (cluster) and common/v2
+//     (namespaced) types the generators have always supported.
+//   - Core: the same shapes but sourced from the crossplane/apis/v2/core/v2
+//     module that Crossplane v2.3 moved the common types into. These are matched
+//     by the *Core generators.
 const (
 	angryjetFixtureSource = `package v1alpha1
 
@@ -135,37 +142,65 @@ type ModernResourceList struct {
 	Items []ModernResource
 }
 
-type ModernProviderConfigUsage struct {
+// A provider config usage embedding the crossplane-runtime common/v2 typed
+// usage, exercising the common/v2 GenerateProviderConfigUsageModern.
+type RuntimeModernProviderConfigUsage struct {
+	metav1.TypeMeta
+	metav1.ObjectMeta
+	xprv2.TypedProviderConfigUsage
+}
+
+type RuntimeModernProviderConfigUsageList struct {
+	metav1.TypeMeta
+	Items []RuntimeModernProviderConfigUsage
+}
+
+// A provider config usage embedding the core API v2 typed usage, exercising
+// GenerateProviderConfigUsageModernCore.
+type CoreModernProviderConfigUsage struct {
 	metav1.TypeMeta
 	metav1.ObjectMeta
 	xpv2.TypedProviderConfigUsage
 }
 
-type ModernProviderConfigUsageList struct {
+type CoreModernProviderConfigUsageList struct {
 	metav1.TypeMeta
-	Items []ModernProviderConfigUsage
+	Items []CoreModernProviderConfigUsage
 }
 
-type ModernProviderCredentials struct {
+// A provider config usage embedding the core API v2 non-typed usage, exercising
+// GenerateProviderConfigUsageLegacyCore.
+type CoreLegacyProviderConfigUsage struct {
+	metav1.TypeMeta
+	metav1.ObjectMeta
+	xpv2.ProviderConfigUsage
+}
+
+type CoreLegacyProviderConfigUsageList struct {
+	metav1.TypeMeta
+	Items []CoreLegacyProviderConfigUsage
+}
+
+type CoreProviderCredentials struct {
 	Source xpv2.CredentialsSource
 	xpv2.CommonCredentialSelectors
 }
 
-type ModernProviderConfigSpec struct {
+type CoreProviderConfigSpec struct {
 	xprv1.ProviderConfigSpec
-	Credentials ModernProviderCredentials
+	Credentials CoreProviderCredentials
 }
 
-// A ModernProviderConfigStatus reflects the observed state of a ProviderConfig.
-type ModernProviderConfigStatus struct {
+// A CoreProviderConfigStatus reflects the observed state of a ProviderConfig.
+type CoreProviderConfigStatus struct {
 	xpv2.ProviderConfigStatus
 }
 
-type ModernProviderConfig struct {
+type CoreProviderConfig struct {
 	metav1.TypeMeta
 	metav1.ObjectMeta
-	Spec   ModernProviderConfigSpec
-	Status ModernProviderConfigStatus
+	Spec   CoreProviderConfigSpec
+	Status CoreProviderConfigStatus
 }
 
 type LegacyProviderConfigSpec struct {
@@ -228,6 +263,8 @@ func (p *ProviderConfigStatus) GetUsers() []User { return nil }
 	runtimeV2FixtureSource = `package v2
 
 type ManagedResourceSpec struct{}
+
+type TypedProviderConfigUsage struct{}
 `
 
 	coreV2ProviderConfigFixtureSource = `package v2
@@ -236,7 +273,11 @@ type ProviderConfigStatus struct{}
 
 type ProviderConfigReference struct{}
 
+type Reference struct{}
+
 type TypedReference struct{}
+
+type ProviderConfigUsage struct{}
 
 type TypedProviderConfigUsage struct{}
 
@@ -263,10 +304,10 @@ func TestGenerateMethods(t *testing.T) {
 		args
 		want
 	}{
-		"Managed namespaced": {
+		"Managed modern core": {
 			args: args{
-				generate: GenerateManagedNamespaced,
-				filename: "zz_generated.namespaced.go",
+				generate: GenerateManagedModernCore,
+				filename: "zz_generated.modern_core.go",
 			},
 			want: want{
 				contains: []string{
@@ -281,10 +322,10 @@ func TestGenerateMethods(t *testing.T) {
 				},
 			},
 		},
-		"Managed cluster": {
+		"Managed legacy core": {
 			args: args{
-				generate: GenerateManagedCluster,
-				filename: "zz_generated.cluster.go",
+				generate: GenerateManagedLegacyCore,
+				filename: "zz_generated.legacy_core.go",
 			},
 			want: want{
 				contains: []string{
@@ -298,10 +339,10 @@ func TestGenerateMethods(t *testing.T) {
 				},
 			},
 		},
-		"Managed list namespaced": {
+		"Managed list modern core": {
 			args: args{
-				generate: GenerateManagedNamespacedList,
-				filename: "zz_generated.namespaced_list.go",
+				generate: GenerateManagedListModernCore,
+				filename: "zz_generated.modern_core_list.go",
 			},
 			want: want{
 				contains: []string{
@@ -313,10 +354,10 @@ func TestGenerateMethods(t *testing.T) {
 				},
 			},
 		},
-		"Managed list cluster": {
+		"Managed list legacy core": {
 			args: args{
-				generate: GenerateManagedClusterList,
-				filename: "zz_generated.cluster_list.go",
+				generate: GenerateManagedListLegacyCore,
+				filename: "zz_generated.legacy_core_list.go",
 			},
 			want: want{
 				contains: []string{
@@ -328,10 +369,10 @@ func TestGenerateMethods(t *testing.T) {
 				},
 			},
 		},
-		"References namespaced": {
+		"References modern core": {
 			args: args{
-				generate: GenerateReferencesNamespaced,
-				filename: "zz_generated.namespaced_refs.go",
+				generate: GenerateReferencesModernCore,
+				filename: "zz_generated.modern_core_refs.go",
 			},
 			want: want{
 				contains: []string{
@@ -343,10 +384,10 @@ func TestGenerateMethods(t *testing.T) {
 				},
 			},
 		},
-		"References cluster": {
+		"References legacy core": {
 			args: args{
-				generate: GenerateReferencesCluster,
-				filename: "zz_generated.cluster_refs.go",
+				generate: GenerateReferencesLegacyCore,
+				filename: "zz_generated.legacy_core_refs.go",
 			},
 			want: want{
 				contains: []string{
@@ -396,54 +437,111 @@ func TestGenerateMethods(t *testing.T) {
 			},
 			want: want{
 				contains: []string{
-					`func (p *ModernProviderConfigUsage) SetProviderConfigReference(r xpv2.ProviderConfigReference) {`,
-					`func (p *ModernProviderConfigUsage) GetProviderConfigReference() xpv2.ProviderConfigReference {`,
-					`func (p *ModernProviderConfigUsage) SetResourceReference(r xpv2.TypedReference) {`,
-					`func (p *ModernProviderConfigUsage) GetResourceReference() xpv2.TypedReference {`,
+					`func (p *RuntimeModernProviderConfigUsage) SetProviderConfigReference(r xpv1.ProviderConfigReference) {`,
+					`func (p *RuntimeModernProviderConfigUsage) GetProviderConfigReference() xpv1.ProviderConfigReference {`,
+					`func (p *RuntimeModernProviderConfigUsage) SetResourceReference(r xpv1.TypedReference) {`,
+					`func (p *RuntimeModernProviderConfigUsage) GetResourceReference() xpv1.TypedReference {`,
 				},
 				notContains: []string{
-					`func (p *ModernProviderConfigUsage) SetProviderConfigReference(r xpv1.ProviderConfigReference) {`,
-					`func (p *ModernProviderConfigUsage) GetResourceReference() xpv1.TypedReference {`,
+					`func (p *RuntimeModernProviderConfigUsage) SetProviderConfigReference(r xpv2.ProviderConfigReference) {`,
+					`func (p *CoreModernProviderConfigUsage)`,
 				},
 			},
 		},
-		"Provider config usage list modern": {
+		"Provider config usage modern core": {
 			args: args{
-				generate: GenerateProviderConfigUsageListModern,
-				filename: "zz_generated.modern_pcu_list.go",
+				generate: GenerateProviderConfigUsageModernCore,
+				filename: "zz_generated.modern_core_pcu.go",
 			},
 			want: want{
 				contains: []string{
-					`func (p *ModernProviderConfigUsageList) GetItems() []resource.ProviderConfigUsage {`,
+					`func (p *CoreModernProviderConfigUsage) SetProviderConfigReference(r xpv2.ProviderConfigReference) {`,
+					`func (p *CoreModernProviderConfigUsage) GetProviderConfigReference() xpv2.ProviderConfigReference {`,
+					`func (p *CoreModernProviderConfigUsage) SetResourceReference(r xpv2.TypedReference) {`,
+					`func (p *CoreModernProviderConfigUsage) GetResourceReference() xpv2.TypedReference {`,
+				},
+				notContains: []string{
+					`func (p *CoreModernProviderConfigUsage) SetProviderConfigReference(r xpv1.ProviderConfigReference) {`,
+					`func (p *RuntimeModernProviderConfigUsage)`,
 				},
 			},
 		},
-		"Provider config legacy": {
+		"Provider config usage legacy core": {
 			args: args{
-				generate: GenerateProviderConfigLegacy,
-				filename: "zz_generated.legacy_pc.go",
+				generate: GenerateProviderConfigUsageLegacyCore,
+				filename: "zz_generated.legacy_core_pcu.go",
+			},
+			want: want{
+				contains: []string{
+					`func (p *CoreLegacyProviderConfigUsage) SetProviderConfigReference(r xpv2.Reference) {`,
+					`func (p *CoreLegacyProviderConfigUsage) GetProviderConfigReference() xpv2.Reference {`,
+					`func (p *CoreLegacyProviderConfigUsage) SetResourceReference(r xpv2.TypedReference) {`,
+					`func (p *CoreLegacyProviderConfigUsage) GetResourceReference() xpv2.TypedReference {`,
+				},
+				notContains: []string{
+					`func (p *CoreLegacyProviderConfigUsage) SetProviderConfigReference(r xpv2.ProviderConfigReference) {`,
+					`func (p *CoreModernProviderConfigUsage)`,
+				},
+			},
+		},
+		"Provider config usage list modern core": {
+			args: args{
+				generate: GenerateProviderConfigUsageListModernCore,
+				filename: "zz_generated.modern_core_pcu_list.go",
+			},
+			want: want{
+				contains: []string{
+					`func (p *CoreModernProviderConfigUsageList) GetItems() []resource.ProviderConfigUsage {`,
+				},
+				notContains: []string{
+					`func (p *CoreLegacyProviderConfigUsageList)`,
+				},
+			},
+		},
+		"Provider config usage list legacy core": {
+			args: args{
+				generate: GenerateProviderConfigUsageListLegacyCore,
+				filename: "zz_generated.legacy_core_pcu_list.go",
+			},
+			want: want{
+				contains: []string{
+					`func (p *CoreLegacyProviderConfigUsageList) GetItems() []resource.ProviderConfigUsage {`,
+				},
+				notContains: []string{
+					`func (p *CoreModernProviderConfigUsageList)`,
+				},
+			},
+		},
+		"Provider config": {
+			args: args{
+				generate: GenerateProviderConfig,
+				filename: "zz_generated.pc.go",
 			},
 			want: want{
 				contains: []string{
 					`func (p *LegacyProviderConfig) SetConditions(c ...xpv1.Condition) {`,
 					`func (p *LegacyProviderConfig) GetCondition(ct xpv1.ConditionType) xpv1.Condition {`,
 				},
+				notContains: []string{
+					`func (p *CoreProviderConfig)`,
+				},
 			},
 		},
-		"Provider config modern status and credential migration": {
+		"Provider config core": {
 			args: args{
-				generate: GenerateProviderConfigModern,
-				filename: "zz_generated.modern_pc.go",
+				generate: GenerateProviderConfigCore,
+				filename: "zz_generated.core_pc.go",
 			},
 			want: want{
 				contains: []string{
-					`func (p *ModernProviderConfig) SetUsers(i int64) {`,
-					`func (p *ModernProviderConfig) GetUsers() int64 {`,
-					`func (p *ModernProviderConfig) SetConditions(c ...xpv2.Condition) {`,
-					`func (p *ModernProviderConfig) GetCondition(ct xpv2.ConditionType) xpv2.Condition {`,
+					`func (p *CoreProviderConfig) SetUsers(i int64) {`,
+					`func (p *CoreProviderConfig) GetUsers() int64 {`,
+					`func (p *CoreProviderConfig) SetConditions(c ...xpv2.Condition) {`,
+					`func (p *CoreProviderConfig) GetCondition(ct xpv2.ConditionType) xpv2.Condition {`,
 				},
 				notContains: []string{
-					`func (p *ModernProviderConfig) GetCondition(ct xpv1.ConditionType) xpv1.Condition {`,
+					`func (p *CoreProviderConfig) GetCondition(ct xpv1.ConditionType) xpv1.Condition {`,
+					`func (p *LegacyProviderConfig)`,
 				},
 			},
 		},

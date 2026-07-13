@@ -57,12 +57,20 @@ const (
 	TypeSuffixProviderConfigStatus = "github.com/crossplane/crossplane-runtime/v2/apis/common/v1.ProviderConfigStatus"
 	TypeSuffixProviderConfigUsage  = "github.com/crossplane/crossplane-runtime/v2/apis/common/v1.ProviderConfigUsage"
 
-	TypeSuffixProviderConfigStatusV2        = "github.com/crossplane/crossplane/apis/v2/core/v2.ProviderConfigStatus"
-	TypeSuffixProviderConfigUsageV2         = "github.com/crossplane/crossplane/apis/v2/core/v2.TypedProviderConfigUsage"
-	TypeSuffixResourceV2Spec                = "github.com/crossplane/crossplane-runtime/v2/apis/common/v2.ManagedResourceSpec"
-	TypeSuffixNamespacedManagedResourceSpec = "github.com/crossplane/crossplane/apis/v2/core/v2.ManagedResourceSpec"
-	TypeSuffixClusterManagedResourceSpec    = "github.com/crossplane/crossplane/apis/v2/core/v2.ClusterManagedResourceSpec"
-	TypeSuffixManagedResourceStatus         = "github.com/crossplane/crossplane/apis/v2/core/v2.ManagedResourceStatus"
+	// Types that live in the crossplane-runtime common/v2 module.
+	TypeSuffixProviderConfigUsageV2 = "github.com/crossplane/crossplane-runtime/v2/apis/common/v2.TypedProviderConfigUsage"
+	TypeSuffixResourceV2Spec        = "github.com/crossplane/crossplane-runtime/v2/apis/common/v2.ManagedResourceSpec"
+
+	// Types that moved into the crossplane/apis/v2/core/v2 module in Crossplane
+	// v2.3. The Core suffix marks the constants and matchers that target this
+	// new module, as opposed to the crossplane-runtime common/v1 and common/v2
+	// modules above.
+	TypeSuffixManagedResourceSpecCore        = "github.com/crossplane/crossplane/apis/v2/core/v2.ManagedResourceSpec"
+	TypeSuffixClusterManagedResourceSpecCore = "github.com/crossplane/crossplane/apis/v2/core/v2.ClusterManagedResourceSpec"
+	TypeSuffixManagedResourceStatusCore      = "github.com/crossplane/crossplane/apis/v2/core/v2.ManagedResourceStatus"
+	TypeSuffixProviderConfigStatusCore       = "github.com/crossplane/crossplane/apis/v2/core/v2.ProviderConfigStatus"
+	TypeSuffixProviderConfigUsageCore        = "github.com/crossplane/crossplane/apis/v2/core/v2.ProviderConfigUsage"
+	TypeSuffixTypedProviderConfigUsageCore   = "github.com/crossplane/crossplane/apis/v2/core/v2.TypedProviderConfigUsage"
 )
 
 func matches(s *types.Struct, m Matcher) bool {
@@ -194,15 +202,15 @@ func IsListMeta() Matcher { return IsTypeNamed(TypeSuffixListMeta, NameListMeta)
 
 // IsSpec returns a Matcher that returns true if the supplied field appears to
 // be a Kubernetes resource spec.
-func IsSpec() Matcher { return IsTypeNamed(NameSpec, TypeSuffixSpec) }
+func IsSpec() Matcher { return IsTypeNamed(TypeSuffixSpec, NameSpec) }
 
 // IsSpecTemplate returns a Matcher that returns true if the supplied field
 // appears to be a Crossplane resource class spec template.
-func IsSpecTemplate() Matcher { return IsTypeNamed(NameSpecTemplate, TypeSuffixSpecTemplate) }
+func IsSpecTemplate() Matcher { return IsTypeNamed(TypeSuffixSpecTemplate, NameSpecTemplate) }
 
 // IsStatus returns a Matcher that returns true if the supplied field appears to
 // be a Kubernetes resource status.
-func IsStatus() Matcher { return IsTypeNamed(NameStatus, TypeSuffixStatus) }
+func IsStatus() Matcher { return IsTypeNamed(TypeSuffixStatus, NameStatus) }
 
 // IsResourceSpec returns a Matcher that returns true if the supplied field
 // appears to be a Crossplane managed resource spec.
@@ -212,26 +220,29 @@ func IsResourceSpec() Matcher { return IsTypeNamed(TypeSuffixResourceSpec, NameR
 // appears to be a Crossplane managed resource spec from crossplane-runtime.
 func IsResourceV2Spec() Matcher { return IsTypeNamed(TypeSuffixResourceV2Spec, NameResourceV2Spec) }
 
-// IsNamespacedManagedResourceSpec returns a Matcher that returns true if the supplied field
-// appears to be a Crossplane namespaced managed resource spec from the core API.
-func IsNamespacedManagedResourceSpec() Matcher {
-	return IsTypeNamed(TypeSuffixNamespacedManagedResourceSpec, NameResourceV2Spec)
+// IsManagedResourceSpecCore returns a Matcher that returns true if the supplied
+// field appears to be a namespaced Crossplane managed resource spec from the
+// core API v2 module.
+func IsManagedResourceSpecCore() Matcher {
+	return IsTypeNamed(TypeSuffixManagedResourceSpecCore, NameResourceV2Spec)
 }
 
-// IsClusterManagedResourceSpec returns a Matcher that returns true if the supplied field
-// appears to be a Crossplane cluster-scoped managed resource spec.
-func IsClusterManagedResourceSpec() Matcher {
-	return IsTypeNamed(TypeSuffixClusterManagedResourceSpec, NameClusterManagedResourceSpec)
+// IsClusterManagedResourceSpecCore returns a Matcher that returns true if the
+// supplied field appears to be a cluster-scoped Crossplane managed resource spec
+// from the core API v2 module.
+func IsClusterManagedResourceSpecCore() Matcher {
+	return IsTypeNamed(TypeSuffixClusterManagedResourceSpecCore, NameClusterManagedResourceSpec)
 }
 
 // IsResourceStatus returns a Matcher that returns true if the supplied field
 // appears to be a Crossplane managed resource status.
 func IsResourceStatus() Matcher { return IsTypeNamed(TypeSuffixResourceStatus, NameResourceStatus) }
 
-// IsManagedResourceStatus returns a Matcher that returns true if the supplied
-// field appears to be a Crossplane managed resource status from the core API.
-func IsManagedResourceStatus() Matcher {
-	return IsTypeNamed(TypeSuffixManagedResourceStatus, NameManagedResourceStatus)
+// IsManagedResourceStatusCore returns a Matcher that returns true if the
+// supplied field appears to be a Crossplane managed resource status from the
+// core API v2 module.
+func IsManagedResourceStatusCore() Matcher {
+	return IsTypeNamed(TypeSuffixManagedResourceStatusCore, NameManagedResourceStatus)
 }
 
 // IsProviderConfigSpec returns a Matcher that returns true if the supplied
@@ -246,10 +257,11 @@ func IsProviderConfigStatus() Matcher {
 	return IsTypeNamed(TypeSuffixProviderConfigStatus, NameProviderConfigStatus)
 }
 
-// IsProviderConfigStatusV2 returns a Matcher that returns true if the supplied
-// field appears to be a Crossplane core API provider config status.
-func IsProviderConfigStatusV2() Matcher {
-	return IsTypeNamed(TypeSuffixProviderConfigStatusV2, NameProviderConfigStatus)
+// IsProviderConfigStatusCore returns a Matcher that returns true if the supplied
+// field appears to be a Crossplane provider config status from the core API v2
+// module.
+func IsProviderConfigStatusCore() Matcher {
+	return IsTypeNamed(TypeSuffixProviderConfigStatusCore, NameProviderConfigStatus)
 }
 
 // IsProviderConfigUsage returns a Matcher that returns true if the supplied
@@ -258,10 +270,24 @@ func IsProviderConfigUsage() Matcher {
 	return IsTypeNamed(TypeSuffixProviderConfigUsage, NameProviderConfigUsage)
 }
 
+// IsProviderConfigUsageCore returns a Matcher that returns true if the supplied
+// field appears to be a Crossplane provider config usage from the core API v2
+// module.
+func IsProviderConfigUsageCore() Matcher {
+	return IsTypeNamed(TypeSuffixProviderConfigUsageCore, NameProviderConfigUsage)
+}
+
 // IsTypedProviderConfigUsage returns a Matcher that returns true if the supplied
 // field appears to be a Crossplane provider config usage with typed ref.
 func IsTypedProviderConfigUsage() Matcher {
 	return IsTypeNamed(TypeSuffixProviderConfigUsageV2, NameTypedProviderConfigUsage)
+}
+
+// IsTypedProviderConfigUsageCore returns a Matcher that returns true if the
+// supplied field appears to be a Crossplane provider config usage with typed ref
+// from the core API v2 module.
+func IsTypedProviderConfigUsageCore() Matcher {
+	return IsTypeNamed(TypeSuffixTypedProviderConfigUsageCore, NameTypedProviderConfigUsage)
 }
 
 // IsItems returns a Matcher that returns true if the supplied field appears to
