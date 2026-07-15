@@ -142,6 +142,49 @@ type ModernResourceList struct {
 	Items []ModernResource
 }
 
+// A legacy (cluster-scoped) managed resource using crossplane-runtime common/v1
+// types, exercising GenerateManagedLegacy, GenerateManagedListLegacy, and the
+// non-namespaced GenerateReferencesLegacy.
+type LegacyResourceParameters struct {
+	// +crossplane:generate:reference:type=ReferenceTarget
+	Target string
+}
+
+type LegacyResourceSpec struct {
+	xprv1.ResourceSpec
+	ForProvider LegacyResourceParameters
+}
+
+type LegacyResourceStatus struct {
+	xprv1.ResourceStatus
+}
+
+type LegacyResource struct {
+	metav1.TypeMeta
+	metav1.ObjectMeta
+	Spec   LegacyResourceSpec
+	Status LegacyResourceStatus
+}
+
+type LegacyResourceList struct {
+	metav1.TypeMeta
+	Items []LegacyResource
+}
+
+// A provider config usage embedding the crossplane-runtime common/v1 non-typed
+// usage, exercising GenerateProviderConfigUsageLegacy and
+// GenerateProviderConfigUsageListLegacy.
+type RuntimeLegacyProviderConfigUsage struct {
+	metav1.TypeMeta
+	metav1.ObjectMeta
+	xprv1.ProviderConfigUsage
+}
+
+type RuntimeLegacyProviderConfigUsageList struct {
+	metav1.TypeMeta
+	Items []RuntimeLegacyProviderConfigUsage
+}
+
 // A provider config usage embedding the crossplane-runtime common/v2 typed
 // usage, exercising the common/v2 GenerateProviderConfigUsageModern.
 type RuntimeModernProviderConfigUsage struct {
@@ -239,6 +282,8 @@ type ManagedResourceStatus struct{}
 
 	runtimeV1FixtureSource = `package v1
 
+type ResourceSpec struct{}
+
 type ResourceStatus struct{}
 
 type Condition struct{}
@@ -248,6 +293,8 @@ type ConditionType string
 type User struct{}
 
 type ProviderConfigSpec struct{}
+
+type ProviderConfigUsage struct{}
 
 type ProviderConfigStatus struct{}
 
@@ -416,6 +463,24 @@ func TestGenerateMethods(t *testing.T) {
 				},
 			},
 		},
+		"Managed legacy": {
+			args: args{
+				generate: GenerateManagedLegacy,
+				filename: "zz_generated.legacy.go",
+			},
+			want: want{
+				contains: []string{
+					`import xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"`,
+					`func (mg *LegacyResource) SetProviderConfigReference(r *xpv1.Reference) {`,
+					`func (mg *LegacyResource) GetWriteConnectionSecretToReference() *xpv1.SecretReference {`,
+					`func (mg *LegacyResource) SetDeletionPolicy(r xpv1.DeletionPolicy) {`,
+				},
+				notContains: []string{
+					`func (mg *ModernResource)`,
+					`func (mg *ClusterResource)`,
+				},
+			},
+		},
 		"Managed list modern": {
 			args: args{
 				generate: GenerateManagedListModern,
@@ -427,6 +492,21 @@ func TestGenerateMethods(t *testing.T) {
 				},
 				notContains: []string{
 					`func (l *NamespacedResourceList)`,
+				},
+			},
+		},
+		"Managed list legacy": {
+			args: args{
+				generate: GenerateManagedListLegacy,
+				filename: "zz_generated.legacy_list.go",
+			},
+			want: want{
+				contains: []string{
+					`import resource "github.com/crossplane/crossplane-runtime/v2/pkg/resource"`,
+					`func (l *LegacyResourceList) GetItems() []resource.Managed {`,
+				},
+				notContains: []string{
+					`func (l *ModernResourceList)`,
 				},
 			},
 		},
@@ -445,6 +525,24 @@ func TestGenerateMethods(t *testing.T) {
 				notContains: []string{
 					`func (p *RuntimeModernProviderConfigUsage) SetProviderConfigReference(r xpv2.ProviderConfigReference) {`,
 					`func (p *CoreModernProviderConfigUsage)`,
+				},
+			},
+		},
+		"Provider config usage legacy": {
+			args: args{
+				generate: GenerateProviderConfigUsageLegacy,
+				filename: "zz_generated.legacy_pcu.go",
+			},
+			want: want{
+				contains: []string{
+					`func (p *RuntimeLegacyProviderConfigUsage) SetProviderConfigReference(r xpv1.Reference) {`,
+					`func (p *RuntimeLegacyProviderConfigUsage) GetProviderConfigReference() xpv1.Reference {`,
+					`func (p *RuntimeLegacyProviderConfigUsage) SetResourceReference(r xpv1.TypedReference) {`,
+					`func (p *RuntimeLegacyProviderConfigUsage) GetResourceReference() xpv1.TypedReference {`,
+				},
+				notContains: []string{
+					`func (p *RuntimeLegacyProviderConfigUsage) SetProviderConfigReference(r xpv1.ProviderConfigReference) {`,
+					`func (p *CoreLegacyProviderConfigUsage)`,
 				},
 			},
 		},
@@ -481,6 +579,36 @@ func TestGenerateMethods(t *testing.T) {
 				notContains: []string{
 					`func (p *CoreLegacyProviderConfigUsage) SetProviderConfigReference(r xpv2.ProviderConfigReference) {`,
 					`func (p *CoreModernProviderConfigUsage)`,
+				},
+			},
+		},
+		"Provider config usage list modern": {
+			args: args{
+				generate: GenerateProviderConfigUsageListModern,
+				filename: "zz_generated.modern_pcu_list.go",
+			},
+			want: want{
+				contains: []string{
+					`func (p *RuntimeModernProviderConfigUsageList) GetItems() []resource.ProviderConfigUsage {`,
+				},
+				notContains: []string{
+					`func (p *CoreModernProviderConfigUsageList)`,
+					`func (p *RuntimeLegacyProviderConfigUsageList)`,
+				},
+			},
+		},
+		"Provider config usage list legacy": {
+			args: args{
+				generate: GenerateProviderConfigUsageListLegacy,
+				filename: "zz_generated.legacy_pcu_list.go",
+			},
+			want: want{
+				contains: []string{
+					`func (p *RuntimeLegacyProviderConfigUsageList) GetItems() []resource.ProviderConfigUsage {`,
+				},
+				notContains: []string{
+					`func (p *CoreLegacyProviderConfigUsageList)`,
+					`func (p *RuntimeModernProviderConfigUsageList)`,
 				},
 			},
 		},
@@ -555,6 +683,23 @@ func TestGenerateMethods(t *testing.T) {
 					`reference.NewAPINamespacedResolver(c, mg)`,
 					`var rsp reference.NamespacedResolutionResponse`,
 					`func (mg *ModernResource) ResolveReferences(ctx context.Context, c client.Reader) error {`,
+				},
+			},
+		},
+		"References legacy": {
+			args: args{
+				generate: GenerateReferencesLegacy,
+				filename: "zz_generated.legacy_refs.go",
+			},
+			want: want{
+				contains: []string{
+					`reference.NewAPIResolver(c, mg)`,
+					`var rsp reference.ResolutionResponse`,
+					`reference.ResolutionRequest{`,
+					`func (mg *LegacyResource) ResolveReferences(ctx context.Context, c client.Reader) error {`,
+				},
+				notContains: []string{
+					`reference.NewAPINamespacedResolver(c, mg)`,
 				},
 			},
 		},
