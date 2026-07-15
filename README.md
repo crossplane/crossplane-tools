@@ -11,9 +11,33 @@ considered capable of satisfying crossplane-runtime's interfaces based on the
 heuristics described in the [Provider Development Guide], for example a
 managed resource must:
 
-* Embed a [`ResourceStatus`] struct in their `Status` struct.
-* Embed a [`ResourceSpec`] struct in their `Spec` struct.
-* Embed a `Parameters` struct in their `Spec` struct.
+- Embed a [`ResourceStatus`] or [`ManagedResourceStatus`] struct in their `Status` struct.
+- Embed a [`ResourceSpec`], [`ManagedResourceSpec`], or [`ClusterManagedResourceSpec`] struct in their `Spec` struct.
+- Embed a `Parameters` struct in their `Spec` struct.
+
+The newer [`ManagedResourceSpec`], [`ClusterManagedResourceSpec`], and
+[`ManagedResourceStatus`] types from `github.com/crossplane/crossplane/apis/v2/core/v2`
+are supported for namespaced and cluster-scoped managed resources respectively.
+
+`angryjet` also supports provider config and provider config usage migrations
+across the legacy crossplane-runtime types and the newer core API v2 types:
+
+- Provider configs are detected when their `Status` embeds either the
+  crossplane-runtime [`ProviderConfigStatus`] or the core API v2
+  [`ProviderConfigStatus`][provider-config-status-core] type.
+- For provider configs that embed the core API v2 status type, generated
+  condition methods use the core API v2 [`Condition`] and
+  [`ConditionType`] types.
+- Provider config usages are detected when they embed a non-typed
+  [`ProviderConfigUsage`] or a typed [`TypedProviderConfigUsage`], from either
+  crossplane-runtime or the core API v2 module.
+- For provider config usages that embed a typed usage from the core API v2
+  module, generated provider config reference methods use the core API v2
+  [`ProviderConfigReference`] type and resource reference methods use the
+  core API v2 [`TypedReference`] type.
+- Provider config specs that migrate nested credential helper fields such as
+  [`CredentialsSource`] and [`CommonCredentialSelectors`] continue to be
+  supported.
 
 Methods are not written if they are already defined outside of the file that
 would be generated. Use the `//+crossplane:generate:methods=false` comment
@@ -31,6 +55,7 @@ the top level of your `api/` directory, for example:
 In addition to functions that satisfy `resource.Managed`, you can use `angryjet`
 to generate a `ResolveReferences` method as well. In order to generate a resolution
 call for given field, you need to add the following comment marker:
+
 ```
 // +crossplane:generate:reference:type=<target type>
 ```
@@ -41,9 +66,15 @@ as `github.com/crossplane/provider-aws/apis/ec2/v1beta1.VPC`.
 
 The generated resolver will use the external name annotation of the target resource
 to fetch the value and it assumes that reference field is named as
-`FieldNameRef`/`FieldNameRefs if array` and selector field is named as 
-`FieldNameSelector`. You can override these defaults by adding the optional comment
-markers, see the following example:
+`FieldNameRef`/`FieldNameRefs if array` and selector field is named as
+`FieldNameSelector`.
+
+For cluster-scoped resolvers built against the core API v2 module these fields
+should use the [`Reference`] and [`Selector`] types. For namespaced
+resolvers they should use [`NamespacedReference`] and
+[`NamespacedSelector`]. You can override the default field names by adding
+the optional comment markers, see the following example:
+
 ```go
 type SomeParameters struct {
     // +crossplane:generate:reference:type=github.com/crossplane/provider-aws/apis/ec2/v1beta1.Subnet
@@ -51,10 +82,10 @@ type SomeParameters struct {
     // +crossplane:generate:reference:refFieldName=SubnetIDRefs
     // +crossplane:generate:reference:selectorFieldName=SubnetIDSelector
     SubnetIDs []string `json:"subnetIds,omitempty"`
-    
-    SubnetIDRefs []xpv1.Reference `json:"subnetIdRefs,omitempty"`
-    
-    SubnetIDSelector *xpv1.Selector `json:"subnetIdSelector,omitempty"`
+
+    SubnetIDRefs []xpv2.Reference `json:"subnetIdRefs,omitempty"`
+
+    SubnetIDSelector *xpv2.Selector `json:"subnetIdSelector,omitempty"`
 }
 ```
 
@@ -94,4 +125,21 @@ Args:
 [`resource.Managed`]: https://godoc.org/github.com/crossplane/crossplane-runtime/v2/pkg/resource#Managed
 [`ResourceSpec`]: https://godoc.org/github.com/crossplane/crossplane-runtime/v2/apis/common/v1#ResourceSpec
 [`ResourceStatus`]: https://godoc.org/github.com/crossplane/crossplane-runtime/v2/apis/common/v1#ResourceStatus
+[`ManagedResourceSpec`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#ManagedResourceSpec
+[`ClusterManagedResourceSpec`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#ClusterManagedResourceSpec
+[`ManagedResourceStatus`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#ManagedResourceStatus
+[`ProviderConfigStatus`]: https://pkg.go.dev/github.com/crossplane/crossplane-runtime/v2/apis/common/v1#ProviderConfigStatus
+[provider-config-status-core]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#ProviderConfigStatus
+[`Condition`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#Condition
+[`ConditionType`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#ConditionType
+[`ProviderConfigUsage`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#ProviderConfigUsage
+[`TypedProviderConfigUsage`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#TypedProviderConfigUsage
+[`ProviderConfigReference`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#ProviderConfigReference
+[`Reference`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#Reference
+[`Selector`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#Selector
+[`NamespacedReference`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#NamespacedReference
+[`NamespacedSelector`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#NamespacedSelector
+[`TypedReference`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#TypedReference
+[`CredentialsSource`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#CredentialsSource
+[`CommonCredentialSelectors`]: https://pkg.go.dev/github.com/crossplane/crossplane/apis/v2/core/v2#CommonCredentialSelectors
 [Provider Development Guide]: https://github.com/crossplane/crossplane/blob/master/contributing/guide-provider-development.md#defining-resource-kinds
