@@ -490,7 +490,7 @@ func GenerateProviderConfigUsageListLegacy(filename, header string, p *packages.
 
 	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
 		generate.WithHeaders(header),
-		generate.WithImportAliases(map[string]string{RuntimeImport: RuntimeAlias}),
+		generate.WithImportAliases(map[string]string{ResourceImport: ResourceAlias}),
 		generate.WithMatcher(match.AllOf(
 			match.ProviderConfigUsageListLegacy(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
@@ -512,7 +512,7 @@ func GenerateProviderConfigUsageListModern(filename, header string, p *packages.
 
 	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
 		generate.WithHeaders(header),
-		generate.WithImportAliases(map[string]string{RuntimeImport: RuntimeAlias, ResourceImport: ResourceAlias}),
+		generate.WithImportAliases(map[string]string{ResourceImport: ResourceAlias}),
 		generate.WithMatcher(match.AllOf(
 			match.ProviderConfigUsageListModern(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
@@ -534,7 +534,7 @@ func GenerateProviderConfigUsageListLegacyCore(filename, header string, p *packa
 
 	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
 		generate.WithHeaders(header),
-		generate.WithImportAliases(map[string]string{RuntimeV2Import: RuntimeV2Alias, ResourceImport: ResourceAlias}),
+		generate.WithImportAliases(map[string]string{ResourceImport: ResourceAlias}),
 		generate.WithMatcher(match.AllOf(
 			match.ProviderConfigUsageListLegacyCore(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
@@ -556,7 +556,7 @@ func GenerateProviderConfigUsageListModernCore(filename, header string, p *packa
 
 	err := generate.WriteMethods(p, methods, filepath.Join(filepath.Dir(p.GoFiles[0]), filename),
 		generate.WithHeaders(header),
-		generate.WithImportAliases(map[string]string{RuntimeV2Import: RuntimeV2Alias, ResourceImport: ResourceAlias}),
+		generate.WithImportAliases(map[string]string{ResourceImport: ResourceAlias}),
 		generate.WithMatcher(match.AllOf(
 			match.ProviderConfigUsageListModernCore(),
 			match.DoesNotHaveMarker(comments.In(p), DisableMarker, "false")),
