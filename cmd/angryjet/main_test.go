@@ -348,8 +348,8 @@ func TestGenerateMethods(t *testing.T) {
 	}
 
 	cases := map[string]struct {
-		args
-		want
+		args args
+		want want
 	}{
 		"Managed modern core": {
 			args: args{

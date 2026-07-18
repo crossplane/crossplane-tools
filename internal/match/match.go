@@ -19,6 +19,7 @@ package match
 
 import (
 	"go/types"
+	"slices"
 
 	"github.com/crossplane/crossplane-tools/internal/comments"
 	"github.com/crossplane/crossplane-tools/internal/fields"
@@ -332,16 +333,12 @@ func ProviderConfigUsageListModernCore() Object {
 // supplied Comments.
 func HasMarker(c comments.Comments, k, v string) Object {
 	return func(o types.Object) bool {
-		for _, val := range comments.ParseMarkers(c.For(o))[k] {
-			if val == v {
-				return true
-			}
+		if slices.Contains(comments.ParseMarkers(c.For(o))[k], v) {
+			return true
 		}
 
-		for _, val := range comments.ParseMarkers(c.Before(o))[k] {
-			if val == v {
-				return true
-			}
+		if slices.Contains(comments.ParseMarkers(c.Before(o))[k], v) {
+			return true
 		}
 
 		return false
