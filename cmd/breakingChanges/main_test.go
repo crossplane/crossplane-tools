@@ -32,8 +32,8 @@ func TestBreakingChanges(t *testing.T) {
 		result []string
 	}
 	cases := map[string]struct {
-		args
-		want
+		args args
+		want want
 	}{
 		"No changes": {
 			args: args{

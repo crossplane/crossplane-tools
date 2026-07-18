@@ -57,14 +57,15 @@ const (
 	TypeSuffixProviderConfigStatus = "github.com/crossplane/crossplane-runtime/v2/apis/common/v1.ProviderConfigStatus"
 	TypeSuffixProviderConfigUsage  = "github.com/crossplane/crossplane-runtime/v2/apis/common/v1.ProviderConfigUsage"
 
-	// Types that live in the crossplane-runtime common/v2 module.
+	// TypeSuffixProviderConfigUsageV2 and TypeSuffixResourceV2Spec live in the
+	// crossplane-runtime common/v2 module.
 	TypeSuffixProviderConfigUsageV2 = "github.com/crossplane/crossplane-runtime/v2/apis/common/v2.TypedProviderConfigUsage"
 	TypeSuffixResourceV2Spec        = "github.com/crossplane/crossplane-runtime/v2/apis/common/v2.ManagedResourceSpec"
 
-	// Types that moved into the crossplane/apis/v2/core/v2 module in Crossplane
-	// v2.3. The Core suffix marks the constants and matchers that target this
-	// new module, as opposed to the crossplane-runtime common/v1 and common/v2
-	// modules above.
+	// TypeSuffixManagedResourceSpecCore and the other *Core suffixes below mark
+	// the constants and matchers for types that moved into the
+	// crossplane/apis/v2/core/v2 module in Crossplane v2.3, as opposed to the
+	// crossplane-runtime common/v1 and common/v2 modules above.
 	TypeSuffixManagedResourceSpecCore        = "github.com/crossplane/crossplane/apis/v2/core/v2.ManagedResourceSpec"
 	TypeSuffixClusterManagedResourceSpecCore = "github.com/crossplane/crossplane/apis/v2/core/v2.ClusterManagedResourceSpec"
 	TypeSuffixManagedResourceStatusCore      = "github.com/crossplane/crossplane/apis/v2/core/v2.ManagedResourceStatus"
