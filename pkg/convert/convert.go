@@ -52,9 +52,9 @@ func FromIntPtrValue(v *int64) string {
 
 // ToPtrValue adapts a ResolvedValue for use as a string pointer field.
 //
-// Deprecated: Use ptr.To from k8s.io/utils/ptr.
+// Deprecated: Use the new builtin, e.g. new(v).
 func ToPtrValue(v string) *string {
-	return ptr.To(v)
+	return new(v)
 }
 
 // ToFloatPtrValue adapts a ResolvedValue for use as a float64 pointer field.
