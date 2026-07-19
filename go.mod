@@ -9,7 +9,7 @@ require (
 	github.com/dave/jennifer v1.7.1
 	github.com/google/go-cmp v0.7.0
 	github.com/pkg/errors v0.9.1
-	golang.org/x/tools v0.44.0
+	golang.org/x/tools v0.48.0
 	golang.org/x/tools/go/packages/packagestest v0.1.1-deprecated
 	k8s.io/apiextensions-apiserver v0.32.3
 	k8s.io/apimachinery v0.32.3
@@ -27,10 +27,10 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
-	golang.org/x/mod v0.35.0 // indirect
-	golang.org/x/net v0.55.0 // indirect
-	golang.org/x/sync v0.20.0 // indirect
-	golang.org/x/text v0.37.0 // indirect
+	golang.org/x/mod v0.38.0 // indirect
+	golang.org/x/net v0.57.0 // indirect
+	golang.org/x/sync v0.22.0 // indirect
+	golang.org/x/text v0.40.0 // indirect
 	golang.org/x/tools/go/expect v0.1.0-deprecated // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
