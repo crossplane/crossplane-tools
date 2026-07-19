@@ -13,7 +13,7 @@ require (
 	golang.org/x/tools/go/packages/packagestest v0.1.1-deprecated
 	k8s.io/apiextensions-apiserver v0.32.3
 	k8s.io/apimachinery v0.32.3
-	k8s.io/utils v0.0.0-20250321185631-1f6e0b77f77e
+	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
 )
 
 require (
