@@ -100,7 +100,7 @@ func ParseMarkers(comment string) Markers {
 func ParseMarkersWithPrefix(prefix, comment string) Markers {
 	m := map[string][]string{}
 
-	for _, line := range strings.Split(comment, "\n") {
+	for line := range strings.SplitSeq(comment, "\n") {
 		line = strings.TrimSpace(line)
 		if line == "" {
 			continue

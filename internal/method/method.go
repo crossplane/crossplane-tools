@@ -63,8 +63,8 @@ type Filter func(o types.Object, methodName string) bool
 func DefinedOutside(fs *token.FileSet, filename string) Filter {
 	return func(o types.Object, name string) bool {
 		s := types.NewMethodSet(types.NewPointer(o.Type()))
-		for i := range s.Len() {
-			mo := s.At(i).Obj()
+		for sel := range s.Methods() {
+			mo := sel.Obj()
 			if mo.Name() != name {
 				continue
 			}

@@ -75,8 +75,8 @@ const (
 )
 
 func matches(s *types.Struct, m Matcher) bool {
-	for i := range s.NumFields() {
-		if m(s.Field(i)) {
+	for f := range s.Fields() {
+		if m(f) {
 			return true
 		}
 	}
